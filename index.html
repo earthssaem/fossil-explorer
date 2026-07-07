@@ -23,10 +23,10 @@
   --navy-deep:#232f52;
   --orange:#ffa25c;
   --orange-dark:#f07c30;
-  --pink:#ff9eb5;
-  --pink-dark:#f2708f;
-  --lav:#b9a7f2;
-  --lav-dark:#8f79d9;
+  --pink:#ff9d85;      /* 코랄 포인트 */
+  --pink-dark:#f0764f;
+  --lav:#8fd0ec;       /* 하늘색 포인트 */
+  --lav-dark:#55a8d6;
   --sun:#ffd97a;
   --mintbg:#eafaf5;
   --card:#fffdf8;
@@ -127,7 +127,9 @@ h1,h2,h3{margin:.3em 0;}
 
 /* ---------- 시작 화면 ---------- */
 #startScreen{
-  justify-content:center;
+  justify-content:flex-start;
+  overflow-y:auto;
+  padding:16px 0 40px;
   background:
     radial-gradient(circle at 70% 16%, rgba(255,244,190,.65), transparent 40%),
     radial-gradient(circle at 16% 30%, rgba(255,158,181,.3), transparent 34%),
@@ -192,33 +194,36 @@ h1,h2,h3{margin:.3em 0;}
 }
 .start-card{
   position:relative;
-  background:rgba(255,253,246,.92);
+  background:rgba(255,253,246,.93);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow);
-  padding:30px 34px 34px;
+  padding:20px 28px 24px;
   width:min(560px, 92%);
   text-align:center;
-  border:4px solid rgba(255,255,255,.8);
+  border:4px solid rgba(255,255,255,.85);
   animation:cardPop .6s cubic-bezier(.2,1.6,.4,1) both;
+  margin:auto;
+  flex:0 0 auto;
 }
 @keyframes cardPop{from{transform:scale(.7) translateY(30px); opacity:0;} to{transform:scale(1) translateY(0); opacity:1;}}
 .start-title{
-  font-size:clamp(1.8rem, 5vw, 3rem);
+  font-size:clamp(1.4rem, 3.6vw, 2.2rem);
   font-weight:900;
   color:var(--earth-dark);
-  line-height:1.2;
+  line-height:1.25;
+  margin:.2em 0;
 }
 .start-title .accent{color:var(--teal-dark);}
 .start-sub{
   color:#7a6a4d;
-  font-size:var(--font-mid);
-  margin:10px 0 4px;
+  font-size:var(--font-base);
+  margin:6px 0 2px;
   line-height:1.5;
-  font-weight:600;
+  font-weight:700;
 }
-.start-buttons{display:flex; flex-direction:column; gap:14px; margin-top:20px; align-items:center;}
+.start-buttons{display:flex; flex-direction:column; gap:10px; margin-top:16px; align-items:center;}
 .start-hero{
-  width:150px; height:170px; margin:6px auto 0;
+  width:118px; height:136px; margin:2px auto 0;
   animation:heroBob 2.4s ease-in-out infinite;
 }
 @keyframes heroBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
@@ -555,7 +560,9 @@ h1,h2,h3{margin:.3em 0;}
    ========================================================== */
 .trail-sky{
   position:absolute; inset:0;
-  background:linear-gradient(180deg,#a5ddf2 0%, #cdf0e6 34%, #fdf2d8 56%, #f5e0b8 100%);
+  background:
+    radial-gradient(circle at 74% 12%, rgba(255,248,210,.7), transparent 26%),
+    linear-gradient(180deg,#ace2f5 0%, #cff0e8 36%, #fdf6e0 64%, #f7ead0 100%);
 }
 .trail-hill{
   position:absolute; bottom:26%;
@@ -600,9 +607,90 @@ h1,h2,h3{margin:.3em 0;}
 .trail-flower .bloom{
   position:absolute; top:0; left:2px;
   width:22px; height:22px; border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, #fff 0 5px, var(--fc,#ff9eb5) 6px 100%);
+  background:radial-gradient(circle at 50% 50%, #fff 0 5px, var(--fc,#ff9d85) 6px 100%);
   box-shadow:0 2px 4px rgba(0,0,0,.15);
   animation:grassSway 3.6s ease-in-out infinite;
+}
+/* --- 탐험 맵 소품: 나무 / 버섯 / 나비 / 징검돌 --- */
+.trail-tree{
+  position:absolute; bottom:24%;
+  width:90px; height:120px;
+}
+.trail-tree .trunk{
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:16px; height:44px;
+  background:linear-gradient(90deg,#8a5f3e,#b08a5e);
+  border-radius:8px;
+}
+.trail-tree .crown{
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:86px; height:84px;
+  background:radial-gradient(circle at 38% 28%, #b5e69a 0%, #7cc26e 55%, #559a52 100%);
+  border-radius:50% 50% 46% 54% / 58% 62% 42% 38%;
+  box-shadow:inset -10px -8px 16px rgba(40,90,45,.35), 0 6px 10px rgba(60,90,50,.2);
+}
+.trail-tree .crown::after{
+  content:"";
+  position:absolute; top:18%; left:16%;
+  width:20px; height:11px;
+  border-radius:50%;
+  background:rgba(255,255,255,.45);
+  transform:rotate(-18deg);
+}
+.trail-mushroom{
+  position:absolute; bottom:6.5%;
+  width:30px; height:30px;
+}
+.trail-mushroom .cap{
+  position:absolute; top:0; left:0; right:0;
+  height:17px;
+  border-radius:15px 15px 5px 5px;
+  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.85) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 55%, rgba(255,255,255,.8) 0 3px, transparent 4px),
+    linear-gradient(180deg,#ff9d85,#f0764f);
+  box-shadow:0 2px 4px rgba(0,0,0,.18);
+}
+.trail-mushroom .stem{
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:11px; height:15px;
+  background:#fff6e8;
+  border-radius:4px 4px 6px 6px;
+  box-shadow:inset -2px 0 3px rgba(150,110,60,.3);
+}
+.butterfly{
+  position:absolute;
+  width:26px; height:20px;
+  animation:butterflyFloat 7s ease-in-out infinite;
+  pointer-events:none;
+}
+.butterfly span{
+  position:absolute; top:2px;
+  width:12px; height:15px;
+  border-radius:60% 60% 45% 45%;
+  background:var(--bc,#ffd97a);
+  border:2px solid rgba(120,85,50,.4);
+  animation:wingFlap .3s ease-in-out infinite alternate;
+}
+.butterfly span:first-child{left:0; transform-origin:right center;}
+.butterfly span:last-child{right:0; transform-origin:left center; animation-delay:.15s;}
+@keyframes wingFlap{from{transform:rotateY(14deg) rotate(-8deg);}to{transform:rotateY(58deg) rotate(8deg);}}
+@keyframes butterflyFloat{
+  0%,100%{transform:translate(0,0);}
+  25%{transform:translate(34px,-26px);}
+  50%{transform:translate(-14px,-44px);}
+  75%{transform:translate(-38px,-14px);}
+}
+.stepping-stone{
+  position:absolute;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #efe0c0 0%, #d3ba8e 70%);
+  box-shadow:inset -3px -3px 5px rgba(140,100,55,.35), 0 2px 3px rgba(120,90,50,.2);
+}
+/* 미조사 노두: 은은한 금빛 링이 숨쉬듯 반짝임 → "저기 가보고 싶다" */
+.outcrop:not(.done) .mound{animation:moundGlow 2.6s ease-in-out infinite;}
+@keyframes moundGlow{
+  0%,100%{box-shadow:inset -14px -8px 20px rgba(90,55,30,.35), inset 10px 8px 16px rgba(255,244,210,.4), 0 10px 18px rgba(120,90,50,.3), 0 0 0 0 rgba(255,210,110,0);}
+  50%{box-shadow:inset -14px -8px 20px rgba(90,55,30,.35), inset 10px 8px 16px rgba(255,244,210,.4), 0 10px 18px rgba(120,90,50,.3), 0 0 26px 6px rgba(255,210,110,.5);}
 }
 /* --- 길 옆 작은 노두 (클릭해서 확대 조사) --- */
 .outcrop{
@@ -1468,7 +1556,10 @@ h1,h2,h3{margin:.3em 0;}
         <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
         <button class="btn teal wide" id="btnHelp">📖 게임 방법</button>
         <button class="btn navy wide" id="btnCollectionFromStart">📚 탐사 도감</button>
-        <button class="btn ghost small" id="btnTeacher">🛠 교사용 설정</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <button class="btn ghost small" id="btnRestart">🔄 처음부터 다시 시작</button>
+          <button class="btn ghost small" id="btnTeacher">🛠 교사용 설정</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1648,7 +1739,7 @@ h1,h2,h3{margin:.3em 0;}
         <button class="btn teal small" id="btnTeacherCopy">📋 JSON 복사</button>
         <button class="btn small" id="btnTeacherApply">✅ 붙여넣은 JSON 적용</button>
         <button class="btn navy small" id="btnTeacherRestore">↩ 기본 데이터 복원</button>
-        <button class="btn ghost small" id="btnTeacherReset">🗑 진행 상황 초기화</button>
+        <button class="btn ghost small" id="btnTeacherReset">🗑 진행 상황 완전 초기화</button>
       </div>
       <div class="teacher-msg" id="teacherMsg"></div>
     </div>
@@ -1956,6 +2047,7 @@ const game = {
   player: { x: 200, dir: 1, moving: false, anim: "idle", z: 0, lat: 0 },
   outcrops: [],              // 산책길의 작은 노두들
   currentOutcrop: null,      // 열려 있는 확대 조사창의 층 id
+  autoTarget: null,          // 노두 클릭 시 자동으로 걸어갈 목표 {x, layerId}
   cameraX: 0,
   input: { left: false, right: false, up: false, down: false },
   sites: [],                 // 조사 지점 런타임 정보
@@ -2020,11 +2112,27 @@ function saveTeacherData(){
     localStorage.setItem(TEACHER_KEY, JSON.stringify({ itemData, layerData, badgeData, missionData, roadSceneData }));
   }catch(e){ }
 }
-function resetProgress(){
+/* 진행 상황 초기화
+   full=false: 플레이 진행만 초기화 (교사 데이터 유지)
+   full=true : localStorage를 완전히 비움 (교사 데이터 포함) */
+function resetProgress(full){
   state = defaultState();
-  saveState();
+  try{
+    localStorage.removeItem(SAVE_KEY);
+    if(full){
+      localStorage.removeItem(TEACHER_KEY);
+      itemData = deepClone(DEFAULT_ITEM_DATA);
+      layerData = deepClone(DEFAULT_LAYER_DATA);
+      badgeData = deepClone(DEFAULT_BADGE_DATA);
+      missionData = deepClone(DEFAULT_MISSION_DATA);
+      roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
+    }
+  }catch(e){ /* localStorage 차단 환경에서도 계속 */ }
   game.discoveryShown = false;
+  game.digging = null;
+  game.nearSite = null;
   renderStartProgress();
+  renderHelpMissions();
   updateHud();
 }
 
@@ -2559,14 +2667,15 @@ function renderGame(){
   /* far: 파스텔 하늘 + 구름 + 먼 언덕 + 먼 미니 절벽 */
   far.style.width = (W + 1200) + "px";
   far.innerHTML = '<div class="trail-sky"></div><div class="bg-photo"></div><div class="sun" style="top:8%; left:880px;"></div>';
-  for(let i=0;i<5;i++){
+  for(let i=0;i<9;i++){
     const cl = document.createElement("div");
     cl.className = "cloud";
-    cl.style.width = (86 + i*30) + "px";
-    cl.style.height = (24 + (i%3)*9) + "px";
-    cl.style.top = (5 + (i*8)%22) + "%";
-    cl.style.left = ((i*617)%(W+500)) + "px";
-    cl.style.animationDuration = (32 + i*8) + "s";
+    cl.style.width = (80 + (i*37)%110) + "px";
+    cl.style.height = (22 + (i%3)*9) + "px";
+    cl.style.top = (4 + (i*67)%38) + "%";
+    cl.style.left = ((i*431)%(W+500)) + "px";
+    cl.style.opacity = String(0.55 + (i%3)*0.15);
+    cl.style.animationDuration = (30 + i*6) + "s";
     far.appendChild(cl);
   }
   for(let i=0;i<6;i++){
@@ -2585,16 +2694,24 @@ function renderGame(){
   }
   makeDust(far, 10, W);
 
-  /* mid: 중간 거리 언덕 장식 (노두는 캐릭터와 같은 레이어에 배치해 좌표를 일치시킴) */
+  /* mid: 중간 거리 언덕 + 나무 (노두는 캐릭터와 같은 레이어에 배치해 좌표를 일치시킴) */
   mid.style.width = W + "px";
-  for(let i=0;i<4;i++){
+  for(let i=0;i<5;i++){
     const h = document.createElement("div");
     h.className = "trail-hill";
     h.style.width = (300 + (i*83)%180) + "px";
     h.style.height = (70 + (i*41)%50) + "px";
-    h.style.left = ((i*677+240)%W) + "px";
+    h.style.left = ((i*577+240)%W) + "px";
     h.style.bottom = "28%";
     mid.appendChild(h);
+  }
+  for(let i=0;i<5;i++){
+    const tr = document.createElement("div");
+    tr.className = "trail-tree";
+    tr.style.left = ((i*613+90)%W) + "px";
+    tr.style.transform = "scale(" + (0.7 + (i%3)*0.2) + ")";
+    tr.innerHTML = '<div class="trunk"></div><div class="crown"></div>';
+    mid.appendChild(tr);
   }
 
   /* play: 풀밭 + 굽은 산책길 + 노두들 + 플레이어 */
@@ -2605,6 +2722,17 @@ function renderGame(){
   const path = document.createElement("div");
   path.className = "trail-path";
   play.appendChild(path);
+  /* 길 위 징검돌: 굽은 길을 따라 콕콕 */
+  for(let i=0;i<14;i++){
+    const st = document.createElement("div");
+    st.className = "stepping-stone";
+    const s = 16 + (i*7)%14;
+    st.style.width = s + "px";
+    st.style.height = Math.round(s*0.6) + "px";
+    st.style.left = (100 + i*195 + (i*53)%60) + "px";
+    st.style.bottom = (7 + (i*29)%9) + "%";
+    play.appendChild(st);
+  }
   const row = document.createElement("div");
   row.id = "outcropRow";
   row.style.cssText = "position:absolute; inset:0;";
@@ -2638,11 +2766,32 @@ function renderGame(){
     fr.style.transform = "scale(" + (0.45 + (i%2)*0.2) + ")";
     fore.appendChild(fr);
   }
+  /* 버섯 + 나비: 맵의 아기자기함 담당 */
+  for(let i=0;i<5;i++){
+    const mu = document.createElement("div");
+    mu.className = "trail-mushroom";
+    mu.style.left = ((i*547+330)%W) + "px";
+    mu.style.transform = "scale(" + (0.8 + (i%2)*0.3) + ")";
+    mu.innerHTML = '<div class="cap"></div><div class="stem"></div>';
+    fore.appendChild(mu);
+  }
+  const bColors = ["#ffd97a","#ff9d85","#8fd0ec"];
+  for(let i=0;i<3;i++){
+    const bf = document.createElement("div");
+    bf.className = "butterfly";
+    bf.style.left = ((i*887+460)%W) + "px";
+    bf.style.bottom = (30 + (i*9)%16) + "%";
+    bf.style.setProperty("--bc", bColors[i%3]);
+    bf.style.animationDelay = (i*1.7) + "s";
+    bf.innerHTML = "<span></span><span></span>";
+    fore.appendChild(bf);
+  }
 
   game.player.x = 200;
   game.player.dir = 1;
+  game.autoTarget = null;
   game.cameraX = 0;
-  $("controlGuide").textContent = "🎮 A/D(◀▶)로 산책 · 반짝이는 노두를 클릭해 조사!";
+  $("controlGuide").textContent = "🎮 A/D(◀▶) 산책 · 노두를 클릭하면 걸어가서 조사해요!";
   applyBgPhoto();
   renderPlayerCharacter("idle");
   updateHud();
@@ -2691,7 +2840,16 @@ function renderLayers(midEl, W){
       '<div class="outcrop-label">' + (unlocked ? "🔓 " : "🪨 ") + "노두 " + escapeHTML(safe(ly.id, "?")) +
         " · " + (unlocked ? escapeHTML(safe(ly.hiddenName, "???")) : "???") + '</div>';
     oc.innerHTML = inner;
-    oc.addEventListener("click", () => { playSound("click"); openOutcropModal(ly.id); });
+    oc.addEventListener("click", () => {
+      playSound("click");
+      if(Math.abs(x - game.player.x) < 200){
+        openOutcropModal(ly.id);
+      }else{
+        /* 멀리 있는 노두를 클릭하면 캐릭터가 걸어가서 자동으로 조사창을 연다 */
+        game.autoTarget = { x: x - 90, layerId: ly.id };
+        toast("🚶 노두 " + safe(ly.id, "?") + "(으)로 걸어가는 중…");
+      }
+    });
     midEl.appendChild(oc);
     game.outcrops.push({ layerId: ly.id, x: x, el: oc });
   });
@@ -2885,6 +3043,21 @@ function gameLoop(t){
       /* 산책길: A/D 좌우로 가볍게 산책 (상하 이동 없음) */
       if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
       if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
+      /* 수동 조작이 있으면 자동 걷기 취소 */
+      if(moving) game.autoTarget = null;
+      /* 노두 클릭 → 자동으로 걸어가서 조사창 열기 */
+      if(game.autoTarget){
+        const dx = game.autoTarget.x - game.player.x;
+        if(Math.abs(dx) < 24){
+          const layerId = game.autoTarget.layerId;
+          game.autoTarget = null;
+          openOutcropModal(layerId);
+        }else{
+          game.player.x += Math.sign(dx) * speed * dt;
+          game.player.dir = Math.sign(dx) || 1;
+          moving = true;
+        }
+      }
       game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
     }
   }
@@ -3717,8 +3890,15 @@ function bindUI(){
   $("btnTeacherRestore").addEventListener("click", () => { playSound("click"); restoreDefaults(); });
   $("btnTeacherReset").addEventListener("click", () => {
     playSound("click");
-    resetProgress();
-    teacherMsg("🗑 진행 상황(발견/퀴즈/배지/점수)이 초기화되었습니다.", "ok");
+    resetProgress(true); /* localStorage 완전 초기화 (교사 데이터 포함) */
+    loadTeacherTextarea();
+    teacherMsg("🗑 저장 데이터를 완전히 초기화했습니다. (진행 상황 + 편집 데이터)", "ok");
+  });
+  $("btnRestart").addEventListener("click", () => {
+    playSound("click");
+    resetProgress(false); /* 진행 상황만 초기화, 교사 데이터는 유지 */
+    renderScreen("startScreen");
+    toast("🔄 처음부터 새로운 탐사를 시작할 준비 완료!");
   });
   /* 결과 화면 */
   $("btnResultFromCollection").addEventListener("click", () => { playSound("click"); openResultScreen(); });
@@ -3746,6 +3926,14 @@ function initGame(){
   game.reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   game.smallScreen = window.innerWidth < 760;
   window.addEventListener("resize", () => { game.smallScreen = window.innerWidth < 760; });
+  /* URL에 ?reset=1 이 붙으면 저장 데이터를 완전히 비우고 처음부터 시작 (테스트/수업 준비용) */
+  try{
+    if(/[?&]reset=1/.test(location.search)){
+      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(TEACHER_KEY);
+      if(history.replaceState) history.replaceState(null, "", location.pathname);
+    }
+  }catch(e){ }
   loadState();
   preloadAssets();
   bindUI();

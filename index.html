@@ -1025,6 +1025,65 @@ h1,h2,h3{margin:.3em 0;}
 @media (max-width:760px){
   #miniMap{width:104px; height:73px; top:64px; right:10px;}
 }
+/* 도감 사이드 패널 (인벤토리 스타일) */
+#dexPanel{
+  position:absolute; right:14px; top:196px;
+  z-index:21;
+  width:196px;
+  background:rgba(255,253,246,.96);
+  border:4px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(74,59,46,.35);
+  display:flex; flex-direction:column;
+  gap:8px;
+  padding:10px;
+}
+#dexPanel .dex-head{
+  display:flex; align-items:center; gap:6px;
+  font-weight:900;
+  color:var(--ink);
+  font-size:.95rem;
+}
+#dexPanel .dex-head b{margin-left:auto; color:var(--teal-dark);}
+#btnDexCollapse{
+  width:26px; height:26px;
+  border:3px solid var(--ink);
+  background:#ffe9c9;
+  font-weight:900;
+  color:var(--ink);
+  line-height:1;
+}
+#dexPanel.collapsed .dex-slots,
+#dexPanel.collapsed #btnDexFull{display:none;}
+.dex-slots{display:flex; flex-direction:column; gap:6px;}
+.dex-slot{
+  display:flex; align-items:center; gap:8px;
+  border:3px solid #d8cbb0;
+  background:#fff;
+  padding:4px 8px;
+  cursor:pointer;
+  transition:transform .1s steps(2,end);
+}
+.dex-slot:hover{transform:translate(-1px,-1px); border-color:var(--teal-dark);}
+.dex-slot.locked{background:#eef0f4; cursor:default;}
+.dex-slot .slot-icon{width:34px; height:34px; flex:0 0 auto; position:relative;}
+.dex-slot .slot-name{
+  font-weight:900; font-size:.8rem;
+  color:#5a4a3e;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.dex-slot.locked .slot-name{color:#9aa4b5; letter-spacing:.2em;}
+.dex-slot .slot-state{margin-left:auto; font-size:.85rem;}
+.dex-slot .slot-new{
+  background:var(--pink);
+  color:#fff; font-weight:900; font-size:.62rem;
+  padding:1px 6px;
+  border:2px solid #fff;
+  animation:newPulse 1.4s ease-in-out infinite;
+}
+.hud-btn-wide{width:auto; min-width:110px; padding:0 18px; font-size:1.05rem; font-weight:900; gap:6px; white-space:nowrap; flex:0 0 auto;}
+@media (max-width:1100px){
+  #dexPanel{display:none;} /* 좁은 화면은 상단 '📚 도감' 버튼으로 전체 도감 사용 */
+}
 /* --- 조사 모달: 위→아래 지층 스택 --- */
 .xsec-wrap{display:flex; flex-direction:column;}
 .xsec-row{
@@ -1846,7 +1905,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       </div>
       <div class="hud-group">
         <button class="hud-btn" id="btnSound" title="소리 켜기/끄기">🔊</button>
-        <button class="hud-btn" id="btnCollectionHud" title="도감">📚</button>
+        <button class="hud-btn hud-btn-wide" id="btnCollectionHud" title="탐사 도감 전체 보기">📚 도감</button>
         <button class="hud-btn" id="btnHome" title="처음으로">🏠</button>
       </div>
     </div>
@@ -1865,6 +1924,17 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     <div id="controlGuide">🎮 W·A·S·D 또는 방향키로 이동 · E/스페이스 조사</div>
 
     <canvas id="miniMap" width="150" height="105"></canvas>
+
+    <!-- 도감 사이드 패널: 인벤토리처럼 항상 보이는 수집 현황 -->
+    <div id="dexPanel">
+      <div class="dex-head">
+        <span>📚 탐사 도감</span>
+        <b id="dexPanelCount">0/0</b>
+        <button id="btnDexCollapse" title="접기/펼치기">▾</button>
+      </div>
+      <div class="dex-slots" id="dexSlots"></div>
+      <button class="btn teal small" id="btnDexFull" style="width:100%;">📖 전체 보기</button>
+    </div>
 
     <div id="cinematicOverlay">
       <div class="cinematic-card">
@@ -2253,10 +2323,10 @@ const DEFAULT_ROAD_SCENE_DATA = {
   outcrops: [
     { layer: "A", x: 250,  y: 210 },
     { layer: "B", x: 760,  y: 150 },
-    { layer: "C", x: 1300, y: 260 },   /* 나무숲 뒤에 살짝 숨김 */
+    { layer: "C", x: 1265, y: 260 },   /* 나무숲 뒤에 살짝 숨김 */
     { layer: "D", x: 210,  y: 780 },
     { layer: "E", x: 700,  y: 900 },   /* 나무숲 뒤에 살짝 숨김 */
-    { layer: "F", x: 1330, y: 880 }
+    { layer: "F", x: 1265, y: 880 }
   ]
 };
 
@@ -2833,8 +2903,9 @@ function renderRoadScene(){
       y: clamp(Number(safe(s && s.y, gy)) || gy, 80, PARK.H - 60)
     });
   });
-  game.player.x = 140;
-  game.player.y = PARK.H / 2;
+  /* 시작 지점: 가로 큰길 서쪽 끝 (항상 길 위에서 시작) */
+  game.player.x = 130;
+  game.player.y = 485 * (PARK.H / 1050);
   game.player.dir = 1;
   game.player.face = "down";
   game.nearSite = null;
@@ -2848,8 +2919,9 @@ function renderRoadScene(){
     ensureAudioOnce();
     if(anyModalOpen()) return;
     const r = park.canvas.getBoundingClientRect();
-    const wx = (e.clientX - r.left) * (park.canvas.width / r.width) + game.camX;
-    const wy = (e.clientY - r.top) * (park.canvas.height / r.height) + game.camY;
+    const z = park.zoom || 1;
+    const wx = (e.clientX - r.left) * (park.canvas.width / r.width) / z + game.camX;
+    const wy = (e.clientY - r.top) * (park.canvas.height / r.height) / z + game.camY;
     let best = null, bd = 90;
     game.outcrops.forEach(o => {
       const d = Math.hypot(o.x - wx, o.y - wy);
@@ -2860,8 +2932,14 @@ function renderRoadScene(){
     if(Math.hypot(best.x - game.player.x, best.y - game.player.y) < 150){
       openOutcropModal(best.layerId);
     }else{
-      game.autoTarget = { x: best.x, y: best.y + 60, layerId: best.layerId };
-      toast("🚶 노두 " + safe(best.layerId, "?") + "(으)로 걸어가는 중…");
+      /* 길을 따라가는 경로 계산 (길이 이어져 있지 않으면 안내) */
+      const wp = findPath(game.player.x, game.player.y, best.x, best.y + 50);
+      if(wp === null){
+        toast("🚧 그쪽으로 이어진 길이 없어요!");
+        return;
+      }
+      game.autoTarget = { waypoints: wp, layerId: best.layerId };
+      toast("🚶 길을 따라 노두 " + safe(best.layerId, "?") + "(으)로 걸어가는 중…");
     }
   };
   if(!park.resizeBound){
@@ -2880,6 +2958,8 @@ function resizeParkCanvas(){
   if(!park.canvas) return;
   park.canvas.width = viewportW();
   park.canvas.height = viewportH();
+  /* 화면이 맵보다 크면 카메라를 확대해 맵이 화면을 꽉 채우게 (빈 여백 방지) */
+  park.zoom = Math.max(1, viewportW() / PARK.W, viewportH() / PARK.H);
   park.ctx.imageSmoothingEnabled = false;
 }
 
@@ -2889,6 +2969,73 @@ function inPond(x, y){
   const p = pondAt();
   const dx = (x - p.cx) / (p.rx + 18), dy = (y - p.cy) / (p.ry + 18);
   return dx*dx + dy*dy < 1;
+}
+
+/* ★ 길 네트워크: 캐릭터는 이 길 위로만 걸을 수 있다 ★
+   (기준 좌표계 1500x1050 — 맵 크기가 바뀌면 비율에 맞게 스케일) */
+const PARK_PATHS_BASE = [
+  { x: 0,    y: 440, w: 1500, h: 90 },   /* 가로 큰길 */
+  { x: 230,  y: 150, w: 80,   h: 900 },  /* 왼쪽 세로길 (노두 A·D 방면) */
+  { x: 700,  y: 110, w: 80,   h: 940 },  /* 가운데 세로길 (노두 B·E 방면) */
+  { x: 1240, y: 190, w: 80,   h: 860 },  /* 오른쪽 세로길 (노두 C·F 방면) */
+  { x: 150,  y: 740, w: 170,  h: 80 },   /* 노두 D 진입로 */
+  { x: 1240, y: 840, w: 170,  h: 80 },   /* 노두 F 진입로 */
+  { x: 1240, y: 190, w: 130,  h: 80 }    /* 노두 C 진입로 */
+];
+function parkPaths(){
+  const sx = PARK.W / 1500, sy = PARK.H / 1050;
+  return PARK_PATHS_BASE.map(p => ({ x: p.x*sx, y: p.y*sy, w: p.w*sx, h: p.h*sy }));
+}
+/* 길 위인가? (플레이어 반폭만큼 여유) */
+function walkableAt(x, y){
+  const M = 16;
+  return parkPaths().some(p => x >= p.x - M && x <= p.x + p.w + M && y >= p.y - M && y <= p.y + p.h + M);
+}
+/* 격자 BFS 길찾기: 노두 클릭 시 길을 따라 걸어가기 위한 경유지 계산 */
+function findPath(sx, sy, tx, ty){
+  const CELL = 30;
+  const cols = Math.ceil(PARK.W / CELL), rows = Math.ceil(PARK.H / CELL);
+  const walk = c => walkableAt((c % cols) * CELL + CELL/2, Math.floor(c / cols) * CELL + CELL/2);
+  const cellOf = (x, y) => clamp(Math.floor(x / CELL), 0, cols-1) + cols * clamp(Math.floor(y / CELL), 0, rows-1);
+  /* 목표가 길 밖이면 가장 가까운 길 칸을 목표로 */
+  let target = cellOf(tx, ty);
+  if(!walk(target)){
+    let best = -1, bd = 1e9;
+    for(let c = 0; c < cols * rows; c++){
+      if(!walk(c)) continue;
+      const cx = (c % cols) * CELL + CELL/2, cy = Math.floor(c / cols) * CELL + CELL/2;
+      const d = (cx - tx) * (cx - tx) + (cy - ty) * (cy - ty);
+      if(d < bd){ bd = d; best = c; }
+    }
+    if(best < 0) return null;
+    target = best;
+  }
+  const start = cellOf(sx, sy);
+  if(start === target) return [];
+  const prev = new Int32Array(cols * rows).fill(-1);
+  prev[start] = start;
+  const q = [start];
+  let found = false;
+  while(q.length){
+    const c = q.shift();
+    if(c === target){ found = true; break; }
+    const cx = c % cols, cy = Math.floor(c / cols);
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(d => {
+      const nx = cx + d[0], ny = cy + d[1];
+      if(nx < 0 || ny < 0 || nx >= cols || ny >= rows) return;
+      const n = nx + cols * ny;
+      if(prev[n] !== -1 || !walk(n)) return;
+      prev[n] = c;
+      q.push(n);
+    });
+  }
+  if(!found) return null;
+  const pts = [];
+  for(let c = target; c !== prev[c]; c = prev[c]){
+    pts.push({ x: (c % cols) * CELL + CELL/2, y: Math.floor(c / cols) * CELL + CELL/2 });
+  }
+  pts.reverse();
+  return pts;
 }
 
 /* 픽셀 맵 → 캔버스 스프라이트 */
@@ -3041,14 +3188,15 @@ function buildParkTerrain(){
   blob(1150, 860, 300, 130, "#b4dc8e");
   blob(180, 950, 260, 120, "#86b862");
   blob(900, 420, 260, 110, "#86b862");
-  /* 흙길: 가로 큰길 + 세로 갈래길 */
+  /* 흙길: 이동 가능한 길 네트워크와 정확히 일치하게 그림 */
+  const paths = parkPaths();
   g.fillStyle = "#e8d19c";
-  g.fillRect(0, PARK.H/2 - 45, PARK.W, 90);
-  g.fillRect(230, 160, 80, PARK.H - 320);
-  g.fillRect(PARK.W - 260, 200, 80, PARK.H - 400);
-  g.fillRect(700, PARK.H/2, 80, PARK.H/2 - 90);
+  paths.forEach(p => g.fillRect(Math.round(p.x), Math.round(p.y), Math.round(p.w), Math.round(p.h)));
   g.fillStyle = "#d9bd82";
-  for(let x = 0; x < PARK.W; x += 46) g.fillRect(x, PARK.H/2 - 45, 10, 90);
+  paths.forEach(p => {
+    if(p.w > p.h){ for(let x = p.x; x < p.x + p.w; x += 46) g.fillRect(Math.round(x), Math.round(p.y), 10, Math.round(p.h)); }
+    else { for(let y = p.y; y < p.y + p.h; y += 46) g.fillRect(Math.round(p.x), Math.round(y), Math.round(p.w), 10); }
+  });
   /* 연못 (이동 불가) — 도트 스캔라인 타원 */
   const p = pondAt();
   for(let ry = -p.ry; ry <= p.ry; ry += 8){
@@ -3095,6 +3243,7 @@ function drawPark(){
   const cw = park.canvas.width, ch = park.canvas.height;
   ctx.clearRect(0, 0, cw, ch);
   ctx.save();
+  ctx.scale(park.zoom || 1, park.zoom || 1);
   ctx.translate(-Math.round(game.camX), -Math.round(game.camY));
   ctx.drawImage(park.terrain, 0, 0);
   /* y-정렬로 나무/노두/플레이어를 그려 자연스러운 가림 표현 */
@@ -3157,11 +3306,12 @@ function drawPark(){
     }
   });
   ctx.restore();
-  /* "조사 가능 (E)" 말풍선 위치 (HTML 오버레이) */
+  /* "조사 가능 (E)" 말풍선 위치 (HTML 오버레이, 줌 반영) */
   const hint = $("actionHint");
   if(hint && hint.classList.contains("on") && game.nearSite){
-    hint.style.left = clamp(game.nearSite.x - game.camX, 140, cw - 160) + "px";
-    hint.style.top = clamp(game.nearSite.y - 90 - game.camY, 100, ch - 180) + "px";
+    const z2 = park.zoom || 1;
+    hint.style.left = clamp((game.nearSite.x - game.camX) * z2, 140, cw - 160) + "px";
+    hint.style.top = clamp((game.nearSite.y - 90 - game.camY) * z2, 100, ch - 180) + "px";
   }
   drawMiniMap();
 }
@@ -3550,8 +3700,10 @@ function renderDigSites(container, layerId){
 function viewportW(){ return $("sceneViewport").clientWidth || window.innerWidth; }
 function updateCamera(){
   if(game.mode !== "park") return;
-  const tx = clamp(game.player.x - viewportW()/2, 0, Math.max(0, PARK.W - viewportW()));
-  const ty = clamp(game.player.y - viewportH()/2, 0, Math.max(0, PARK.H - viewportH()));
+  const z = park.zoom || 1;
+  const vw = viewportW() / z, vh = viewportH() / z;
+  const tx = clamp(game.player.x - vw/2, 0, Math.max(0, PARK.W - vw));
+  const ty = clamp(game.player.y - vh/2, 0, Math.max(0, PARK.H - vh));
   const ease = game.reducedMotion ? 1 : 0.12;
   game.camX += (tx - game.camX) * ease;
   game.camY += (ty - game.camY) * ease;
@@ -3581,17 +3733,21 @@ function gameLoop(t){
     if(game.input.down)  dy += 1;
     const manual = dx !== 0 || dy !== 0;
     if(manual) game.autoTarget = null;
-    /* 노두 클릭 → 자동으로 걸어가기 */
+    /* 노두 클릭 → 길을 따라(BFS 경유지) 자동으로 걸어가기 */
     if(!manual && game.autoTarget){
-      const ax = game.autoTarget.x - game.player.x;
-      const ay = game.autoTarget.y - game.player.y;
-      const ad = Math.hypot(ax, ay);
-      if(ad < 30){
-        const layerId = game.autoTarget.layerId;
+      const at = game.autoTarget;
+      while(at.waypoints.length && Math.hypot(at.waypoints[0].x - game.player.x, at.waypoints[0].y - game.player.y) < 18){
+        at.waypoints.shift();
+      }
+      if(!at.waypoints.length){
+        const layerId = at.layerId;
         game.autoTarget = null;
         openOutcropModal(layerId);
       }else{
-        dx = ax / ad; dy = ay / ad;
+        const w = at.waypoints[0];
+        const ad = Math.hypot(w.x - game.player.x, w.y - game.player.y) || 1;
+        dx = (w.x - game.player.x) / ad;
+        dy = (w.y - game.player.y) / ad;
       }
     }
     if(dx !== 0 || dy !== 0){
@@ -3601,10 +3757,11 @@ function gameLoop(t){
       let ny = game.player.y + dy * speed * dt;
       nx = clamp(nx, 40, PARK.W - 40);
       ny = clamp(ny, 60, PARK.H - 30);
-      /* 연못 충돌: 막히면 축별로 미끄러지기 */
-      if(inPond(nx, ny)){
-        if(!inPond(nx, game.player.y)) ny = game.player.y;
-        else if(!inPond(game.player.x, ny)) nx = game.player.x;
+      /* 길 밖/연못은 못 감: 막히면 축별로 미끄러지기 */
+      const blocked = (x, y) => !walkableAt(x, y) || inPond(x, y);
+      if(blocked(nx, ny)){
+        if(!blocked(nx, game.player.y)) ny = game.player.y;
+        else if(!blocked(game.player.x, ny)) nx = game.player.x;
         else { nx = game.player.x; ny = game.player.y; }
       }
       moving = (nx !== game.player.x || ny !== game.player.y);
@@ -4051,6 +4208,7 @@ function updateHud(){
   $("hudScore").textContent = safe(state.score, 0);
   $("hudOutcrops").textContent = exploredOutcropCount() + "/" + layerData.length;
   $("hudCollect").textContent = state.completed.length + "/" + itemData.length;
+  renderDexPanel();
   const comboEl = $("hudCombo");
   if(safe(state.combo,0) >= 2){
     comboEl.style.display = "flex";
@@ -4058,6 +4216,37 @@ function updateHud(){
   }else{
     comboEl.style.display = "none";
   }
+}
+
+/* ---------- 도감 사이드 패널 (인벤토리처럼 항상 보이는 수집 현황) ---------- */
+function renderDexPanel(){
+  const slots = $("dexSlots");
+  if(!slots) return;
+  $("dexPanelCount").textContent = state.completed.length + "/" + itemData.length;
+  slots.innerHTML = "";
+  itemData.forEach(item => {
+    const completed = state.completed.includes(item.id);
+    const discovered = state.discovered.includes(item.id) || completed;
+    const isNew = completed && !state.seenInDex.includes(item.id);
+    const slot = document.createElement("div");
+    slot.className = "dex-slot" + (discovered ? "" : " locked");
+    slot.innerHTML =
+      '<div class="slot-icon item-visual-slot"></div>' +
+      '<div class="slot-name">' + (discovered ? escapeHTML(safe(item.name, "단서")) : "???") + '</div>' +
+      (isNew ? '<span class="slot-new">NEW</span>' : '') +
+      '<span class="slot-state">' + (completed ? "⭐" : (discovered ? "🔍" : "🔒")) + '</span>';
+    renderAssetImage(slot.querySelector(".slot-icon"), item, discovered ? "normal" : "silhouette");
+    slot.addEventListener("click", () => {
+      if(!discovered){ toast("🔒 아직 발견하지 못한 단서예요. 노두를 조사해 보세요!"); return; }
+      playSound("click");
+      if(isNew && !state.seenInDex.includes(item.id)){
+        state.seenInDex.push(item.id);
+        saveState();
+      }
+      openItemModal(item.id, true);
+    });
+    slots.appendChild(slot);
+  });
 }
 
 /* ---------- 배지 시스템 ---------- */
@@ -4380,6 +4569,18 @@ function bindUI(){
   $("btnCollectionFromStart").addEventListener("click", () => {
     playSound("click");
     collectionReturnTo = "startScreen";
+    renderCollection();
+    renderScreen("collectionScreen");
+  });
+  $("btnDexCollapse").addEventListener("click", () => {
+    playSound("click");
+    const p = $("dexPanel");
+    p.classList.toggle("collapsed");
+    $("btnDexCollapse").textContent = p.classList.contains("collapsed") ? "▸" : "▾";
+  });
+  $("btnDexFull").addEventListener("click", () => {
+    playSound("click");
+    collectionReturnTo = "gameScreen";
     renderCollection();
     renderScreen("collectionScreen");
   });

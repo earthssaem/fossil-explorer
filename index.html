@@ -1,0 +1,3016 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>탐사대: 숨겨진 층의 비밀을 찾아라</title>
+<style>
+/* ==========================================================================
+   탐사대: 숨겨진 층의 비밀을 찾아라 — 범용 2.5D 탐험 게임 엔진
+   - 외부 라이브러리 없음 / 단일 파일 / 정적 배포 가능
+   - 이미지가 없어도 CSS/SVG fallback으로 항상 동작
+   ========================================================================== */
+
+:root{
+  --ivory:#faf3e3;
+  --sand:#e8d9b8;
+  --earth:#8a6240;
+  --earth-dark:#5c3f2a;
+  --brown:#a97b50;
+  --teal:#2ea79c;
+  --teal-dark:#1d7a72;
+  --navy:#22385c;
+  --navy-deep:#16243d;
+  --orange:#ff8c42;
+  --orange-dark:#e06a1f;
+  --card:#fffdf6;
+  --shadow:0 8px 24px rgba(34,56,92,.18);
+  --radius-lg:26px;
+  --radius-md:18px;
+  --radius-sm:12px;
+  --font-big:clamp(1.6rem, 3.5vw, 2.6rem);
+  --font-mid:clamp(1.05rem, 2.2vw, 1.4rem);
+  --font-base:clamp(.95rem, 1.8vw, 1.15rem);
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:'Segoe UI','Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  background:var(--navy-deep);
+  color:var(--navy);
+  overflow:hidden;
+  font-size:var(--font-base);
+}
+
+#app{
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 20%, #2c4a75 0%, var(--navy-deep) 70%);
+}
+
+/* ---------- 공통 화면 ---------- */
+.screen{
+  position:absolute; inset:0;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+}
+.screen.active{display:flex;}
+
+.panel-screen{
+  background:linear-gradient(180deg,#fdf8ec 0%, #f2e6cd 100%);
+  overflow-y:auto;
+  padding:20px 16px 90px;
+}
+
+button{
+  font-family:inherit;
+  cursor:pointer;
+  border:none;
+  -webkit-user-select:none; user-select:none;
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  padding:16px 30px;
+  font-size:var(--font-mid);
+  font-weight:800;
+  border-radius:999px;
+  color:#fff;
+  background:linear-gradient(180deg,var(--orange) 0%, var(--orange-dark) 100%);
+  box-shadow:0 6px 0 rgba(160,70,10,.55), var(--shadow);
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  letter-spacing:.02em;
+}
+.btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(160,70,10,.55);}
+.btn:hover{filter:brightness(1.06);}
+.btn.teal{background:linear-gradient(180deg,var(--teal) 0%, var(--teal-dark) 100%); box-shadow:0 6px 0 rgba(15,80,74,.55), var(--shadow);}
+.btn.teal:active{box-shadow:0 2px 0 rgba(15,80,74,.55);}
+.btn.navy{background:linear-gradient(180deg,#3a5a8c 0%, var(--navy) 100%); box-shadow:0 6px 0 rgba(10,20,40,.55), var(--shadow);}
+.btn.navy:active{box-shadow:0 2px 0 rgba(10,20,40,.55);}
+.btn.ghost{background:rgba(255,255,255,.85); color:var(--navy); box-shadow:0 4px 0 rgba(34,56,92,.25);}
+.btn.small{padding:10px 20px; font-size:var(--font-base);}
+.btn.wide{width:min(340px, 84%);}
+.btn:disabled{filter:grayscale(.7); opacity:.6; cursor:default;}
+
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.9);
+  border-radius:999px;
+  padding:6px 14px;
+  font-weight:700;
+  box-shadow:0 3px 8px rgba(34,56,92,.15);
+  font-size:var(--font-base);
+}
+
+h1,h2,h3{margin:.3em 0;}
+.screen-title{
+  font-size:var(--font-big);
+  color:var(--navy);
+  text-shadow:0 2px 0 rgba(255,255,255,.6);
+  display:flex; align-items:center; gap:12px;
+}
+
+/* ---------- 시작 화면 ---------- */
+#startScreen{
+  justify-content:center;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255,240,190,.5), transparent 45%),
+    linear-gradient(180deg,#8fd3e8 0%, #cfe8d8 34%, #e8d9b8 58%, #b98a5e 78%, #7a5236 100%);
+}
+#startScreen::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 130% 45% at 50% 110%, rgba(92,63,42,.55), transparent 60%),
+    repeating-linear-gradient(175deg, transparent 0 90px, rgba(120,80,50,.06) 90px 96px);
+  pointer-events:none;
+}
+.start-card{
+  position:relative;
+  background:rgba(255,253,246,.92);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:30px 34px 34px;
+  width:min(560px, 92%);
+  text-align:center;
+  border:4px solid rgba(255,255,255,.8);
+  animation:cardPop .6s cubic-bezier(.2,1.6,.4,1) both;
+}
+@keyframes cardPop{from{transform:scale(.7) translateY(30px); opacity:0;} to{transform:scale(1) translateY(0); opacity:1;}}
+.start-title{
+  font-size:clamp(1.8rem, 5vw, 3rem);
+  font-weight:900;
+  color:var(--earth-dark);
+  line-height:1.2;
+}
+.start-title .accent{color:var(--teal-dark);}
+.start-sub{
+  color:#7a6a4d;
+  font-size:var(--font-mid);
+  margin:10px 0 4px;
+  line-height:1.5;
+  font-weight:600;
+}
+.start-buttons{display:flex; flex-direction:column; gap:14px; margin-top:20px; align-items:center;}
+.start-hero{
+  width:150px; height:170px; margin:6px auto 0;
+  animation:heroBob 2.4s ease-in-out infinite;
+}
+@keyframes heroBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.start-badge-row{margin-top:14px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;}
+
+/* ---------- 게임 방법 / 도감 / 교사용 / 결과 (패널 화면 공통) ---------- */
+.panel-card{
+  background:var(--card);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  border:3px solid #fff;
+  padding:20px 22px;
+  width:min(860px, 96%);
+  margin:12px auto;
+}
+.help-step{
+  display:flex; gap:14px; align-items:flex-start;
+  padding:12px 0;
+  border-bottom:2px dashed #e5d8bd;
+}
+.help-step:last-child{border-bottom:none;}
+.help-num{
+  flex:0 0 auto;
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--teal); color:#fff; font-weight:900; font-size:1.2rem;
+  box-shadow:0 3px 0 var(--teal-dark);
+}
+.help-step b{color:var(--earth-dark);}
+.back-bar{
+  position:sticky; top:0; z-index:5;
+  width:100%;
+  display:flex; align-items:center; gap:12px;
+  padding:6px 4px 10px;
+  background:linear-gradient(180deg,#fdf8ec 70%, transparent);
+}
+
+/* ---------- 탐사 화면 (길 + 지층 공용) ---------- */
+#gameScreen{background:#0d1626;}
+#sceneViewport{
+  position:absolute; inset:0;
+  overflow:hidden;
+  perspective:900px;
+  perspective-origin:50% 42%;
+}
+.scene-world{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+}
+.parallax-layer{
+  position:absolute; top:0; bottom:0; left:0;
+  will-change:transform;
+}
+/* 사진 배경 (이미지 교체 시) */
+.bg-photo{
+  position:absolute; inset:0;
+  background-size:cover;
+  background-position:center bottom;
+  display:none;
+}
+.bg-photo.on{display:block;}
+
+/* --- 길 구간 CSS fallback 배경 --- */
+.road-sky{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg,#7ec8e3 0%, #a8ddda 40%, #f5e2b8 72%, #eccfa0 100%);
+}
+.sun{
+  position:absolute; top:7%; right:14%;
+  width:90px; height:90px; border-radius:50%;
+  background:radial-gradient(circle,#fff6d8 20%, #ffd97a 60%, rgba(255,217,122,0) 75%);
+  filter:blur(1px);
+  animation:sunPulse 5s ease-in-out infinite;
+}
+@keyframes sunPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.cloud{
+  position:absolute;
+  background:rgba(255,255,255,.85);
+  border-radius:999px;
+  filter:blur(2px);
+  animation:cloudDrift 40s linear infinite;
+}
+@keyframes cloudDrift{from{transform:translateX(0);} to{transform:translateX(-160px);}}
+.far-mountain{
+  position:absolute; bottom:32%;
+  width:420px; height:200px;
+  background:linear-gradient(180deg,#9db9c9 0%, #7d9cb3 100%);
+  clip-path:polygon(0 100%, 18% 30%, 32% 62%, 50% 8%, 68% 55%, 84% 25%, 100% 100%);
+  opacity:.8;
+}
+.far-canyon{
+  position:absolute; bottom:30%;
+  width:560px; height:300px;
+  border-radius:18px 60px 0 0;
+  background:
+    repeating-linear-gradient(178deg,
+      #c98d5a 0 40px, #b3714a 40px 78px, #8a5a3c 78px 112px, #a97b50 112px 150px),
+    #b3714a;
+  box-shadow:inset 0 -40px 60px rgba(60,35,20,.5), inset 20px 0 40px rgba(255,230,180,.25);
+  transform-origin:bottom center;
+}
+.far-canyon::after{
+  content:"";
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 30% 20%, rgba(255,244,200,.35), transparent 55%);
+  border-radius:inherit;
+}
+.road-ground{
+  position:absolute; left:0; right:0; bottom:0;
+  height:36%;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.12) 0 3px, transparent 4px),
+    linear-gradient(180deg,#c9a468 0%, #a97b50 45%, #7a5236 100%);
+}
+.road-path{
+  position:absolute; bottom:0; left:0; right:0; height:34%;
+  background:linear-gradient(180deg,#e8cf9a 0%, #d8b878 100%);
+  clip-path:polygon(0 55%, 100% 30%, 100% 100%, 0 100%);
+  box-shadow:inset 0 6px 12px rgba(120,80,40,.35);
+}
+.road-path::before{
+  content:"";
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(100deg, transparent 0 70px, rgba(140,100,55,.25) 70px 76px);
+  clip-path:inherit;
+}
+.deco-rock{
+  position:absolute; bottom:8%;
+  width:70px; height:46px;
+  background:radial-gradient(circle at 35% 30%, #b7a084 0%, #8a755c 60%, #6b5946 100%);
+  border-radius:45% 55% 50% 50% / 70% 65% 35% 40%;
+  box-shadow:inset -8px -8px 12px rgba(50,35,20,.4), 0 6px 8px rgba(40,25,10,.35);
+}
+.deco-grass{
+  position:absolute; bottom:6%;
+  width:46px; height:34px;
+}
+.deco-grass span{
+  position:absolute; bottom:0;
+  width:8px; height:100%;
+  background:linear-gradient(180deg,#7fbf6a 0%, #4e8f4a 100%);
+  border-radius:8px 8px 0 0;
+  transform-origin:bottom center;
+  animation:grassSway 3s ease-in-out infinite;
+}
+@keyframes grassSway{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(7deg);}}
+.deco-sign{
+  position:absolute; bottom:9%;
+  width:110px; text-align:center;
+}
+.deco-sign .plate{
+  background:#8a5a3c;
+  color:#ffe9c4;
+  border:3px solid #5c3f2a;
+  border-radius:10px;
+  padding:6px 8px;
+  font-weight:800;
+  font-size:.85rem;
+  box-shadow:0 3px 6px rgba(0,0,0,.3);
+  white-space:nowrap;
+}
+.deco-sign .pole{
+  width:10px; height:44px; margin:0 auto;
+  background:linear-gradient(90deg,#5c3f2a,#8a5a3c);
+  border-radius:0 0 4px 4px;
+}
+.sparkle-point{
+  position:absolute;
+  width:26px; height:26px;
+  pointer-events:none;
+}
+.sparkle-point::before{
+  content:"✦";
+  position:absolute; inset:0;
+  color:#ffe27a;
+  text-shadow:0 0 10px #ffce4a;
+  font-size:24px;
+  animation:sparkleTwinkle 1.6s ease-in-out infinite;
+}
+@keyframes sparkleTwinkle{0%,100%{opacity:.35; transform:scale(.8) rotate(0deg);}50%{opacity:1; transform:scale(1.2) rotate(25deg);}}
+
+/* --- 먼지/공기 입자 --- */
+.dust-mote{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,240,200,.5);
+  animation:moteFloat linear infinite;
+  pointer-events:none;
+}
+@keyframes moteFloat{
+  0%{transform:translateY(0) translateX(0); opacity:0;}
+  15%{opacity:.7;}
+  85%{opacity:.5;}
+  100%{transform:translateY(-140px) translateX(40px); opacity:0;}
+}
+
+/* --- 지층 구간 CSS fallback 배경 --- */
+.strata-sky{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg,#f6c98a 0%, #e8a76a 30%, #c98d5a 55%, #8a5a3c 100%);
+}
+.strata-lightbeam{
+  position:absolute; top:-10%; left:20%;
+  width:34%; height:70%;
+  background:linear-gradient(195deg, rgba(255,244,200,.5), transparent 70%);
+  transform:skewX(-14deg);
+  filter:blur(6px);
+  pointer-events:none;
+}
+.cliff-wall{
+  position:absolute; top:0; bottom:26%;
+  left:0;
+  transform-style:preserve-3d;
+}
+.strata-band{
+  position:absolute; left:0; right:0;
+  box-shadow:
+    inset 0 14px 18px rgba(255,235,190,.18),
+    inset 0 -18px 26px rgba(40,20,8,.45);
+  overflow:hidden;
+}
+.strata-band .band-crack{
+  position:absolute;
+  background:rgba(35,18,8,.4);
+  border-radius:4px;
+  transform:rotate(var(--rot,4deg));
+}
+.strata-band .band-pebble{
+  position:absolute;
+  border-radius:50% 45% 55% 50%;
+  background:rgba(60,35,18,.35);
+  box-shadow:inset 2px 2px 3px rgba(255,240,200,.25);
+}
+.layer-tag{
+  position:absolute; left:14px;
+  z-index:4;
+  display:flex; align-items:center; gap:8px;
+  background:rgba(22,36,61,.82);
+  color:#ffe9c4;
+  border-radius:999px;
+  padding:7px 16px;
+  font-weight:800;
+  font-size:var(--font-base);
+  box-shadow:0 4px 10px rgba(0,0,0,.35);
+  border:2px solid rgba(255,233,196,.5);
+  cursor:pointer;
+  transition:transform .15s ease;
+}
+.layer-tag:hover{transform:scale(1.06);}
+.layer-tag .lock{font-size:.9em;}
+.layer-tag.unlocked{background:rgba(29,122,114,.9);}
+.strata-ground{
+  position:absolute; left:0; right:0; bottom:0; height:26%;
+  background:
+    radial-gradient(circle at 15% 30%, rgba(255,255,255,.1) 0 3px, transparent 4px),
+    linear-gradient(180deg,#9a6a44 0%, #7a5236 55%, #5c3f2a 100%);
+  box-shadow:inset 0 10px 16px rgba(30,15,5,.5);
+}
+.strata-ground::before{
+  content:"";
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(92deg, transparent 0 120px, rgba(255,230,180,.05) 120px 128px);
+}
+
+/* --- 전경 장식 레이어 --- */
+.fore-rock{
+  position:absolute; bottom:-4%;
+  width:150px; height:110px;
+  background:radial-gradient(circle at 30% 25%, #7a6a55 0%, #4d4033 55%, #35291e 100%);
+  border-radius:48% 52% 46% 54% / 68% 60% 40% 32%;
+  box-shadow:0 10px 20px rgba(0,0,0,.5);
+  filter:blur(.5px);
+}
+.fore-grass{
+  position:absolute; bottom:-2%;
+  width:60px; height:60px;
+  filter:blur(.4px);
+}
+.fore-grass span{
+  position:absolute; bottom:0;
+  width:11px; height:100%;
+  background:linear-gradient(180deg,#5f9c52 0%, #37613a 100%);
+  border-radius:10px 10px 0 0;
+  transform-origin:bottom center;
+  animation:grassSway 3.4s ease-in-out infinite;
+}
+
+/* ---------- 조사 지점 ---------- */
+.dig-site{
+  position:absolute;
+  width:84px; height:84px;
+  transform:translate(-50%,-50%);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  z-index:3;
+}
+.dig-site .socket{
+  position:absolute; inset:6px;
+  border-radius:50% 46% 54% 50%;
+  background:
+    radial-gradient(circle at 40% 32%, rgba(255,235,190,.25), transparent 55%),
+    radial-gradient(circle at 55% 60%, rgba(30,14,5,.85) 0%, rgba(70,42,22,.9) 60%, rgba(110,70,40,.6) 100%);
+  box-shadow:
+    inset 0 8px 14px rgba(0,0,0,.65),
+    inset 0 -4px 8px rgba(255,220,170,.15),
+    0 3px 8px rgba(0,0,0,.4);
+  transition:transform .2s ease;
+}
+.dig-site .glint{
+  position:absolute; top:2px; left:50%;
+  transform:translateX(-50%);
+  font-size:20px;
+  color:#ffe27a;
+  text-shadow:0 0 8px #ffce4a;
+  animation:sparkleTwinkle 1.8s ease-in-out infinite;
+  pointer-events:none;
+}
+.dig-site .site-item{
+  position:absolute; inset:16px;
+  opacity:0;
+  transform:scale(.5);
+  transition:opacity .5s ease, transform .5s cubic-bezier(.2,1.5,.4,1);
+  filter:brightness(.25) contrast(.8);
+  pointer-events:none;
+}
+.dig-site.near .socket{transform:scale(1.12); box-shadow:inset 0 8px 14px rgba(0,0,0,.65), 0 0 22px rgba(255,206,74,.65);}
+.dig-site.digging .glint{display:none;}
+.dig-site.digging .site-item{opacity:.85; transform:scale(.9);}
+.dig-site.discovered .site-item,
+.dig-site.collected .site-item{opacity:1; transform:scale(1); filter:none;}
+.dig-site.discovered .glint{display:none;}
+.dig-site.collected .glint{display:none;}
+.dig-site.collected{cursor:default;}
+.dig-site.collected .socket{
+  background:
+    radial-gradient(circle at 50% 55%, rgba(46,167,156,.35) 0%, rgba(70,42,22,.85) 70%);
+}
+.dig-site .check-mark{
+  position:absolute; right:-2px; top:-2px;
+  width:28px; height:28px; border-radius:50%;
+  background:var(--teal);
+  color:#fff; font-weight:900;
+  display:none; align-items:center; justify-content:center;
+  border:2px solid #fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  font-size:15px;
+}
+.dig-site.collected .check-mark{display:flex;}
+.dig-progress{
+  position:absolute; bottom:-20px; left:50%;
+  transform:translateX(-50%);
+  width:76px; height:12px;
+  background:rgba(0,0,0,.55);
+  border-radius:999px;
+  overflow:hidden;
+  display:none;
+  border:2px solid rgba(255,255,255,.5);
+}
+.dig-site.digging .dig-progress{display:block;}
+.dig-progress .fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg,var(--orange),#ffd166);
+  border-radius:999px;
+  transition:width .1s linear;
+}
+.dig-particle{
+  position:absolute;
+  width:9px; height:9px;
+  border-radius:50%;
+  background:#c9a468;
+  pointer-events:none;
+  animation:digFly .7s ease-out forwards;
+}
+@keyframes digFly{
+  0%{transform:translate(0,0) scale(1); opacity:1;}
+  100%{transform:translate(var(--dx,20px), var(--dy,-50px)) scale(.3); opacity:0;}
+}
+
+/* ---------- 플레이어 캐릭터 ---------- */
+#player{
+  position:absolute;
+  width:92px; height:118px;
+  transform:translateX(-50%);
+  z-index:5;
+  pointer-events:none;
+}
+.player-shadow{
+  position:absolute; bottom:-8px; left:50%;
+  transform:translateX(-50%);
+  width:64px; height:14px;
+  background:radial-gradient(ellipse, rgba(0,0,0,.4) 0%, transparent 70%);
+  border-radius:50%;
+  transition:width .2s ease, opacity .2s ease;
+}
+.player-visual{
+  position:absolute; inset:0;
+  transform-origin:50% 100%;
+}
+.player-visual.flip{transform:scaleX(-1);}
+.player-img{width:100%; height:100%; object-fit:contain; display:block;}
+.player-svg{width:100%; height:100%; display:block;}
+
+.player-anim{position:absolute; inset:0; transform-origin:50% 100%;}
+.anim-idle .player-anim{animation:pIdle 2.2s ease-in-out infinite;}
+@keyframes pIdle{0%,100%{transform:translateY(0) scale(1,1);}50%{transform:translateY(-4px) scale(1.015,.985);}}
+.anim-walk .player-anim{animation:pWalk .38s ease-in-out infinite;}
+@keyframes pWalk{0%,100%{transform:translateY(0) rotate(-2deg);}25%{transform:translateY(-8px) rotate(0deg);}50%{transform:translateY(0) rotate(2deg);}75%{transform:translateY(-8px) rotate(0deg);}}
+.anim-dig .player-anim{animation:pDig .5s ease-in-out infinite;}
+@keyframes pDig{0%,100%{transform:rotate(-9deg) translateY(0);}45%{transform:rotate(13deg) translateY(4px);}60%{transform:rotate(11deg) translateY(3px);}}
+.anim-inspect .player-anim{animation:pInspect 1.6s ease-in-out infinite;}
+@keyframes pInspect{0%,100%{transform:rotate(0deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-3px);}}
+.anim-discover .player-anim{animation:pDiscover .55s cubic-bezier(.3,1.6,.5,1) infinite;}
+@keyframes pDiscover{0%,100%{transform:translateY(0) scale(1);}45%{transform:translateY(-18px) scale(1.05,.97) rotate(3deg);}}
+
+/* ---------- 조사 안내 말풍선 ---------- */
+#actionHint{
+  position:absolute;
+  transform:translate(-50%,-130%);
+  z-index:8;
+  display:none;
+  flex-direction:column; align-items:center;
+  pointer-events:none;
+}
+#actionHint.on{display:flex;}
+#actionHint .bubble{
+  background:#fffdf6;
+  border:3px solid var(--orange);
+  color:var(--earth-dark);
+  border-radius:14px;
+  padding:7px 14px;
+  font-weight:900;
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+  animation:hintBounce 1s ease-in-out infinite;
+  font-size:var(--font-base);
+}
+#actionHint .bubble::after{
+  content:"";
+  position:absolute; left:50%; bottom:-11px;
+  transform:translateX(-50%);
+  border:8px solid transparent;
+  border-top-color:var(--orange);
+}
+@keyframes hintBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+/* ---------- HUD ---------- */
+#hud{
+  position:absolute; top:0; left:0; right:0;
+  z-index:20;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:12px 14px;
+  pointer-events:none;
+}
+#hud > *{pointer-events:auto;}
+.hud-group{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+.hud-chip{
+  background:rgba(22,36,61,.8);
+  color:#ffe9c4;
+  border-radius:999px;
+  padding:8px 16px;
+  font-weight:800;
+  border:2px solid rgba(255,233,196,.4);
+  box-shadow:0 3px 10px rgba(0,0,0,.35);
+  font-size:var(--font-base);
+  display:flex; align-items:center; gap:8px;
+}
+.hud-btn{
+  width:52px; height:52px;
+  border-radius:50%;
+  font-size:1.4rem;
+  background:rgba(255,253,246,.92);
+  border:3px solid var(--navy);
+  color:var(--navy);
+  box-shadow:0 4px 0 rgba(34,56,92,.45);
+  transition:transform .12s ease;
+  display:flex; align-items:center; justify-content:center;
+}
+.hud-btn:active{transform:translateY(3px);}
+
+/* ---------- 모바일 조작 버튼 ---------- */
+#mobileControls{
+  position:absolute; left:0; right:0; bottom:0;
+  z-index:22;
+  display:flex; justify-content:space-between; align-items:flex-end;
+  padding:0 16px calc(14px + env(safe-area-inset-bottom));
+  pointer-events:none;
+}
+#mobileControls .pad{display:flex; gap:12px; pointer-events:auto;}
+.ctrl-btn{
+  width:74px; height:74px;
+  border-radius:50%;
+  font-size:1.9rem;
+  font-weight:900;
+  background:rgba(255,253,246,.9);
+  color:var(--navy);
+  border:4px solid var(--navy);
+  box-shadow:0 5px 0 rgba(34,56,92,.5);
+  touch-action:none;
+}
+.ctrl-btn:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(34,56,92,.5);}
+.ctrl-btn.act{
+  width:92px; height:92px;
+  background:linear-gradient(180deg,var(--orange),var(--orange-dark));
+  color:#fff;
+  border-color:#fff;
+  box-shadow:0 5px 0 rgba(160,70,10,.6);
+  font-size:1.15rem;
+}
+
+/* ---------- 연출 오버레이 (탐사 현장 발견!) ---------- */
+#cinematicOverlay{
+  position:absolute; inset:0;
+  z-index:40;
+  display:none;
+  align-items:center; justify-content:center;
+  background:radial-gradient(circle, rgba(255,220,140,.25) 0%, rgba(22,36,61,.85) 75%);
+}
+#cinematicOverlay.on{display:flex;}
+.cinematic-card{
+  text-align:center;
+  animation:cineZoom .7s cubic-bezier(.2,1.5,.4,1) both;
+}
+@keyframes cineZoom{from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;}}
+.cinematic-title{
+  font-size:clamp(1.9rem, 6vw, 3.4rem);
+  font-weight:900;
+  color:#ffe27a;
+  text-shadow:0 0 24px rgba(255,206,74,.8), 0 4px 0 rgba(120,70,10,.6);
+  margin-bottom:10px;
+}
+.cinematic-sub{color:#fff; font-size:var(--font-mid); font-weight:700; margin-bottom:22px; text-shadow:0 2px 6px rgba(0,0,0,.5);}
+
+/* 카메라 셰이크 */
+.shake #sceneViewport{animation:camShake .35s ease-in-out;}
+@keyframes camShake{
+  0%,100%{transform:translate(0,0);}
+  20%{transform:translate(-6px,4px);}
+  40%{transform:translate(5px,-4px);}
+  60%{transform:translate(-4px,2px);}
+  80%{transform:translate(3px,-2px);}
+}
+
+/* ---------- 모달 공통 ---------- */
+.modal-backdrop{
+  position:fixed; inset:0;
+  z-index:60;
+  background:rgba(13,22,38,.7);
+  display:none;
+  align-items:center; justify-content:center;
+  padding:16px;
+}
+.modal-backdrop.on{display:flex;}
+.modal-card{
+  background:var(--card);
+  border-radius:var(--radius-lg);
+  border:4px solid #fff;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  width:min(560px, 96%);
+  max-height:min(86vh, 760px);
+  overflow-y:auto;
+  padding:22px 22px 26px;
+  animation:modalPop .4s cubic-bezier(.2,1.6,.4,1) both;
+  position:relative;
+}
+@keyframes modalPop{from{transform:scale(.6) translateY(40px); opacity:0;} to{transform:scale(1) translateY(0); opacity:1;}}
+.modal-close{
+  position:absolute; top:10px; right:10px;
+  width:44px; height:44px;
+  border-radius:50%;
+  background:#eee2c8;
+  color:var(--earth-dark);
+  font-size:1.3rem; font-weight:900;
+  border:2px solid #d8c8a4;
+}
+.modal-title{
+  font-size:var(--font-mid);
+  font-weight:900;
+  color:var(--earth-dark);
+  text-align:center;
+  margin:0 0 12px;
+}
+.modal-item-visual{
+  width:min(220px, 55vw);
+  height:min(220px, 55vw);
+  margin:0 auto 12px;
+  border-radius:var(--radius-md);
+  background:
+    radial-gradient(circle at 50% 40%, #fff 0%, #f2e6cd 80%);
+  border:3px solid #e5d8bd;
+  padding:16px;
+  box-shadow:inset 0 4px 10px rgba(120,90,50,.15);
+  position:relative;
+}
+.modal-item-visual .shine{
+  position:absolute; inset:-8px;
+  border-radius:inherit;
+  pointer-events:none;
+  background:conic-gradient(from 0deg, transparent 0 20deg, rgba(255,220,120,.35) 30deg 40deg, transparent 50deg 360deg);
+  animation:shineSpin 4s linear infinite;
+}
+@keyframes shineSpin{to{transform:rotate(360deg);}}
+.info-row{
+  display:flex; gap:8px;
+  padding:8px 0;
+  border-bottom:2px dashed #eadfc4;
+  align-items:baseline;
+}
+.info-row:last-child{border-bottom:none;}
+.info-label{
+  flex:0 0 92px;
+  font-weight:900;
+  color:var(--teal-dark);
+}
+.info-value{flex:1; line-height:1.5; color:#4c3f2c; font-weight:600;}
+.info-value.locked{color:#a89b80; font-style:italic;}
+.modal-actions{display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;}
+
+/* ---------- 발견 팝업 ---------- */
+#discoveryModal .modal-card{text-align:center;}
+.discover-banner{
+  font-size:clamp(1.4rem, 4vw, 2rem);
+  font-weight:900;
+  color:var(--orange-dark);
+  text-shadow:0 2px 0 #ffe9c4;
+  animation:bannerPulse 1.2s ease-in-out infinite;
+}
+@keyframes bannerPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.confetti-burst{
+  position:absolute;
+  width:12px; height:12px;
+  border-radius:3px;
+  pointer-events:none;
+  animation:confettiFall 1.3s ease-in forwards;
+  z-index:70;
+}
+@keyframes confettiFall{
+  0%{transform:translate(0,0) rotate(0deg); opacity:1;}
+  100%{transform:translate(var(--cx,0), var(--cy,240px)) rotate(540deg); opacity:0;}
+}
+
+/* ---------- 퀴즈 모달 ---------- */
+.quiz-question{
+  background:#fdf4de;
+  border:3px solid #eadfc4;
+  border-radius:var(--radius-md);
+  padding:16px;
+  font-weight:800;
+  color:var(--earth-dark);
+  line-height:1.55;
+  font-size:var(--font-mid);
+}
+.quiz-choices{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+.quiz-choice{
+  text-align:left;
+  padding:14px 18px;
+  border-radius:var(--radius-md);
+  background:#fff;
+  border:3px solid #e0d3b4;
+  font-size:var(--font-base);
+  font-weight:700;
+  color:var(--navy);
+  transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  display:flex; align-items:center; gap:10px;
+}
+.quiz-choice:hover{transform:translateX(4px); border-color:var(--teal);}
+.quiz-choice.correct{background:#e0f5ef; border-color:var(--teal); animation:choicePop .4s ease;}
+.quiz-choice.wrong{background:#fde4dc; border-color:#e0654a; animation:choiceShake .35s ease;}
+.quiz-choice:disabled{opacity:.85; transform:none;}
+@keyframes choicePop{0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
+@keyframes choiceShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+.quiz-feedback{
+  margin-top:14px;
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  display:none;
+  font-weight:700;
+  line-height:1.55;
+}
+.quiz-feedback.hint{display:block; background:#fff4dd; border:3px solid #f0c76a; color:#8a6215;}
+.quiz-feedback.explain{display:block; background:#e0f5ef; border:3px solid var(--teal); color:var(--teal-dark);}
+.quiz-progress-dots{display:flex; gap:8px; justify-content:center; margin-bottom:10px;}
+.quiz-progress-dots span{
+  width:14px; height:14px; border-radius:50%;
+  background:#e0d3b4;
+}
+.quiz-progress-dots span.done{background:var(--teal);}
+.quiz-progress-dots span.now{background:var(--orange); transform:scale(1.25);}
+
+/* ---------- 도감 ---------- */
+#collectionScreen{background:linear-gradient(180deg,#eaf6f4 0%, #f2e6cd 100%);}
+.collect-stats{
+  display:flex; gap:10px; flex-wrap:wrap;
+  justify-content:center;
+  margin:8px 0 4px;
+}
+.rate-bar{
+  width:min(560px, 92%);
+  height:22px;
+  margin:8px auto;
+  border-radius:999px;
+  background:#e0d3b4;
+  overflow:hidden;
+  border:3px solid #fff;
+  box-shadow:var(--shadow);
+}
+.rate-bar .fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--teal), #7fd9c0);
+  border-radius:999px;
+  transition:width .6s ease;
+}
+.collection-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  gap:14px;
+  width:min(900px, 96%);
+  margin:10px auto 20px;
+}
+.collect-card{
+  background:var(--card);
+  border-radius:var(--radius-md);
+  border:3px solid #fff;
+  box-shadow:var(--shadow);
+  padding:12px 10px 14px;
+  text-align:center;
+  cursor:pointer;
+  transition:transform .18s cubic-bezier(.2,1.5,.4,1), box-shadow .18s ease;
+  position:relative;
+  overflow:hidden;
+}
+.collect-card:hover{transform:translateY(-6px) scale(1.03);}
+.collect-card .card-no{
+  position:absolute; top:8px; left:10px;
+  font-weight:900; color:#b7a88a; font-size:.85rem;
+}
+.collect-card .card-state{
+  position:absolute; top:6px; right:8px;
+  font-size:1.05rem;
+}
+.collect-card .card-visual{
+  width:92px; height:92px;
+  margin:14px auto 8px;
+}
+.collect-card .card-name{font-weight:900; color:var(--earth-dark);}
+.collect-card .card-sub{font-size:.85rem; color:#9a8a68; font-weight:700; margin-top:2px;}
+.collect-card.locked{background:#e9e2d2;}
+.collect-card.locked .card-name{color:#9a8a68; letter-spacing:.2em;}
+.collect-card.locked .card-visual{filter:grayscale(1) brightness(.45) contrast(.7); opacity:.75;}
+.collect-card.completed{border-color:var(--teal);}
+.collect-card.completed::after{
+  content:"";
+  position:absolute; inset:0;
+  background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.5) 46%, transparent 60%);
+  transform:translateX(-120%);
+  animation:cardShine 3.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes cardShine{0%,60%{transform:translateX(-120%);}90%,100%{transform:translateX(130%);}}
+.badge-grid{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+.badge-token{
+  width:120px;
+  background:var(--card);
+  border-radius:var(--radius-md);
+  border:3px solid #fff;
+  box-shadow:var(--shadow);
+  padding:12px 8px;
+  text-align:center;
+}
+.badge-token .icon{font-size:2rem;}
+.badge-token .name{font-weight:900; font-size:.9rem; margin-top:4px; color:var(--earth-dark);}
+.badge-token .desc{font-size:.75rem; color:#9a8a68; font-weight:700; margin-top:2px; line-height:1.35;}
+.badge-token.locked{filter:grayscale(1); opacity:.55;}
+
+/* ---------- 교사용 ---------- */
+#teacherScreen{background:linear-gradient(180deg,#eef2f8 0%, #dde6ef 100%);}
+.teacher-note{
+  background:#fff8e0;
+  border:3px solid #f0c76a;
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  line-height:1.6;
+  font-weight:600;
+  color:#6a4e10;
+}
+.teacher-textarea{
+  width:100%;
+  min-height:260px;
+  border-radius:var(--radius-sm);
+  border:3px solid #c8d4e2;
+  padding:12px;
+  font-family:ui-monospace, Consolas, monospace;
+  font-size:.85rem;
+  resize:vertical;
+  background:#fbfdff;
+  color:#22385c;
+}
+.teacher-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+.teacher-msg{
+  margin-top:10px;
+  font-weight:800;
+  min-height:1.4em;
+}
+.teacher-msg.ok{color:var(--teal-dark);}
+.teacher-msg.err{color:#c0392b;}
+.teacher-tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+.teacher-tab{
+  padding:9px 18px;
+  border-radius:999px;
+  font-weight:800;
+  background:#fff;
+  border:3px solid #c8d4e2;
+  color:var(--navy);
+}
+.teacher-tab.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+/* ---------- 결과 화면 ---------- */
+#resultScreen{background:linear-gradient(180deg,#fdeecd 0%, #f2ddb4 100%);}
+.result-stat{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 4px;
+  border-bottom:2px dashed #eadfc4;
+  font-weight:800;
+  font-size:var(--font-mid);
+}
+.result-stat .val{color:var(--teal-dark); font-weight:900;}
+
+/* ---------- 토스트 ---------- */
+#toastZone{
+  position:fixed; left:50%; top:76px;
+  transform:translateX(-50%);
+  z-index:90;
+  display:flex; flex-direction:column; gap:8px;
+  align-items:center;
+  pointer-events:none;
+  width:max-content;
+  max-width:92vw;
+}
+.toast{
+  background:rgba(22,36,61,.92);
+  color:#ffe9c4;
+  border-radius:999px;
+  border:2px solid rgba(255,233,196,.5);
+  padding:10px 22px;
+  font-weight:800;
+  box-shadow:0 8px 22px rgba(0,0,0,.4);
+  animation:toastIn .35s cubic-bezier(.2,1.5,.4,1) both;
+  max-width:92vw;
+  text-align:center;
+}
+.toast.gold{background:linear-gradient(180deg,#b8860b,#8a6215); color:#fff8dc;}
+@keyframes toastIn{from{transform:translateY(-24px) scale(.7); opacity:0;} to{transform:translateY(0) scale(1); opacity:1;}}
+.toast.out{animation:toastOut .3s ease both;}
+@keyframes toastOut{to{transform:translateY(-16px); opacity:0;}}
+
+/* ---------- 아이템 fallback 공통 ---------- */
+.item-visual-slot{width:100%; height:100%; position:relative;}
+.item-img{width:100%; height:100%; object-fit:contain; display:block;}
+.item-fallback-svg{width:100%; height:100%; display:block;}
+
+/* ---------- 반응형 ---------- */
+@media (max-width:760px){
+  .hud-chip{padding:6px 12px; font-size:.85rem;}
+  .hud-btn{width:46px; height:46px; font-size:1.2rem;}
+  #player{width:76px; height:98px;}
+  .dig-site{width:70px; height:70px;}
+  .collection-grid{grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:10px;}
+  .fore-rock,.fore-grass{display:none;} /* 모바일 성능: 전경 장식 간소화 */
+  .strata-lightbeam{display:none;}
+}
+@media (min-width:761px){
+  #mobileControls .pad.move{display:flex;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 1. 시작 화면 ============ -->
+  <section id="startScreen" class="screen active">
+    <div class="start-card">
+      <div class="start-hero" id="startHero"></div>
+      <h1 class="start-title">탐사대<br><span class="accent">숨겨진 층의 비밀을 찾아라</span></h1>
+      <p class="start-sub">길을 따라 탐험하며 단서를 발견하고, 기록하고,<br>숨겨진 정보를 해금하라!</p>
+      <div class="start-badge-row" id="startProgressRow"></div>
+      <div class="start-buttons">
+        <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
+        <button class="btn teal wide" id="btnHelp">📖 게임 방법</button>
+        <button class="btn navy wide" id="btnCollectionFromStart">📚 탐사 도감</button>
+        <button class="btn ghost small" id="btnTeacher">🛠 교사용 설정</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. 게임 방법 화면 ============ -->
+  <section id="helpScreen" class="screen panel-screen">
+    <div class="back-bar" style="width:min(860px,96%);">
+      <button class="btn ghost small" data-goto="startScreen">← 돌아가기</button>
+      <h2 class="screen-title">📖 게임 방법</h2>
+    </div>
+    <div class="panel-card">
+      <div class="help-step"><div class="help-num">1</div><div><b>길을 따라 탐험!</b><br>귀여운 탐사대원을 조작해 길을 걸어요. PC는 <b>←/→ 또는 A/D</b> 키, 모바일은 <b>화면 아래 좌우 버튼</b>으로 움직여요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>탐사 현장 발견!</b><br>길 끝에 다다르면 층층이 쌓인 신비한 절벽(층상 단면)을 발견하게 돼요. 처음에는 층의 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>반짝이는 조사 지점을 찾아라!</b><br>층 곳곳에 ✦ 반짝이는 조사 지점이 숨어 있어요. 가까이 가면 "조사하기" 표시가 떠요. <b>E키 / 스페이스 / 조사 버튼</b>으로 발굴을 시작!</div></div>
+      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
+      <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
+      <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
+    </div>
+    <div class="panel-card" id="helpMissionCard"></div>
+  </section>
+
+  <!-- ============ 3~4. 탐사 화면 (길 구간 + 지층 구간 공용) ============ -->
+  <section id="gameScreen" class="screen">
+    <div id="sceneViewport">
+      <div class="scene-world" id="sceneWorld">
+        <div class="parallax-layer" id="farLayer"></div>
+        <div class="parallax-layer" id="midLayer"></div>
+        <div class="parallax-layer" id="playLayer"></div>
+        <div class="parallax-layer" id="foreLayer" style="pointer-events:none;"></div>
+      </div>
+      <div id="actionHint"><div class="bubble">🔍 조사하기 (E / 스페이스)</div></div>
+    </div>
+
+    <div id="hud">
+      <div class="hud-group">
+        <div class="hud-chip">⭐ <span id="hudScore">0</span></div>
+        <div class="hud-chip">📦 <span id="hudCollect">0/0</span></div>
+        <div class="hud-chip" id="hudCombo" style="display:none;">🔥 콤보 <span id="hudComboNum">0</span></div>
+      </div>
+      <div class="hud-group">
+        <button class="hud-btn" id="btnSound" title="소리 켜기/끄기">🔊</button>
+        <button class="hud-btn" id="btnCollectionHud" title="도감">📚</button>
+        <button class="hud-btn" id="btnHome" title="처음으로">🏠</button>
+      </div>
+    </div>
+
+    <div id="mobileControls">
+      <div class="pad move">
+        <button class="ctrl-btn" id="btnLeft">◀</button>
+        <button class="ctrl-btn" id="btnRight">▶</button>
+      </div>
+      <div class="pad">
+        <button class="ctrl-btn act" id="btnAction">🔍 조사</button>
+      </div>
+    </div>
+
+    <div id="cinematicOverlay">
+      <div class="cinematic-card">
+        <div class="cinematic-title" id="cinematicTitle">탐사 현장 발견!</div>
+        <div class="cinematic-sub" id="cinematicSub">층층이 쌓인 신비한 절벽이 나타났다…!</div>
+        <button class="btn" id="btnCinematicGo">⛏ 본격 탐사 시작!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. 아이템 관찰 모달 ============ -->
+  <div class="modal-backdrop" id="itemModal">
+    <div class="modal-card">
+      <button class="modal-close" data-close="itemModal">✕</button>
+      <h3 class="modal-title" id="itemModalTitle">단서 관찰</h3>
+      <div class="modal-item-visual"><div class="shine"></div><div class="item-visual-slot" id="itemModalVisual"></div></div>
+      <div id="itemModalInfo"></div>
+      <div class="modal-actions" id="itemModalActions"></div>
+    </div>
+  </div>
+
+  <!-- ============ 발견 팝업 ============ -->
+  <div class="modal-backdrop" id="discoveryModal">
+    <div class="modal-card">
+      <div class="discover-banner">✨ 새로운 단서 발견! ✨</div>
+      <div class="modal-item-visual" style="margin-top:14px;"><div class="shine"></div><div class="item-visual-slot" id="discoveryVisual"></div></div>
+      <h3 class="modal-title" id="discoveryName">???</h3>
+      <p id="discoveryHint" style="text-align:center; color:#7a6a4d; font-weight:700; line-height:1.5;"></p>
+      <div class="modal-actions">
+        <button class="btn teal" id="btnObserve">🔍 자세히 관찰하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 6. 퀴즈 모달 ============ -->
+  <div class="modal-backdrop" id="quizModal">
+    <div class="modal-card">
+      <h3 class="modal-title" id="quizItemName">추론 퀴즈</h3>
+      <div class="quiz-progress-dots" id="quizDots"></div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="quiz-choices" id="quizChoices"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="modal-actions" id="quizActions"></div>
+    </div>
+  </div>
+
+  <!-- ============ 층 정보 모달 ============ -->
+  <div class="modal-backdrop" id="layerModal">
+    <div class="modal-card">
+      <button class="modal-close" data-close="layerModal">✕</button>
+      <h3 class="modal-title" id="layerModalTitle">층 정보</h3>
+      <div id="layerModalInfo"></div>
+      <div class="modal-actions"><button class="btn ghost small" data-close="layerModal">닫기</button></div>
+    </div>
+  </div>
+
+  <!-- ============ 배지 획득 팝업 ============ -->
+  <div class="modal-backdrop" id="badgeModal">
+    <div class="modal-card" style="text-align:center;">
+      <div class="discover-banner" style="color:#b8860b;">🏅 배지 획득!</div>
+      <div style="font-size:4rem; margin:12px 0;" id="badgeModalIcon">🏅</div>
+      <h3 class="modal-title" id="badgeModalName"></h3>
+      <p id="badgeModalDesc" style="text-align:center; color:#7a6a4d; font-weight:700;"></p>
+      <div class="modal-actions"><button class="btn" data-close="badgeModal">좋았어!</button></div>
+    </div>
+  </div>
+
+  <!-- ============ 7. 도감 화면 ============ -->
+  <section id="collectionScreen" class="screen panel-screen">
+    <div class="back-bar" style="width:min(900px,96%);">
+      <button class="btn ghost small" id="btnCollectionBack">← 돌아가기</button>
+      <h2 class="screen-title">📚 탐사 도감</h2>
+    </div>
+    <div class="collect-stats" id="collectStats"></div>
+    <div class="rate-bar"><div class="fill" id="collectRateFill"></div></div>
+    <div class="collection-grid" id="collectionGrid"></div>
+    <div class="panel-card">
+      <h3 style="color:var(--earth-dark);">🏅 탐사 배지</h3>
+      <div class="badge-grid" id="badgeGrid"></div>
+    </div>
+    <div class="panel-card" style="text-align:center;">
+      <button class="btn navy" id="btnResultFromCollection">📋 탐사 결과 보기</button>
+    </div>
+  </section>
+
+  <!-- ============ 8. 교사용 화면 ============ -->
+  <section id="teacherScreen" class="screen panel-screen">
+    <div class="back-bar" style="width:min(860px,96%);">
+      <button class="btn ghost small" data-goto="startScreen">← 돌아가기</button>
+      <h2 class="screen-title">🛠 교사용 설정</h2>
+    </div>
+    <div class="panel-card">
+      <div class="teacher-note">
+        💡 <b>교사 안내</b><br>
+        · 상세 퀴즈 내용은 <b>itemData</b>의 <b>quiz 배열</b>에서 수정할 수 있습니다.<br>
+        · 이미지를 교체하려면 <b>images 폴더</b>에 같은 파일명으로 이미지를 넣으면 됩니다.<br>
+        · 이미지가 없으면 자동으로 기본 그림이 표시됩니다.<br>
+        · 아래에서 데이터를 JSON으로 복사/수정/적용할 수 있습니다. JSON에 오류가 있어도 기존 데이터는 안전하게 유지됩니다.
+      </div>
+    </div>
+    <div class="panel-card">
+      <div class="teacher-tabs" id="teacherTabs"></div>
+      <textarea class="teacher-textarea" id="teacherTextarea" spellcheck="false"></textarea>
+      <div class="teacher-row">
+        <button class="btn teal small" id="btnTeacherCopy">📋 JSON 복사</button>
+        <button class="btn small" id="btnTeacherApply">✅ 붙여넣은 JSON 적용</button>
+        <button class="btn navy small" id="btnTeacherRestore">↩ 기본 데이터 복원</button>
+        <button class="btn ghost small" id="btnTeacherReset">🗑 진행 상황 초기화</button>
+      </div>
+      <div class="teacher-msg" id="teacherMsg"></div>
+    </div>
+    <div class="panel-card">
+      <h3 style="color:var(--navy);">🖼 이미지 교체 안내</h3>
+      <p style="line-height:1.7; font-weight:600; color:#44546e;">
+        index.html 옆에 <b>images</b> 폴더를 만들고 아래 파일명으로 PNG를 넣으면 자동으로 교체됩니다.<br>
+        · 길 배경: <code>images/road-scene.png</code><br>
+        · 층상 단면 배경: <code>images/strata-background.png</code><br>
+        · 캐릭터: <code>images/player-idle.png</code>, <code>player-walk.png</code>, <code>player-dig.png</code>, <code>player-inspect.png</code>, <code>player-discover.png</code><br>
+        · 아이템: itemData 각 항목의 <code>img</code> 경로 (기본: <code>images/item-01.png</code> ~ <code>item-06.png</code>)<br>
+        이미지가 없거나 로드에 실패하면 언제나 기본 CSS/SVG 그림이 대신 표시되어 게임이 깨지지 않습니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 9. 결과 화면 ============ -->
+  <section id="resultScreen" class="screen panel-screen">
+    <div class="back-bar" style="width:min(860px,96%);">
+      <button class="btn ghost small" id="btnResultBack">← 돌아가기</button>
+      <h2 class="screen-title">📋 탐사 결과</h2>
+    </div>
+    <div class="panel-card" id="resultStats"></div>
+    <div class="panel-card">
+      <h3 style="color:var(--earth-dark);">🏅 획득한 배지</h3>
+      <div class="badge-grid" id="resultBadges"></div>
+    </div>
+    <div class="panel-card" style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn teal" id="btnResultCollection">📚 도감 보기</button>
+      <button class="btn" id="btnRetry">🔄 처음부터 다시하기</button>
+    </div>
+  </section>
+
+</div>
+
+<div id="toastZone"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   ██ 교사가 수정할 데이터 영역 ██
+   아래 데이터만 수정하면 게임 내용이 바뀝니다.
+   (교사용 설정 화면에서 JSON으로도 수정할 수 있습니다)
+   ========================================================================== */
+
+/* --- 이미지 에셋 경로 (images 폴더에 파일을 넣으면 자동 적용) --- */
+const gameAssets = {
+  backgroundImg: "images/strata-background.png",   // 층상 단면 탐사 배경
+  roadBackgroundImg: "images/road-scene.png",      // 길 탐사 배경
+  player: {
+    idle: "images/player-idle.png",
+    walk: "images/player-walk.png",
+    dig: "images/player-dig.png",
+    inspect: "images/player-inspect.png",
+    discover: "images/player-discover.png"
+  }
+};
+
+/* --- 수집 아이템 데이터 (교사가 수정할 데이터 영역) ---
+   · quiz 배열에 문항을 추가/수정하세요. type: "choice"(4지선다) 또는 "ox"
+   · shape: 이미지가 없을 때 표시할 기본 그림 종류
+     (spiral / segmented / bone / disk / branch / leaf / unknown)          */
+const DEFAULT_ITEM_DATA = [
+  {
+    id: "sample_item_01",
+    name: "샘플 단서 01",
+    img: "images/item-01.png",
+    shape: "spiral",
+    layer: "A",
+    group: "샘플 분류 가",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "빙글빙글 나선 모양의 단서처럼 보입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "이 단서를 바탕으로 무엇을 추론할 수 있을까요? (임시 문항)",
+        choices: ["숨겨진 정보 A", "숨겨진 정보 B", "숨겨진 정보 C", "숨겨진 정보 D"],
+        answer: "숨겨진 정보 A",
+        hint: "관찰 포인트를 다시 확인해 보세요.",
+        explanation: "이 설명은 임시 해설입니다. 나중에 교사가 수정할 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sample_item_02",
+    name: "샘플 단서 02",
+    img: "images/item-02.png",
+    shape: "segmented",
+    layer: "B",
+    group: "샘플 분류 가",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "둥글고 마디가 있는 단서처럼 보입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "마디가 있는 이 단서는 어떤 특징과 관련이 있을까요? (임시 문항)",
+        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
+        answer: "임시 선택지 1",
+        hint: "단서의 생김새를 다시 살펴보세요.",
+        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+      },
+      {
+        type: "ox",
+        question: "이 단서는 관찰 기록으로 남길 가치가 있다. (임시 OX 문항)",
+        answer: "O",
+        hint: "탐사대원은 모든 단서를 소중히 기록해요.",
+        explanation: "임시 해설입니다. OX 문항도 이렇게 만들 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sample_item_03",
+    name: "샘플 단서 03",
+    img: "images/item-03.png",
+    shape: "leaf",
+    layer: "B",
+    group: "샘플 분류 나",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "잎맥 같은 무늬가 보이는 단서입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "이 단서에서 관찰할 수 있는 것은 무엇일까요? (임시 문항)",
+        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
+        answer: "임시 선택지 2",
+        hint: "무늬의 모양에 주목하세요.",
+        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sample_item_04",
+    name: "샘플 단서 04",
+    img: "images/item-04.png",
+    shape: "disk",
+    layer: "C",
+    group: "샘플 분류 나",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "동글납작한 원반형 단서처럼 보입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "원반형 단서를 발견한 층에서 알 수 있는 것은? (임시 문항)",
+        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
+        answer: "임시 선택지 3",
+        hint: "발견 위치(층)를 떠올려 보세요.",
+        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sample_item_05",
+    name: "샘플 단서 05",
+    img: "images/item-05.png",
+    shape: "branch",
+    layer: "C",
+    group: "샘플 분류 다",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "가지처럼 갈라진 모양의 단서입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "ox",
+        question: "가지 모양 단서는 다른 단서와 비교하며 관찰하면 좋다. (임시 OX 문항)",
+        answer: "O",
+        hint: "비교 관찰은 탐사의 기본!",
+        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sample_item_06",
+    name: "샘플 단서 06",
+    img: "images/item-06.png",
+    shape: "bone",
+    layer: "D",
+    group: "샘플 분류 다",
+    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
+    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
+    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
+    funNote: "임시 한 줄 메모입니다.",
+    visualHint: "단단해 보이는 뼈 모양 단서입니다.",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "가장 아래층에서 발견된 이 단서로 추론할 수 있는 것은? (임시 문항)",
+        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
+        answer: "임시 선택지 4",
+        hint: "층이 쌓이는 순서를 생각해 보세요.",
+        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+      }
+    ]
+  }
+];
+
+/* --- 층 데이터 (교사가 수정할 데이터 영역)
+   hiddenName / hiddenInfo는 그 층의 아이템 퀴즈를 완료해야 해금됩니다. --- */
+const DEFAULT_LAYER_DATA = [
+  { id: "A", label: "층 A", color1: "#d8b070", color2: "#c09050",
+    hiddenName: "미확인 층 A의 정체 (교사가 수정)",
+    hiddenInfo: "층 A의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
+  { id: "B", label: "층 B", color1: "#b98a5e", color2: "#a06e46",
+    hiddenName: "미확인 층 B의 정체 (교사가 수정)",
+    hiddenInfo: "층 B의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
+  { id: "C", label: "층 C", color1: "#96704e", color2: "#7c583c",
+    hiddenName: "미확인 층 C의 정체 (교사가 수정)",
+    hiddenInfo: "층 C의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
+  { id: "D", label: "층 D", color1: "#6e523a", color2: "#57402d",
+    hiddenName: "미확인 층 D의 정체 (교사가 수정)",
+    hiddenInfo: "층 D의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." }
+];
+
+/* --- 배지 데이터 (교사가 수정할 데이터 영역) --- */
+const DEFAULT_BADGE_DATA = [
+  { id: "first_find",  icon: "🥇", name: "첫 발견자",       desc: "첫 아이템을 발견했어요!",            type: "discoverCount", value: 1 },
+  { id: "rookie",      icon: "⛏", name: "초보 탐사대원",   desc: "아이템 3개를 발견했어요!",           type: "discoverCount", value: 3 },
+  { id: "collector",   icon: "📚", name: "도감 수집가",     desc: "전체 아이템 50% 이상 수집!",         type: "completeRate",  value: 0.5 },
+  { id: "layer_reader",icon: "🧩", name: "층 해석자",       desc: "층 정보를 1개 이상 해금했어요!",     type: "layerUnlock",   value: 1 },
+  { id: "perfect",     icon: "👑", name: "완벽한 탐사대원", desc: "모든 샘플 아이템을 수집했어요!",     type: "completeAll",   value: 1 }
+];
+
+/* --- 미션 데이터 (교사가 수정할 데이터 영역) --- */
+const DEFAULT_MISSION_DATA = {
+  main: "층상 단면에 숨겨진 모든 단서를 발굴하고, 도감을 완성해 층의 비밀을 밝혀라!",
+  bonus: [
+    "모든 층의 정보를 해금해 보세요.",
+    "퀴즈를 첫 시도에 맞혀 콤보를 쌓아 보세요.",
+    "배지 5개를 모두 획득해 보세요."
+  ]
+};
+
+/* --- 길 구간 설정 (교사가 수정할 데이터 영역) --- */
+const DEFAULT_ROAD_SCENE_DATA = {
+  length: 3000,            // 길 구간 전체 길이(px)
+  discoveryPoint: 2550,    // 이 지점에 도달하면 "탐사 현장 발견!" 연출
+  discoveryTitle: "탐사 현장 발견!",
+  discoverySub: "층층이 쌓인 신비한 절벽이 나타났다…!",
+  signs: [
+    { x: 500,  text: "탐사로 입구 →" },
+    { x: 1400, text: "미확인 절벽 1.2km" },
+    { x: 2200, text: "⚠ 탐사 구역" }
+  ]
+};
+
+/* ==========================================================================
+   ██ 여기서부터 엔진 코드 (일반적으로 수정할 필요 없음) ██
+   ========================================================================== */
+
+/* ---------- 전역 상태 ---------- */
+const SAVE_KEY = "stratumExplorer_save_v1";
+const TEACHER_KEY = "stratumExplorer_teacherData_v1";
+
+let itemData   = deepClone(DEFAULT_ITEM_DATA);
+let layerData  = deepClone(DEFAULT_LAYER_DATA);
+let badgeData  = deepClone(DEFAULT_BADGE_DATA);
+let missionData = deepClone(DEFAULT_MISSION_DATA);
+let roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
+
+let state = defaultState();
+function defaultState(){
+  return {
+    discovered: [],      // 발굴한 아이템 id
+    completed: [],       // 퀴즈까지 완료한 아이템 id
+    unlockedLayers: [],  // 해금된 층 id
+    badges: [],          // 획득 배지 id
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    quizAnswered: 0,     // 응답한 퀴즈 수
+    quizFirstCorrect: 0, // 첫 시도 정답 수
+    roadDone: false,     // 길 탐사 완료 여부
+    enteredSite: false,  // 본 탐사 구간 진입 여부
+    lastPlayed: ""
+  };
+}
+
+/* 게임 진행용 런타임 변수 */
+const game = {
+  mode: "road",              // "road" | "strata"
+  running: false,
+  worldLen: 3000,
+  player: { x: 200, dir: 1, moving: false, anim: "idle" },
+  cameraX: 0,
+  input: { left: false, right: false },
+  sites: [],                 // 조사 지점 런타임 정보
+  nearSite: null,
+  digging: null,             // {siteId, progress, timer}
+  discoveryShown: false,
+  soundOn: true,
+  reducedMotion: false,
+  smallScreen: false,
+  stepSoundTimer: 0,
+  playerBaseX: 0             // playLayer 안에서 플레이어 요소 기준
+};
+
+/* 에셋 로드 상태: "loading" | "ok" | "fail" */
+const assetStatus = { road: "loading", strata: "loading", player: {} };
+const playerImgCache = {};
+
+/* ---------- 유틸 ---------- */
+function $(id){ return document.getElementById(id); }
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+function safe(v, fallback){ return (v === undefined || v === null || (typeof v === "number" && isNaN(v))) ? (fallback !== undefined ? fallback : "") : v; }
+function escapeHTML(s){
+  return String(safe(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ---------- 저장 시스템 (localStorage, 실패해도 앱 유지) ---------- */
+function loadState(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign(defaultState(), parsed);
+      // 배열 필드 방어
+      ["discovered","completed","unlockedLayers","badges"].forEach(k=>{
+        if(!Array.isArray(state[k])) state[k] = [];
+      });
+    }
+  }catch(e){ /* localStorage 차단/오류 → 기본 상태로 진행 */ }
+  try{
+    const t = localStorage.getItem(TEACHER_KEY);
+    if(t){
+      const d = JSON.parse(t);
+      if(Array.isArray(d.itemData) && d.itemData.length) itemData = d.itemData;
+      if(Array.isArray(d.layerData) && d.layerData.length) layerData = d.layerData;
+      if(Array.isArray(d.badgeData)) badgeData = d.badgeData;
+      if(d.missionData) missionData = d.missionData;
+      if(d.roadSceneData) roadSceneData = Object.assign(deepClone(DEFAULT_ROAD_SCENE_DATA), d.roadSceneData);
+    }
+  }catch(e){ /* 교사 데이터 손상 → 기본 데이터 유지 */ }
+}
+function saveState(){
+  try{
+    state.lastPlayed = new Date().toLocaleString();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  }catch(e){ /* 저장 불가 환경에서도 게임은 계속 */ }
+}
+function saveTeacherData(){
+  try{
+    localStorage.setItem(TEACHER_KEY, JSON.stringify({ itemData, layerData, badgeData, missionData, roadSceneData }));
+  }catch(e){ }
+}
+function resetProgress(){
+  state = defaultState();
+  saveState();
+  game.discoveryShown = false;
+  renderStartProgress();
+  updateHud();
+}
+
+/* ---------- 사운드 시스템 (Web Audio API, 외부 음원 없음) ---------- */
+let audioCtx = null;
+function ensureAudio(){
+  if(audioCtx) {
+    if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+    return;
+  }
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC) audioCtx = new AC();
+  }catch(e){ audioCtx = null; }
+}
+function tone(freq, dur, type, vol, delay){
+  if(!audioCtx || !game.soundOn) return;
+  try{
+    const t0 = audioCtx.currentTime + (delay || 0);
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  }catch(e){ }
+}
+function playSound(type){
+  if(!game.soundOn) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  switch(type){
+    case "click":    tone(660, .08, "triangle", .1); break;
+    case "step":     tone(220 + Math.random()*40, .05, "triangle", .04); break;
+    case "dig":      tone(140, .09, "square", .08); tone(90, .12, "sawtooth", .05, .04); break;
+    case "found":    tone(523, .12, "triangle", .12); tone(659, .12, "triangle", .12, .1); tone(784, .2, "triangle", .13, .2); break;
+    case "correct":  tone(523, .1, "sine", .12); tone(784, .18, "sine", .13, .1); break;
+    case "wrong":    tone(220, .18, "sawtooth", .08); tone(180, .22, "sawtooth", .07, .12); break;
+    case "register": tone(392, .1, "triangle", .1); tone(523, .1, "triangle", .11, .09); tone(659, .1, "triangle", .12, .18); tone(1047, .25, "triangle", .12, .27); break;
+    case "badge":    tone(659, .12, "square", .07); tone(784, .12, "square", .07, .11); tone(988, .12, "square", .08, .22); tone(1319, .3, "square", .08, .33); break;
+    case "place":    tone(440, .15, "sine", .1); tone(660, .25, "sine", .12, .13); break;
+    default:         tone(440, .08, "sine", .08);
+  }
+}
+
+/* ---------- 에셋 사전 로드 ---------- */
+function preloadAssets(){
+  // 배경
+  tryLoadBg(gameAssets.roadBackgroundImg, ok => { assetStatus.road = ok ? "ok" : "fail"; applyBgPhoto(); });
+  tryLoadBg(gameAssets.backgroundImg, ok => { assetStatus.strata = ok ? "ok" : "fail"; applyBgPhoto(); });
+  // 캐릭터 상태별 이미지
+  const p = gameAssets.player || {};
+  ["idle","walk","dig","inspect","discover"].forEach(st => {
+    const src = p[st];
+    if(!src){ assetStatus.player[st] = "fail"; return; }
+    assetStatus.player[st] = "loading";
+    const im = new Image();
+    im.onload = () => { assetStatus.player[st] = "ok"; playerImgCache[st] = src; renderPlayerCharacter(game.player.anim); };
+    im.onerror = () => { assetStatus.player[st] = "fail"; renderPlayerCharacter(game.player.anim); };
+    im.src = src;
+  });
+}
+function tryLoadBg(src, cb){
+  if(!src){ cb(false); return; }
+  const im = new Image();
+  im.onload = () => cb(true);
+  im.onerror = () => cb(false);
+  im.src = src;
+}
+function applyBgPhoto(){
+  const photo = document.querySelector("#sceneViewport .bg-photo");
+  if(!photo) return;
+  const which = game.mode === "road" ? "road" : "strata";
+  const src = which === "road" ? gameAssets.roadBackgroundImg : gameAssets.backgroundImg;
+  if(assetStatus[which] === "ok" && src){
+    photo.style.backgroundImage = "url('" + src + "')";
+    photo.classList.add("on");
+  }else{
+    photo.classList.remove("on");
+    photo.style.backgroundImage = "";
+  }
+}
+
+/* ---------- 아이템 fallback 그림 (SVG) ---------- */
+const FALLBACK_COLORS = ["#2ea79c","#ff8c42","#8a6fbf","#e05a7a","#4a90d9","#7fae3f"];
+function itemColor(item){
+  const idx = Math.max(0, itemData.findIndex(i => i.id === item.id));
+  return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
+}
+function fallbackShapeSVG(shape, color, silhouette){
+  const c  = silhouette ? "#6b6b6b" : color;
+  const c2 = silhouette ? "#585858" : "#5c3f2a";
+  const q  = silhouette ? '<text x="60" y="72" text-anchor="middle" font-size="34" font-weight="900" fill="#3d3d3d">?</text>' : "";
+  let body = "";
+  switch(shape){
+    case "spiral":
+      body = '<path d="M60 60 m0 -3 a3 3 0 0 1 3 3 a6 6 0 0 1 -6 6 a10 10 0 0 1 -10 -10 a15 15 0 0 1 15 -15 a21 21 0 0 1 21 21 a27 27 0 0 1 -27 27 a33 33 0 0 1 -33 -33 a38 38 0 0 1 38 -38" fill="none" stroke="' + c + '" stroke-width="9" stroke-linecap="round"/>';
+      break;
+    case "segmented":
+      body = '<ellipse cx="60" cy="60" rx="42" ry="26" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+             '<path d="M34 40 q4 20 0 40 M48 36 q4 24 0 48 M62 35 q4 25 0 50 M76 37 q4 23 0 46 M88 44 q3 16 0 32" stroke="' + c2 + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+      break;
+    case "bone":
+      body = '<path d="M35 45 a10 10 0 1 1 12 -12 a10 10 0 1 1 12 12 L52 52 L85 85 a10 10 0 1 1 -12 12 a10 10 0 1 1 -12 -12 L68 68 Z" transform="rotate(8 60 60)" fill="' + c + '" stroke="' + c2 + '" stroke-width="4" stroke-linejoin="round"/>';
+      break;
+    case "disk":
+      body = '<circle cx="60" cy="60" r="38" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+             '<circle cx="60" cy="60" r="26" fill="none" stroke="' + c2 + '" stroke-width="3" opacity=".7"/>' +
+             '<circle cx="60" cy="60" r="14" fill="none" stroke="' + c2 + '" stroke-width="3" opacity=".7"/>' +
+             '<circle cx="60" cy="60" r="4" fill="' + c2 + '"/>';
+      break;
+    case "branch":
+      body = '<path d="M60 100 L60 58 M60 58 L38 34 M60 74 L82 52 M38 34 L30 20 M38 34 L52 24 M82 52 L92 38 M82 52 L70 40" stroke="' + c + '" stroke-width="9" fill="none" stroke-linecap="round"/>';
+      break;
+    case "leaf":
+      body = '<path d="M60 18 C 92 40 92 80 60 102 C 28 80 28 40 60 18 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+             '<path d="M60 24 L60 96 M60 44 L42 56 M60 44 L78 56 M60 64 L44 74 M60 64 L76 74" stroke="' + c2 + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+      break;
+    default: // unknown
+      body = '<path d="M60 16 C 90 16 104 42 100 64 C 96 88 80 104 60 104 C 40 104 24 88 20 64 C 16 42 30 16 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>';
+      break;
+  }
+  return '<svg class="item-fallback-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+         '<ellipse cx="60" cy="106" rx="34" ry="7" fill="rgba(0,0,0,.15)"/>' + body + q + '</svg>';
+}
+/* fallback 플레이스홀더 표시 (item id/group/shape에 따라 다른 그림) */
+function renderFallbackItem(container, item, silhouette){
+  if(!container) return;
+  const shape = safe(item && item.shape, "unknown") || "unknown";
+  container.innerHTML = fallbackShapeSVG(shape, itemColor(item || {id:"?"}), !!silhouette);
+}
+/* 공통 이미지 렌더 함수: 성공 시 img, 실패 시 fallback (카드/도감/팝업 공용)
+   type: "normal" | "silhouette"  */
+function renderAssetImage(container, item, type){
+  if(!container) return;
+  container.innerHTML = "";
+  if(type === "silhouette"){
+    // 미발견 카드: 스포일러 방지를 위해 항상 실루엣 fallback
+    renderFallbackItem(container, item, true);
+    return;
+  }
+  const src = item && item.img;
+  if(!src){ renderFallbackItem(container, item, false); return; }
+  const img = document.createElement("img");
+  img.className = "item-img";
+  img.alt = safe(item.name, "단서");
+  img.onerror = () => renderFallbackItem(container, item, false);
+  img.src = src;
+  container.appendChild(img);
+}
+
+/* ---------- 플레이어 캐릭터 ---------- */
+function playerFallbackSVG(){
+  /* 꼬마 탐사대원: 노란 안전모 + 조끼 + 가방 + 루페 + 망치 (CSS/SVG 기본 캐릭터) */
+  return '<svg class="player-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    // 가방 (등 뒤)
+    '<rect x="14" y="72" width="26" height="34" rx="9" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
+    '<rect x="19" y="80" width="16" height="10" rx="4" fill="#c9a468"/>' +
+    // 다리
+    '<rect x="42" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<rect x="63" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<ellipse cx="48" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
+    '<ellipse cx="70" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
+    // 몸통(조끼)
+    '<rect x="36" y="70" width="46" height="48" rx="16" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
+    '<rect x="52" y="70" width="14" height="48" fill="#ffe9c4" stroke="#b35a1f" stroke-width="3"/>' +
+    '<circle cx="59" cy="84" r="3" fill="#b35a1f"/><circle cx="59" cy="98" r="3" fill="#b35a1f"/>' +
+    '<rect x="40" y="78" width="9" height="12" rx="3" fill="#ffd166" stroke="#b35a1f" stroke-width="2.5"/>' +
+    // 왼팔 + 망치
+    '<rect x="24" y="76" width="14" height="30" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4" transform="rotate(18 31 91)"/>' +
+    '<circle cx="24" cy="106" r="7" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
+    '<rect x="8" y="103" width="24" height="7" rx="3.5" fill="#a97b50" stroke="#5c3f2a" stroke-width="3" transform="rotate(-30 20 106)"/>' +
+    '<rect x="2" y="88" width="13" height="12" rx="3" fill="#8c9bab" stroke="#4c5866" stroke-width="3" transform="rotate(-30 8 94)"/>' +
+    // 오른팔 + 루페
+    '<rect x="80" y="76" width="14" height="30" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4" transform="rotate(-18 87 91)"/>' +
+    '<circle cx="95" cy="104" r="7" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
+    '<circle cx="106" cy="90" r="11" fill="rgba(180,230,255,.55)" stroke="#22385c" stroke-width="4.5"/>' +
+    '<line x1="99" y1="99" x2="94" y2="106" stroke="#22385c" stroke-width="5" stroke-linecap="round"/>' +
+    // 얼굴
+    '<circle cx="59" cy="46" r="26" fill="#ffd9b0" stroke="#b3763d" stroke-width="4"/>' +
+    '<circle cx="50" cy="46" r="3.6" fill="#22385c"/>' +
+    '<circle cx="68" cy="46" r="3.6" fill="#22385c"/>' +
+    '<circle cx="51.4" cy="44.8" r="1.2" fill="#fff"/>' +
+    '<circle cx="69.4" cy="44.8" r="1.2" fill="#fff"/>' +
+    '<path d="M52 57 Q59 63 66 57" stroke="#b3763d" stroke-width="3.5" fill="none" stroke-linecap="round"/>' +
+    '<circle cx="42" cy="54" r="4.5" fill="#ffb3a0" opacity=".8"/>' +
+    '<circle cx="76" cy="54" r="4.5" fill="#ffb3a0" opacity=".8"/>' +
+    // 안전모
+    '<path d="M32 40 a27 27 0 0 1 54 0 l0 4 l-54 0 Z" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
+    '<rect x="28" y="40" width="62" height="9" rx="4.5" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
+    '<rect x="53" y="16" width="12" height="14" rx="5" fill="#ffe08c" stroke="#c98d1a" stroke-width="3"/>' +
+    '</svg>';
+}
+/* 캐릭터 렌더: 이미지 우선, 실패 시 idle 이미지, 그것도 없으면 SVG fallback */
+function renderPlayerCharacter(animState){
+  const el = $("player");
+  if(!el) return;
+  const stateName = animState || "idle";
+  game.player.anim = stateName;
+  el.className = "anim-" + stateName;
+  const vis = el.querySelector(".player-visual");
+  if(!vis) return;
+  // 방향 반전 (캐릭터만 반전, UI는 반전 금지)
+  vis.classList.toggle("flip", game.player.dir < 0);
+  const inner = vis.querySelector(".player-anim");
+  let src = null;
+  if(assetStatus.player[stateName] === "ok") src = gameAssets.player[stateName];
+  else if(assetStatus.player.idle === "ok") src = gameAssets.player.idle;
+  const cur = inner.getAttribute("data-src") || "";
+  const want = src || "fallback";
+  if(cur === want) return; // 불필요한 재렌더 방지
+  inner.setAttribute("data-src", want);
+  if(src){
+    inner.innerHTML = '<img class="player-img" alt="탐사대원">';
+    const im = inner.querySelector("img");
+    im.onerror = () => { inner.setAttribute("data-src","fallback"); inner.innerHTML = playerFallbackSVG(); };
+    im.src = src;
+  }else{
+    inner.innerHTML = playerFallbackSVG();
+  }
+}
+
+/* ---------- 화면 전환 ---------- */
+function renderScreen(name){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const el = $(name);
+  if(el) el.classList.add("active");
+  game.running = (name === "gameScreen");
+  if(name === "startScreen") renderStartProgress();
+}
+function closeModal(id){ const m = $(id); if(m) m.classList.remove("on"); }
+function openModal(id){ const m = $(id); if(m) m.classList.add("on"); }
+
+/* ---------- 시작 화면 ---------- */
+function renderStartProgress(){
+  const row = $("startProgressRow");
+  if(!row) return;
+  const total = itemData.length;
+  const done = state.completed.length;
+  let html = '<span class="chip">📦 수집 ' + done + '/' + total + '</span>' +
+             '<span class="chip">⭐ ' + safe(state.score,0) + '점</span>' +
+             '<span class="chip">🏅 배지 ' + state.badges.length + '/' + badgeData.length + '</span>';
+  if(state.lastPlayed) html += '<span class="chip">🕐 최근: ' + escapeHTML(state.lastPlayed) + '</span>';
+  row.innerHTML = html;
+  const hero = $("startHero");
+  if(hero && !hero.hasChildNodes()) hero.innerHTML = playerFallbackSVG();
+}
+function renderHelpMissions(){
+  const card = $("helpMissionCard");
+  if(!card) return;
+  let bonus = "";
+  (missionData.bonus || []).forEach(b => { bonus += "<li style='margin:6px 0;'>" + escapeHTML(b) + "</li>"; });
+  card.innerHTML =
+    '<h3 style="color:var(--teal-dark);">🎯 메인 미션</h3>' +
+    '<p style="font-weight:800; color:var(--earth-dark); line-height:1.6;">' + escapeHTML(safe(missionData.main,"")) + '</p>' +
+    '<h3 style="color:var(--teal-dark);">🌟 보너스 미션</h3>' +
+    '<ul style="font-weight:700; color:#7a6a4d; line-height:1.5; padding-left:22px;">' + bonus + '</ul>';
+}
+
+/* ---------- 장면(씬) 구성 ---------- */
+function clearLayers(){
+  ["farLayer","midLayer","playLayer","foreLayer"].forEach(id => { $(id).innerHTML = ""; });
+}
+function makeDust(layerEl, count, areaW){
+  const n = game.smallScreen ? Math.floor(count/2) : count;
+  for(let i=0;i<n;i++){
+    const d = document.createElement("div");
+    d.className = "dust-mote";
+    const sz = 3 + (i*7)%6;
+    d.style.width = sz + "px"; d.style.height = sz + "px";
+    d.style.left = ((i*173)%areaW) + "px";
+    d.style.bottom = (10 + (i*61)%55) + "%";
+    d.style.animationDuration = (6 + (i*13)%8) + "s";
+    d.style.animationDelay = ((i*29)%60/10) + "s";
+    layerEl.appendChild(d);
+  }
+}
+
+/* --- 길 구간 씬 --- */
+function renderRoadScene(){
+  game.mode = "road";
+  game.worldLen = Math.max(1200, Number(safe(roadSceneData.length, 3000)) || 3000);
+  clearLayers();
+  const far = $("farLayer"), mid = $("midLayer"), play = $("playLayer"), fore = $("foreLayer");
+  const W = game.worldLen;
+
+  /* far: 하늘 + 태양 + 구름 + 먼 산 + 멀리 보이는 협곡 (CSS fallback 배경) */
+  far.style.width = (W + 1200) + "px";
+  far.innerHTML =
+    '<div class="road-sky"></div>' +
+    '<div class="bg-photo"></div>' +
+    '<div class="sun"></div>';
+  for(let i=0;i<5;i++){
+    const cl = document.createElement("div");
+    cl.className = "cloud";
+    cl.style.width = (90 + i*34) + "px";
+    cl.style.height = (26 + (i%3)*10) + "px";
+    cl.style.top = (6 + (i*9)%26) + "%";
+    cl.style.left = ((i*613)% (W+600)) + "px";
+    cl.style.animationDuration = (30 + i*9) + "s";
+    far.appendChild(cl);
+  }
+  for(let i=0;i<3;i++){
+    const m = document.createElement("div");
+    m.className = "far-mountain";
+    m.style.left = (i*900 + 120) + "px";
+    m.style.opacity = String(.5 + i*.12);
+    far.appendChild(m);
+  }
+  /* 길 끝에 보이는 협곡: 진행할수록 커짐 */
+  const canyon = document.createElement("div");
+  canyon.className = "far-canyon";
+  canyon.id = "roadCanyon";
+  canyon.style.left = (W - 240) + "px";
+  canyon.style.transform = "scale(.55)";
+  far.appendChild(canyon);
+
+  /* mid: 땅 + 길 + 표지판 + 바위 + 풀 + 반짝 포인트 */
+  mid.style.width = (W + 800) + "px";
+  const ground = document.createElement("div");
+  ground.className = "road-ground";
+  mid.appendChild(ground);
+  const path = document.createElement("div");
+  path.className = "road-path";
+  mid.appendChild(path);
+  (roadSceneData.signs || []).forEach(s => {
+    const sg = document.createElement("div");
+    sg.className = "deco-sign";
+    sg.style.left = (Number(safe(s.x,0))||0) + "px";
+    sg.innerHTML = '<div class="plate">' + escapeHTML(safe(s.text,"→")) + '</div><div class="pole"></div>';
+    mid.appendChild(sg);
+  });
+  for(let i=0;i<10;i++){
+    const r = document.createElement("div");
+    r.className = "deco-rock";
+    r.style.left = ((i*331+180)%W) + "px";
+    r.style.transform = "scale(" + (0.5 + (i%4)*0.22) + ")";
+    mid.appendChild(r);
+    const g = document.createElement("div");
+    g.className = "deco-grass";
+    g.style.left = ((i*277+80)%W) + "px";
+    g.innerHTML = '<span style="left:0;"></span><span style="left:12px; height:75%; animation-delay:.4s;"></span><span style="left:24px; height:88%; animation-delay:.9s;"></span>';
+    mid.appendChild(g);
+  }
+  for(let i=0;i<6;i++){
+    const sp = document.createElement("div");
+    sp.className = "sparkle-point";
+    sp.style.left = ((i*457+300)%W) + "px";
+    sp.style.bottom = (10 + (i*7)%14) + "%";
+    mid.appendChild(sp);
+  }
+  makeDust(mid, 10, W);
+
+  /* play: 플레이어 */
+  play.style.width = W + "px";
+  const player = document.createElement("div");
+  player.id = "player";
+  player.innerHTML = '<div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div>';
+  player.style.bottom = "9%";
+  play.appendChild(player);
+
+  /* fore: 전경 장식 */
+  fore.style.width = (W + 800) + "px";
+  for(let i=0;i<5;i++){
+    const fr = document.createElement("div");
+    fr.className = "fore-rock";
+    fr.style.left = ((i*683+240)%W) + "px";
+    fr.style.transform = "scale(" + (0.7 + (i%3)*0.3) + ")";
+    fore.appendChild(fr);
+    const fg = document.createElement("div");
+    fg.className = "fore-grass";
+    fg.style.left = ((i*541+420)%W) + "px";
+    fg.innerHTML = '<span style="left:0;"></span><span style="left:15px; height:70%; animation-delay:.5s;"></span><span style="left:30px; height:85%; animation-delay:1s;"></span>';
+    fore.appendChild(fg);
+  }
+
+  game.sites = [];
+  game.nearSite = null;
+  game.player.x = state.roadDone ? game.worldLen - 300 : 160;
+  game.player.dir = 1;
+  game.cameraX = clamp(game.player.x - viewportW()/2, 0, Math.max(0, W - viewportW()));
+  applyBgPhoto();
+  renderPlayerCharacter("idle");
+  updateHud();
+}
+
+/* --- 지층(층상 단면) 씬 --- */
+function renderGame(){
+  game.mode = "strata";
+  game.worldLen = 2600;
+  clearLayers();
+  const far = $("farLayer"), mid = $("midLayer"), play = $("playLayer"), fore = $("foreLayer");
+  const W = game.worldLen;
+
+  /* far: 저녁빛 하늘 + 빛줄기 */
+  far.style.width = (W + 1200) + "px";
+  far.innerHTML =
+    '<div class="strata-sky"></div>' +
+    '<div class="bg-photo"></div>' +
+    '<div class="strata-lightbeam"></div>' +
+    '<div class="strata-lightbeam" style="left:62%; width:22%; opacity:.6;"></div>';
+  makeDust(far, 14, W);
+
+  /* mid: 층상 단면 절벽 */
+  mid.style.width = W + "px";
+  renderLayers(mid, W);
+
+  /* play: 바닥 + 조사 지점 + 플레이어 */
+  play.style.width = W + "px";
+  const ground = document.createElement("div");
+  ground.className = "strata-ground";
+  play.appendChild(ground);
+  renderDigSites(play, W);
+  const player = document.createElement("div");
+  player.id = "player";
+  player.innerHTML = '<div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div>';
+  player.style.bottom = "5%";
+  play.appendChild(player);
+
+  /* fore: 전경 바위/풀 (모바일에서는 CSS로 자동 숨김) */
+  fore.style.width = (W + 800) + "px";
+  for(let i=0;i<4;i++){
+    const fr = document.createElement("div");
+    fr.className = "fore-rock";
+    fr.style.left = ((i*719+300)%W) + "px";
+    fr.style.transform = "scale(" + (0.8 + (i%3)*0.35) + ")";
+    fore.appendChild(fr);
+    const fg = document.createElement("div");
+    fg.className = "fore-grass";
+    fg.style.left = ((i*577+520)%W) + "px";
+    fg.innerHTML = '<span style="left:0;"></span><span style="left:15px; height:72%; animation-delay:.4s;"></span><span style="left:30px; height:86%; animation-delay:.8s;"></span>';
+    fore.appendChild(fg);
+  }
+
+  game.player.x = 220;
+  game.player.dir = 1;
+  game.cameraX = 0;
+  applyBgPhoto();
+  renderPlayerCharacter("idle");
+  updateHud();
+}
+
+/* 층상 단면 렌더링: 층 A~D를 위에서 아래로 쌓아 표현 (질감/균열/자갈 포함) */
+function renderLayers(midEl, W){
+  const cliff = document.createElement("div");
+  cliff.className = "cliff-wall";
+  cliff.style.width = W + "px";
+  const n = Math.max(1, layerData.length);
+  const bandH = 100 / n;
+  layerData.forEach((ly, i) => {
+    const band = document.createElement("div");
+    band.className = "strata-band";
+    band.style.top = (i * bandH) + "%";
+    band.style.height = (bandH + 1.5) + "%";
+    const c1 = safe(ly.color1, "#b98a5e"), c2 = safe(ly.color2, "#8a5a3c");
+    /* 사선 경계 + 질감: 살짝 기울어진 반복 무늬로 자연스러운 층리 표현 */
+    band.style.background =
+      "repeating-linear-gradient(" + (178 - i) + "deg, " + c1 + " 0 26px, " + c2 + " 26px 34px, " + c1 + " 34px 60px), " +
+      "linear-gradient(180deg," + c1 + "," + c2 + ")";
+    band.style.transform = "skewY(" + ((i % 2 === 0 ? -1 : 1) * 0.4) + "deg)";
+    /* 균열 */
+    for(let k=0;k<4;k++){
+      const cr = document.createElement("div");
+      cr.className = "band-crack";
+      cr.style.left = ((k*613 + i*257) % (W-80)) + "px";
+      cr.style.top = (12 + (k*23)%55) + "%";
+      cr.style.width = (2 + k%2) + "px";
+      cr.style.height = (26 + (k*17)%34) + "px";
+      cr.style.setProperty("--rot", ((k%2? -1:1)*(6+k*4)) + "deg");
+      band.appendChild(cr);
+    }
+    /* 작은 자갈 */
+    for(let k=0;k<7;k++){
+      const pb = document.createElement("div");
+      pb.className = "band-pebble";
+      pb.style.left = ((k*389 + i*151 + 60) % (W-40)) + "px";
+      pb.style.top = (15 + (k*31)%60) + "%";
+      const s = 6 + (k*5)%10;
+      pb.style.width = s + "px"; pb.style.height = (s*0.7) + "px";
+      band.appendChild(pb);
+    }
+    cliff.appendChild(band);
+  });
+  midEl.appendChild(cliff);
+  /* 층 이름표 (해금 전에는 ??? 로 숨김) */
+  layerData.forEach((ly, i) => {
+    const tag = document.createElement("button");
+    tag.className = "layer-tag" + (state.unlockedLayers.includes(ly.id) ? " unlocked" : "");
+    tag.style.top = (i * bandH * 0.74 + bandH * 0.3) + "%"; // cliff이 화면 위쪽 74%를 차지하므로 보정
+    const unlocked = state.unlockedLayers.includes(ly.id);
+    tag.innerHTML = '<span class="lock">' + (unlocked ? "🔓" : "🔒") + '</span> ' +
+      escapeHTML(safe(ly.label, "층")) + " · " + (unlocked ? escapeHTML(safe(ly.hiddenName,"???")) : "???");
+    tag.addEventListener("click", () => { playSound("click"); openLayerModal(ly.id); });
+    midEl.appendChild(tag);
+  });
+}
+
+/* 조사 지점 렌더링 */
+function renderDigSites(playEl, W){
+  game.sites = [];
+  const n = itemData.length;
+  const startX = 380, endX = W - 320;
+  const layerIds = layerData.map(l => l.id);
+  itemData.forEach((item, i) => {
+    const x = n > 1 ? startX + (endX - startX) * i / (n - 1) + ((i * 137) % 90 - 45) : (startX + endX) / 2;
+    const li = Math.max(0, layerIds.indexOf(safe(item.layer, layerIds[0])));
+    const bandH = 74 / Math.max(1, layerIds.length);          // 절벽은 화면 위 74%
+    const y = bandH * li + bandH * 0.55;                       // 층 안쪽 중간쯤
+    let status = "undiscovered";
+    if(state.completed.includes(item.id)) status = "collected";
+    else if(state.discovered.includes(item.id)) status = "discovered";
+
+    const site = document.createElement("div");
+    site.className = "dig-site " + status;
+    site.id = "site_" + item.id;
+    site.style.left = x + "px";
+    site.style.top = y + "%";
+    site.innerHTML =
+      '<div class="socket"></div>' +
+      '<div class="glint">✦</div>' +
+      '<div class="site-item item-visual-slot"></div>' +
+      '<div class="check-mark">✓</div>' +
+      '<div class="dig-progress"><div class="fill"></div></div>';
+    const slot = site.querySelector(".site-item");
+    if(status === "undiscovered") renderAssetImage(slot, item, "silhouette");
+    else renderAssetImage(slot, item, "normal");
+    site.addEventListener("click", () => {
+      const s = game.sites.find(s2 => s2.id === item.id);
+      if(!s) return;
+      if(Math.abs(game.player.x - s.x) < 150) tryAction();
+      else toast("조금 더 가까이 가 보세요! 🚶");
+    });
+    playEl.appendChild(site);
+    game.sites.push({ id: item.id, x: x, el: site, status: status });
+  });
+}
+
+/* ---------- 2.5D 패럴랙스 / 카메라 ---------- */
+function viewportW(){ return $("sceneViewport").clientWidth || window.innerWidth; }
+function updateCamera(){
+  const target = clamp(game.player.x - viewportW()/2, 0, Math.max(0, game.worldLen - viewportW()));
+  const ease = game.reducedMotion ? 1 : 0.09;
+  game.cameraX += (target - game.cameraX) * ease;
+  if(Math.abs(target - game.cameraX) < 0.4) game.cameraX = target;
+}
+function renderParallaxScene(){
+  const cam = game.cameraX;
+  const lite = game.reducedMotion;
+  /* 각 레이어를 서로 다른 속도로 이동 + 깊이(translateZ) 부여 */
+  $("farLayer").style.transform  = lite
+    ? "translate3d(" + (-cam*0.25) + "px,0,0)"
+    : "translate3d(" + (-cam*0.25) + "px,0,-140px) scale(1.16)";
+  $("midLayer").style.transform  = "translate3d(" + (-cam*0.6) + "px,0,0)";
+  $("playLayer").style.transform = "translate3d(" + (-cam) + "px,0,0)";
+  $("foreLayer").style.transform = lite
+    ? "translate3d(" + (-cam*1.25) + "px,0,0)"
+    : "translate3d(" + (-cam*1.25) + "px,0,60px) scale(0.94)";
+
+  /* 플레이어 위치 */
+  const p = $("player");
+  if(p) p.style.left = game.player.x + "px";
+
+  /* 길 구간: 진행할수록 협곡이 커지며 다가오는 연출 */
+  if(game.mode === "road"){
+    const cy = $("roadCanyon");
+    if(cy){
+      const prog = clamp(game.player.x / Math.max(1, safe(roadSceneData.discoveryPoint, game.worldLen-400)), 0, 1);
+      cy.style.transform = "scale(" + (0.55 + prog*0.75) + ")";
+    }
+  }
+
+  /* 조사 안내 말풍선 위치 */
+  const hint = $("actionHint");
+  if(hint && game.nearSite){
+    const rect = game.nearSite.el.getBoundingClientRect();
+    const vp = $("sceneViewport").getBoundingClientRect();
+    /* 말풍선이 화면 밖으로 잘리지 않게 위치 보정 */
+    const x = clamp(rect.left - vp.left + rect.width/2, 120, vp.width - 120);
+    const y = Math.max(rect.top - vp.top, 76);
+    hint.style.left = x + "px";
+    hint.style.top = y + "px";
+  }
+}
+
+/* ---------- 게임 루프 ---------- */
+let lastT = 0;
+function gameLoop(t){
+  requestAnimationFrame(gameLoop);
+  const dt = Math.min(0.05, (t - lastT)/1000 || 0.016);
+  lastT = t;
+  if(!game.running) return;
+
+  const speed = 340;
+  let moving = false;
+  if(!game.digging && !anyModalOpen()){
+    if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
+    if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
+  }
+  game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
+
+  /* 걷기 효과음 (가볍게) */
+  if(moving){
+    game.stepSoundTimer -= dt;
+    if(game.stepSoundTimer <= 0){ playSound("step"); game.stepSoundTimer = 0.28; }
+  }
+
+  /* 캐릭터 상태 */
+  if(game.digging){
+    if(game.player.anim !== "dig") renderPlayerCharacter("dig");
+  }else if(moving){
+    if(game.player.anim !== "walk") renderPlayerCharacter("walk");
+    else { const vis = document.querySelector("#player .player-visual"); if(vis) vis.classList.toggle("flip", game.player.dir < 0); }
+  }else if(game.player.anim === "walk" || game.player.anim === "dig"){
+    renderPlayerCharacter("idle");
+  }
+
+  /* 그림자 크기 변화 */
+  const sh = document.querySelector("#player .player-shadow");
+  if(sh){ sh.style.width = moving ? "52px" : "64px"; sh.style.opacity = moving ? ".8" : "1"; }
+
+  /* 길 구간: 발견 지점 도달 체크 */
+  if(game.mode === "road" && !game.discoveryShown){
+    const dp = Number(safe(roadSceneData.discoveryPoint, game.worldLen - 400)) || (game.worldLen - 400);
+    if(game.player.x >= dp) showDiscoveryCinematic();
+  }
+
+  /* 지층 구간: 조사 지점 근접 체크 */
+  if(game.mode === "strata") updateNearSite();
+
+  /* 발굴 진행 */
+  if(game.digging) tickDigging(dt);
+
+  updateCamera();
+  renderParallaxScene();
+}
+function anyModalOpen(){
+  return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
+}
+function updateNearSite(){
+  let best = null, bestDist = 150;
+  game.sites.forEach(s => {
+    if(s.status === "collected") return;
+    const d = Math.abs(s.x - game.player.x);
+    if(d < bestDist){ best = s; bestDist = d; }
+  });
+  if(best !== game.nearSite){
+    if(game.nearSite) game.nearSite.el.classList.remove("near");
+    game.nearSite = best;
+    if(best) best.el.classList.add("near");
+  }
+  const hint = $("actionHint");
+  const show = !!best && !game.digging && !anyModalOpen();
+  hint.classList.toggle("on", show);
+  if(show){
+    const label = best.status === "discovered" ? "🔍 다시 관찰하기 (E / 스페이스)" : "⛏ 조사하기 (E / 스페이스)";
+    hint.querySelector(".bubble").textContent = label;
+  }
+}
+
+/* ---------- 길 → 지층 전환 연출 ---------- */
+function showDiscoveryCinematic(){
+  game.discoveryShown = true;
+  playSound("place");
+  $("cinematicTitle").textContent = safe(roadSceneData.discoveryTitle, "탐사 현장 발견!");
+  $("cinematicSub").textContent = safe(roadSceneData.discoverySub, "층층이 쌓인 신비한 절벽이 나타났다…!");
+  openCinematic();
+  renderPlayerCharacter("discover");
+  cameraShake();
+  state.roadDone = true;
+  saveState();
+}
+function openCinematic(){ $("cinematicOverlay").classList.add("on"); }
+function enterExplorationArea(){
+  $("cinematicOverlay").classList.remove("on");
+  state.enteredSite = true;
+  saveState();
+  renderGame();
+  toast("🧭 층상 단면 탐사 시작! 반짝이는 곳을 조사해 보세요.");
+}
+function cameraShake(){
+  if(game.reducedMotion) return;
+  const appEl = $("app");
+  appEl.classList.remove("shake");
+  void appEl.offsetWidth;
+  appEl.classList.add("shake");
+  setTimeout(() => appEl.classList.remove("shake"), 400);
+}
+
+/* ---------- 조사/발굴 시스템 ---------- */
+function tryAction(){
+  if(game.mode !== "strata" || anyModalOpen()) return;
+  const s = game.nearSite;
+  if(!s) return;
+  if(s.status === "undiscovered" && !game.digging) startDigging(s.id);
+  else if(s.status === "discovered") openDiscoveryPopup(s.id);
+}
+function startDigging(siteId){
+  const s = game.sites.find(x => x.id === siteId);
+  if(!s || s.status !== "undiscovered") return;
+  game.digging = { siteId: siteId, progress: 0, particleT: 0 };
+  s.status = "digging";
+  s.el.classList.remove("undiscovered");
+  s.el.classList.add("digging");
+  renderPlayerCharacter("dig");
+  playSound("dig");
+}
+function tickDigging(dt){
+  const d = game.digging;
+  const s = game.sites.find(x => x.id === d.siteId);
+  if(!s){ game.digging = null; return; }
+  d.progress += dt * 55;   // 약 1.8초에 완료
+  d.particleT -= dt;
+  if(d.particleT <= 0){
+    spawnDigParticles(s.el, 3);
+    playSound("dig");
+    d.particleT = 0.3;
+  }
+  const fill = s.el.querySelector(".dig-progress .fill");
+  if(fill) fill.style.width = clamp(d.progress, 0, 100) + "%";
+  if(d.progress >= 100){
+    game.digging = null;
+    completeDigging(d.siteId);
+  }
+}
+function spawnDigParticles(siteEl, n){
+  if(game.reducedMotion) return;
+  for(let i=0;i<n;i++){
+    const p = document.createElement("div");
+    p.className = "dig-particle";
+    p.style.left = (30 + Math.random()*24) + "px";
+    p.style.top = (40 + Math.random()*20) + "px";
+    p.style.setProperty("--dx", (Math.random()*70 - 35) + "px");
+    p.style.setProperty("--dy", (-40 - Math.random()*50) + "px");
+    p.style.background = Math.random() < 0.5 ? "#c9a468" : "#8a6242";
+    siteEl.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+function completeDigging(siteId){
+  const s = game.sites.find(x => x.id === siteId);
+  const item = itemData.find(i => i.id === siteId);
+  if(!s || !item) return;
+  s.status = "discovered";
+  s.el.classList.remove("digging");
+  s.el.classList.add("discovered");
+  renderAssetImage(s.el.querySelector(".site-item"), item, "normal");
+  if(!state.discovered.includes(item.id)){
+    state.discovered.push(item.id);
+    state.score = safe(state.score,0) + 10;
+    saveState();
+  }
+  renderPlayerCharacter("discover");
+  playSound("found");
+  cameraShake();
+  updateHud();
+  checkBadges();
+  setTimeout(() => openDiscoveryPopup(siteId), 350);
+}
+
+/* ---------- 발견 팝업 → 관찰 모달 → 퀴즈 ---------- */
+let currentItemId = null;
+function openDiscoveryPopup(itemId){
+  const item = itemData.find(i => i.id === itemId);
+  if(!item) return;
+  currentItemId = itemId;
+  renderAssetImage($("discoveryVisual"), item, "normal");
+  $("discoveryName").textContent = safe(item.name, "새로운 단서");
+  $("discoveryHint").textContent = safe(item.visualHint, "");
+  openModal("discoveryModal");
+  spawnConfetti();
+  renderPlayerCharacter("discover");
+}
+function spawnConfetti(){
+  if(game.reducedMotion) return;
+  const colors = ["#ff8c42","#2ea79c","#ffd166","#e05a7a","#4a90d9"];
+  const zone = document.body;
+  for(let i=0;i<18;i++){
+    const c = document.createElement("div");
+    c.className = "confetti-burst";
+    c.style.left = (window.innerWidth/2 + (Math.random()*160-80)) + "px";
+    c.style.top = (window.innerHeight*0.28) + "px";
+    c.style.background = colors[i % colors.length];
+    c.style.setProperty("--cx", (Math.random()*260-130) + "px");
+    c.style.setProperty("--cy", (140 + Math.random()*200) + "px");
+    zone.appendChild(c);
+    setTimeout(() => c.remove(), 1400);
+  }
+}
+
+/* 아이템 관찰 모달: 발견 전/후, 퀴즈 완료 전/후 정보 공개 범위가 다름 */
+function openItemModal(itemId, fromCollection){
+  const item = itemData.find(i => i.id === itemId);
+  if(!item) return;
+  currentItemId = itemId;
+  const done = state.completed.includes(itemId);
+  const found = state.discovered.includes(itemId) || done;
+  $("itemModalTitle").textContent = found ? ("🔍 " + safe(item.name,"단서") + " 관찰") : "미발견 단서";
+  renderAssetImage($("itemModalVisual"), item, found ? "normal" : "silhouette");
+  const layer = layerData.find(l => l.id === item.layer);
+  const rows = [];
+  rows.push(row("발견 위치", found ? (safe(layer && layer.label, "?") ) : "???", !found));
+  rows.push(row("관찰 포인트", found ? safe(item.visualHint,"-") : "발굴하면 관찰할 수 있어요.", !found));
+  rows.push(row("분류", done ? safe(item.group,"-") : "🔒 퀴즈를 풀면 해금!", !done));
+  rows.push(row("숨겨진 정보 1", done ? safe(item.hiddenInfo1,"-") : "🔒 ???", !done));
+  rows.push(row("숨겨진 정보 2", done ? safe(item.hiddenInfo2,"-") : "🔒 ???", !done));
+  rows.push(row("설명", done ? safe(item.description,"-") : "🔒 퀴즈를 풀어 정보를 해금하세요.", !done));
+  if(done) rows.push(row("한 줄 메모", safe(item.funNote,"-"), false));
+  $("itemModalInfo").innerHTML = rows.join("");
+  const actions = $("itemModalActions");
+  actions.innerHTML = "";
+  if(found && !done){
+    const hasQuiz = Array.isArray(item.quiz) && item.quiz.length > 0;
+    const b = document.createElement("button");
+    b.className = "btn";
+    b.textContent = hasQuiz ? "🧠 추론 퀴즈 도전!" : "📚 도감에 등록하기";
+    b.addEventListener("click", () => {
+      playSound("click");
+      closeModal("itemModal");
+      if(hasQuiz) startQuiz(itemId);
+      else completeItem(itemId);
+    });
+    actions.appendChild(b);
+  }
+  const c = document.createElement("button");
+  c.className = "btn ghost small";
+  c.textContent = "닫기";
+  c.addEventListener("click", () => { playSound("click"); closeModal("itemModal"); });
+  actions.appendChild(c);
+  renderPlayerCharacter("inspect");
+  openModal("itemModal");
+  function row(label, value, locked){
+    return '<div class="info-row"><div class="info-label">' + escapeHTML(label) + '</div>' +
+           '<div class="info-value' + (locked ? " locked" : "") + '">' + escapeHTML(value) + '</div></div>';
+  }
+}
+
+/* ---------- 퀴즈 시스템 ---------- */
+const quiz = { itemId: null, index: 0, attempts: 0, solvedInModal: 0 };
+function startQuiz(itemId){
+  const item = itemData.find(i => i.id === itemId);
+  if(!item || !Array.isArray(item.quiz) || !item.quiz.length){ completeItem(itemId); return; }
+  quiz.itemId = itemId;
+  quiz.index = 0;
+  quiz.attempts = 0;
+  openModal("quizModal");
+  renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  const item = itemData.find(i => i.id === quiz.itemId);
+  if(!item) { closeModal("quizModal"); return; }
+  const qs = item.quiz;
+  const q = qs[quiz.index];
+  quiz.attempts = 0;
+  $("quizItemName").textContent = "🧠 " + safe(item.name,"단서") + " 추론 퀴즈";
+  /* 진행 점 */
+  let dots = "";
+  qs.forEach((_, i) => {
+    dots += '<span class="' + (i < quiz.index ? "done" : (i === quiz.index ? "now" : "")) + '"></span>';
+  });
+  $("quizDots").innerHTML = dots;
+  $("quizQuestion").textContent = safe(q.question, "문항이 준비 중입니다.");
+  const fb = $("quizFeedback");
+  fb.className = "quiz-feedback";
+  fb.textContent = "";
+  $("quizActions").innerHTML = "";
+  /* 선택지: choice(4지선다) / ox 지원 (확장 가능한 구조) */
+  const choices = (q.type === "ox") ? ["O", "X"] : (Array.isArray(q.choices) ? q.choices : []);
+  const box = $("quizChoices");
+  box.innerHTML = "";
+  const marks = ["①","②","③","④","⑤"];
+  choices.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.className = "quiz-choice";
+    b.innerHTML = "<span>" + (q.type === "ox" ? (c === "O" ? "⭕" : "❌") : safe(marks[i], "·")) + "</span><span>" + escapeHTML(c) + "</span>";
+    b.addEventListener("click", () => checkAnswer(c, b));
+    box.appendChild(b);
+  });
+  if(!choices.length){
+    box.innerHTML = '<p style="font-weight:700; color:#9a8a68;">선택지가 없어 자동으로 통과합니다. (교사용: quiz 데이터에 choices를 추가하세요)</p>';
+    afterQuestionSolved(true);
+  }
+}
+function checkAnswer(answer, btnEl){
+  const item = itemData.find(i => i.id === quiz.itemId);
+  if(!item) return;
+  const q = item.quiz[quiz.index];
+  const correct = String(answer) === String(safe(q.answer, ""));
+  const fb = $("quizFeedback");
+  if(correct){
+    playSound("correct");
+    if(btnEl) btnEl.classList.add("correct");
+    document.querySelectorAll("#quizChoices .quiz-choice").forEach(b => b.disabled = true);
+    state.quizAnswered = safe(state.quizAnswered,0) + 1;
+    if(quiz.attempts === 0){
+      state.quizFirstCorrect = safe(state.quizFirstCorrect,0) + 1;
+      state.combo = safe(state.combo,0) + 1;
+      state.maxCombo = Math.max(safe(state.maxCombo,0), state.combo);
+      state.score = safe(state.score,0) + 30;
+    }else{
+      state.score = safe(state.score,0) + 15;
+    }
+    saveState();
+    updateHud();
+    fb.className = "quiz-feedback explain";
+    fb.textContent = "🎉 정답! " + safe(q.explanation, "");
+    afterQuestionSolved(false);
+  }else{
+    playSound("wrong");
+    if(btnEl){ btnEl.classList.add("wrong"); btnEl.disabled = true; }
+    state.combo = 0;
+    saveState();
+    updateHud();
+    quiz.attempts++;
+    if(quiz.attempts === 1){
+      fb.className = "quiz-feedback hint";
+      fb.textContent = "💡 힌트: " + safe(q.hint, "다시 한번 생각해 보세요!") + " (한 번 더 도전!)";
+    }else{
+      /* 두 번째 오답: 정답과 해설 공개 후 다음으로 */
+      document.querySelectorAll("#quizChoices .quiz-choice").forEach(b => b.disabled = true);
+      state.quizAnswered = safe(state.quizAnswered,0) + 1;
+      saveState();
+      fb.className = "quiz-feedback explain";
+      fb.textContent = "정답은 「" + safe(q.answer,"?") + "」! " + safe(q.explanation, "");
+      afterQuestionSolved(false);
+    }
+  }
+}
+function afterQuestionSolved(){
+  const item = itemData.find(i => i.id === quiz.itemId);
+  const isLast = quiz.index >= item.quiz.length - 1;
+  const actions = $("quizActions");
+  actions.innerHTML = "";
+  const b = document.createElement("button");
+  b.className = "btn teal";
+  b.textContent = isLast ? "✅ 단서 정보 해금!" : "➡ 다음 문제";
+  b.addEventListener("click", () => {
+    playSound("click");
+    if(isLast){
+      closeModal("quizModal");
+      completeItem(quiz.itemId);
+    }else{
+      quiz.index++;
+      renderQuizQuestion();
+    }
+  });
+  actions.appendChild(b);
+}
+
+/* ---------- 아이템 완료(도감 등록 + 층 해금) ---------- */
+function completeItem(itemId){
+  const item = itemData.find(i => i.id === itemId);
+  if(!item) return;
+  if(!state.completed.includes(itemId)){
+    state.completed.push(itemId);
+    state.score = safe(state.score,0) + 20;
+  }
+  /* 층 정보 해금 */
+  const layerId = safe(item.layer, null);
+  let newLayer = false;
+  if(layerId && !state.unlockedLayers.includes(layerId) && layerData.some(l => l.id === layerId)){
+    state.unlockedLayers.push(layerId);
+    newLayer = true;
+  }
+  saveState();
+  playSound("register");
+  toast("📚 「" + safe(item.name,"단서") + "」 도감 등록 완료!");
+  spawnConfetti();
+  /* 조사 지점 상태 갱신 */
+  const s = game.sites.find(x => x.id === itemId);
+  if(s){
+    s.status = "collected";
+    s.el.classList.remove("discovered","digging","near");
+    s.el.classList.add("collected");
+  }
+  /* 층 이름표 갱신을 위해 mid 레이어의 층 부분 다시 그림 */
+  if(game.mode === "strata" && newLayer){
+    const mid = $("midLayer");
+    mid.innerHTML = "";
+    renderLayers(mid, game.worldLen);
+    setTimeout(() => {
+      const ly = layerData.find(l => l.id === layerId);
+      toast("🔓 " + safe(ly && ly.label, "층") + " 정보가 해금되었어요!", "gold");
+      playSound("place");
+    }, 900);
+  }
+  updateHud();
+  checkBadges();
+  /* 전부 수집 시 축하 연출 */
+  if(state.completed.length >= itemData.length){
+    setTimeout(showAllCollected, 1400);
+  }
+}
+function showAllCollected(){
+  playSound("badge");
+  $("cinematicTitle").textContent = "🎉 도감 완성! 🎉";
+  $("cinematicSub").textContent = "모든 단서를 수집했어요! 층의 비밀이 전부 밝혀졌습니다!";
+  const btn = $("btnCinematicGo");
+  btn.textContent = "📋 탐사 결과 보기";
+  btn.onclick = () => {
+    $("cinematicOverlay").classList.remove("on");
+    btn.onclick = defaultCinematicGo;
+    btn.textContent = "⛏ 본격 탐사 시작!";
+    openResultScreen();
+  };
+  openCinematic();
+  spawnConfetti();
+}
+function defaultCinematicGo(){ playSound("click"); enterExplorationArea(); }
+
+/* ---------- 층 정보 모달 ---------- */
+function openLayerModal(layerId){
+  const ly = layerData.find(l => l.id === layerId);
+  if(!ly) return;
+  const unlocked = state.unlockedLayers.includes(layerId);
+  $("layerModalTitle").textContent = (unlocked ? "🔓 " : "🔒 ") + safe(ly.label, "층");
+  const items = itemData.filter(i => i.layer === layerId);
+  const foundCnt = items.filter(i => state.completed.includes(i.id)).length;
+  let html = "";
+  html += '<div class="info-row"><div class="info-label">정체</div><div class="info-value' + (unlocked?"":" locked") + '">' +
+          (unlocked ? escapeHTML(safe(ly.hiddenName,"-")) : "??? (이 층의 단서 퀴즈를 완료하면 해금)") + "</div></div>";
+  html += '<div class="info-row"><div class="info-label">숨겨진 정보</div><div class="info-value' + (unlocked?"":" locked") + '">' +
+          (unlocked ? escapeHTML(safe(ly.hiddenInfo,"-")) : "???") + "</div></div>";
+  html += '<div class="info-row"><div class="info-label">단서 수집</div><div class="info-value">' + foundCnt + " / " + items.length + "</div></div>";
+  $("layerModalInfo").innerHTML = html;
+  openModal("layerModal");
+}
+
+/* ---------- HUD ---------- */
+function updateHud(){
+  $("hudScore").textContent = safe(state.score, 0);
+  $("hudCollect").textContent = state.completed.length + "/" + itemData.length;
+  const comboEl = $("hudCombo");
+  if(safe(state.combo,0) >= 2){
+    comboEl.style.display = "flex";
+    $("hudComboNum").textContent = state.combo;
+  }else{
+    comboEl.style.display = "none";
+  }
+}
+
+/* ---------- 배지 시스템 ---------- */
+function checkBadges(){
+  const total = Math.max(1, itemData.length);
+  badgeData.forEach(b => {
+    if(state.badges.includes(b.id)) return;
+    let earned = false;
+    switch(b.type){
+      case "discoverCount": earned = state.discovered.length >= safe(b.value,1); break;
+      case "completeRate":  earned = (state.completed.length / total) >= safe(b.value,0.5); break;
+      case "layerUnlock":   earned = state.unlockedLayers.length >= safe(b.value,1); break;
+      case "completeAll":   earned = state.completed.length >= total; break;
+      default: earned = false;
+    }
+    if(earned){
+      state.badges.push(b.id);
+      saveState();
+      setTimeout(() => showBadgePopup(b), 500);
+    }
+  });
+}
+function showBadgePopup(b){
+  /* 다른 팝업이 열려 있으면 겹치지 않게 잠시 대기 후 표시 */
+  if(anyModalOpen()){
+    setTimeout(() => showBadgePopup(b), 700);
+    return;
+  }
+  $("badgeModalIcon").textContent = safe(b.icon, "🏅");
+  $("badgeModalName").textContent = safe(b.name, "배지");
+  $("badgeModalDesc").textContent = safe(b.desc, "");
+  playSound("badge");
+  openModal("badgeModal");
+  spawnConfetti();
+}
+
+/* ---------- 도감 (컬렉션) ---------- */
+let collectionReturnTo = "startScreen";
+function renderCollection(){
+  const grid = $("collectionGrid");
+  grid.innerHTML = "";
+  const total = Math.max(1, itemData.length);
+  const done = state.completed.length;
+  /* 전체 수집률 */
+  $("collectRateFill").style.width = Math.round(done/total*100) + "%";
+  /* 층별/분류별 수집률 */
+  const stats = $("collectStats");
+  let chips = '<span class="chip">📦 전체 ' + done + "/" + total + " (" + Math.round(done/total*100) + "%)</span>";
+  layerData.forEach(ly => {
+    const items = itemData.filter(i => i.layer === ly.id);
+    if(!items.length) return;
+    const c = items.filter(i => state.completed.includes(i.id)).length;
+    chips += '<span class="chip">' + escapeHTML(safe(ly.label,"층")) + " " + c + "/" + items.length + "</span>";
+  });
+  const groups = [...new Set(itemData.map(i => safe(i.group,"기타")))];
+  groups.forEach(g => {
+    const items = itemData.filter(i => safe(i.group,"기타") === g);
+    const c = items.filter(i => state.completed.includes(i.id)).length;
+    chips += '<span class="chip">🏷 ' + escapeHTML(g) + " " + c + "/" + items.length + "</span>";
+  });
+  stats.innerHTML = chips;
+  /* 카드 */
+  itemData.forEach((item, idx) => {
+    const completed = state.completed.includes(item.id);
+    const discovered = state.discovered.includes(item.id) || completed;
+    const cls = completed ? "completed" : (discovered ? "discovered" : "locked");
+    const card = document.createElement("div");
+    card.className = "collect-card " + cls;
+    const stateIcon = completed ? "✅" : (discovered ? "🔍" : "🔒");
+    const layer = layerData.find(l => l.id === item.layer);
+    card.innerHTML =
+      '<div class="card-no">No.' + String(idx+1).padStart(2,"0") + '</div>' +
+      '<div class="card-state">' + stateIcon + '</div>' +
+      '<div class="card-visual item-visual-slot"></div>' +
+      '<div class="card-name">' + (discovered ? escapeHTML(safe(item.name,"단서")) : "???") + '</div>' +
+      '<div class="card-sub">' + (discovered ? escapeHTML(safe(layer && layer.label, "?")) : "미발견") +
+        (completed ? " · " + escapeHTML(safe(item.group,"")) : "") + '</div>';
+    renderAssetImage(card.querySelector(".card-visual"), item, discovered ? "normal" : "silhouette");
+    card.addEventListener("click", () => {
+      playSound("click");
+      openItemModal(item.id, true);
+    });
+    grid.appendChild(card);
+  });
+  /* 배지 */
+  renderBadgeGrid($("badgeGrid"));
+}
+function renderBadgeGrid(el){
+  el.innerHTML = "";
+  badgeData.forEach(b => {
+    const got = state.badges.includes(b.id);
+    const t = document.createElement("div");
+    t.className = "badge-token" + (got ? "" : " locked");
+    t.innerHTML = '<div class="icon">' + (got ? escapeHTML(safe(b.icon,"🏅")) : "🔒") + '</div>' +
+                  '<div class="name">' + escapeHTML(safe(b.name,"배지")) + '</div>' +
+                  '<div class="desc">' + escapeHTML(safe(b.desc,"")) + '</div>';
+    el.appendChild(t);
+  });
+}
+
+/* ---------- 결과 화면 ---------- */
+function openResultScreen(){
+  const total = Math.max(1, itemData.length);
+  const acc = state.quizAnswered > 0 ? Math.round(state.quizFirstCorrect / state.quizAnswered * 100) : 0;
+  $("resultStats").innerHTML =
+    '<div class="result-stat"><span>⭐ 총 점수</span><span class="val">' + safe(state.score,0) + '점</span></div>' +
+    '<div class="result-stat"><span>📦 수집한 단서</span><span class="val">' + state.completed.length + " / " + total + '</span></div>' +
+    '<div class="result-stat"><span>🧠 퀴즈 첫 시도 정답률</span><span class="val">' + acc + '%</span></div>' +
+    '<div class="result-stat"><span>🔥 최고 콤보</span><span class="val">' + safe(state.maxCombo,0) + '</span></div>' +
+    '<div class="result-stat"><span>🔓 해금한 층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
+    '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>';
+  renderBadgeGrid($("resultBadges"));
+  renderScreen("resultScreen");
+}
+
+/* ---------- 교사용 설정 모드 ---------- */
+const TEACHER_TABS = [
+  { key: "itemData",      label: "아이템(itemData)" },
+  { key: "layerData",     label: "층(layerData)" },
+  { key: "badgeData",     label: "배지(badgeData)" },
+  { key: "missionData",   label: "미션(missionData)" },
+  { key: "roadSceneData", label: "길 구간(roadSceneData)" }
+];
+let teacherTab = "itemData";
+function currentTeacherData(key){
+  switch(key){
+    case "itemData": return itemData;
+    case "layerData": return layerData;
+    case "badgeData": return badgeData;
+    case "missionData": return missionData;
+    case "roadSceneData": return roadSceneData;
+    default: return {};
+  }
+}
+function openTeacherMode(){
+  renderScreen("teacherScreen");
+  renderTeacherTabs();
+  loadTeacherTextarea();
+  teacherMsg("", "");
+}
+function renderTeacherTabs(){
+  const tabs = $("teacherTabs");
+  tabs.innerHTML = "";
+  TEACHER_TABS.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "teacher-tab" + (t.key === teacherTab ? " on" : "");
+    b.textContent = t.label;
+    b.addEventListener("click", () => {
+      teacherTab = t.key;
+      renderTeacherTabs();
+      loadTeacherTextarea();
+      teacherMsg("", "");
+    });
+    tabs.appendChild(b);
+  });
+}
+function loadTeacherTextarea(){
+  try{
+    $("teacherTextarea").value = JSON.stringify(currentTeacherData(teacherTab), null, 2);
+  }catch(e){
+    $("teacherTextarea").value = "";
+  }
+}
+function teacherMsg(text, kind){
+  const m = $("teacherMsg");
+  m.textContent = text;
+  m.className = "teacher-msg " + (kind || "");
+}
+/* JSON 적용: 오류가 있어도 기존 데이터는 유지 */
+function applyTeacherData(){
+  const raw = $("teacherTextarea").value;
+  let parsed;
+  try{
+    parsed = JSON.parse(raw);
+  }catch(e){
+    teacherMsg("❌ JSON 형식 오류: " + e.message + " — 기존 데이터는 그대로 유지됩니다.", "err");
+    return;
+  }
+  /* 간단한 구조 검증 */
+  try{
+    if(teacherTab === "itemData"){
+      if(!Array.isArray(parsed) || !parsed.length) throw new Error("itemData는 1개 이상의 항목을 가진 배열이어야 합니다.");
+      parsed.forEach((it, i) => {
+        if(!it.id) throw new Error((i+1) + "번째 항목에 id가 없습니다.");
+        if(!it.name) throw new Error((i+1) + "번째 항목에 name이 없습니다.");
+        if(!Array.isArray(it.quiz)) it.quiz = [];
+      });
+      itemData = parsed;
+    }else if(teacherTab === "layerData"){
+      if(!Array.isArray(parsed) || !parsed.length) throw new Error("layerData는 1개 이상의 항목을 가진 배열이어야 합니다.");
+      parsed.forEach((l, i) => { if(!l.id) throw new Error((i+1) + "번째 층에 id가 없습니다."); });
+      layerData = parsed;
+    }else if(teacherTab === "badgeData"){
+      if(!Array.isArray(parsed)) throw new Error("badgeData는 배열이어야 합니다.");
+      badgeData = parsed;
+    }else if(teacherTab === "missionData"){
+      if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("missionData는 객체여야 합니다.");
+      missionData = parsed;
+    }else if(teacherTab === "roadSceneData"){
+      if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("roadSceneData는 객체여야 합니다.");
+      roadSceneData = Object.assign(deepClone(DEFAULT_ROAD_SCENE_DATA), parsed);
+    }
+    saveTeacherData();
+    renderHelpMissions();
+    renderStartProgress();
+    updateHud();
+    teacherMsg("✅ 적용 완료! (" + teacherTab + " 갱신, 자동 저장됨)", "ok");
+    playSound("correct");
+  }catch(e){
+    teacherMsg("❌ 데이터 구조 오류: " + e.message + " — 기존 데이터는 그대로 유지됩니다.", "err");
+  }
+}
+function restoreDefaults(){
+  itemData = deepClone(DEFAULT_ITEM_DATA);
+  layerData = deepClone(DEFAULT_LAYER_DATA);
+  badgeData = deepClone(DEFAULT_BADGE_DATA);
+  missionData = deepClone(DEFAULT_MISSION_DATA);
+  roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
+  try{ localStorage.removeItem(TEACHER_KEY); }catch(e){}
+  loadTeacherTextarea();
+  renderHelpMissions();
+  renderStartProgress();
+  updateHud();
+  teacherMsg("↩ 기본 데이터로 복원했습니다.", "ok");
+}
+
+/* ---------- 토스트 ---------- */
+function toast(msg, kind){
+  const zone = $("toastZone");
+  const t = document.createElement("div");
+  t.className = "toast" + (kind ? " " + kind : "");
+  t.textContent = msg;
+  zone.appendChild(t);
+  setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 350); }, 2600);
+  while(zone.children.length > 3) zone.firstChild.remove();
+}
+
+/* ---------- 입력 처리 ---------- */
+function bindInputs(){
+  /* 키보드 */
+  window.addEventListener("keydown", e => {
+    if(e.repeat) return ensureAudioOnce();
+    ensureAudioOnce();
+    if(!game.running || anyModalOpen()) return;
+    if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = true;
+    if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = true;
+    if(e.key === "e" || e.key === "E" || e.key === " "){
+      e.preventDefault();
+      tryAction();
+    }
+  });
+  window.addEventListener("keyup", e => {
+    if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = false;
+    if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = false;
+  });
+  /* 모바일 버튼 (터치/마우스 겸용) */
+  bindHold($("btnLeft"), v => game.input.left = v);
+  bindHold($("btnRight"), v => game.input.right = v);
+  $("btnAction").addEventListener("click", () => { ensureAudioOnce(); tryAction(); });
+  /* 첫 입력에서 오디오 활성화 (모바일 자동재생 제한 대응) */
+  ["pointerdown","touchstart"].forEach(ev => {
+    window.addEventListener(ev, ensureAudioOnce, { passive: true });
+  });
+}
+let audioReady = false;
+function ensureAudioOnce(){
+  if(audioReady) { ensureAudio(); return; }
+  audioReady = true;
+  ensureAudio();
+}
+function bindHold(el, setter){
+  if(!el) return;
+  const on = e => { e.preventDefault(); ensureAudioOnce(); setter(true); };
+  const off = e => { e.preventDefault(); setter(false); };
+  el.addEventListener("pointerdown", on);
+  el.addEventListener("pointerup", off);
+  el.addEventListener("pointerleave", off);
+  el.addEventListener("pointercancel", off);
+  el.addEventListener("contextmenu", e => e.preventDefault());
+}
+
+/* ---------- UI 이벤트 바인딩 ---------- */
+function bindUI(){
+  $("btnStart").addEventListener("click", () => {
+    playSound("click");
+    renderScreen("gameScreen");
+    game.discoveryShown = false;
+    if(state.enteredSite){
+      /* 이미 본 탐사 구간에 진입한 적이 있으면 바로 지층 구간에서 이어하기 */
+      renderGame();
+      toast("🧭 탐사를 이어서 진행합니다!");
+    }else{
+      renderRoadScene();
+      toast("🚶 길을 따라 → 방향으로 걸어가 보세요!");
+    }
+  });
+  $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
+  $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });
+  $("btnCollectionFromStart").addEventListener("click", () => {
+    playSound("click");
+    collectionReturnTo = "startScreen";
+    renderCollection();
+    renderScreen("collectionScreen");
+  });
+  $("btnCollectionHud").addEventListener("click", () => {
+    playSound("click");
+    collectionReturnTo = "gameScreen";
+    renderCollection();
+    renderScreen("collectionScreen");
+  });
+  $("btnCollectionBack").addEventListener("click", () => {
+    playSound("click");
+    renderScreen(collectionReturnTo);
+  });
+  $("btnHome").addEventListener("click", () => { playSound("click"); saveState(); renderScreen("startScreen"); });
+  $("btnSound").addEventListener("click", () => {
+    game.soundOn = !game.soundOn;
+    $("btnSound").textContent = game.soundOn ? "🔊" : "🔇";
+    if(game.soundOn) playSound("click");
+  });
+  $("btnCinematicGo").onclick = defaultCinematicGo;
+  $("btnObserve").addEventListener("click", () => {
+    playSound("click");
+    closeModal("discoveryModal");
+    openItemModal(currentItemId, false);
+  });
+  /* 데이터 goto/close 속성 버튼 */
+  document.querySelectorAll("[data-goto]").forEach(b => {
+    b.addEventListener("click", () => { playSound("click"); renderScreen(b.getAttribute("data-goto")); });
+  });
+  document.querySelectorAll("[data-close]").forEach(b => {
+    b.addEventListener("click", () => { playSound("click"); closeModal(b.getAttribute("data-close")); });
+  });
+  /* 교사용 */
+  $("btnTeacherCopy").addEventListener("click", () => {
+    const text = $("teacherTextarea").value;
+    const done = () => teacherMsg("📋 JSON이 클립보드에 복사되었습니다.", "ok");
+    const fail = () => {
+      try{ $("teacherTextarea").select(); document.execCommand("copy"); done(); }
+      catch(e){ teacherMsg("복사에 실패했습니다. 텍스트를 직접 선택해 복사해 주세요.", "err"); }
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    }else fail();
+  });
+  $("btnTeacherApply").addEventListener("click", () => { playSound("click"); applyTeacherData(); });
+  $("btnTeacherRestore").addEventListener("click", () => { playSound("click"); restoreDefaults(); });
+  $("btnTeacherReset").addEventListener("click", () => {
+    playSound("click");
+    resetProgress();
+    teacherMsg("🗑 진행 상황(발견/퀴즈/배지/점수)이 초기화되었습니다.", "ok");
+  });
+  /* 결과 화면 */
+  $("btnResultFromCollection").addEventListener("click", () => { playSound("click"); openResultScreen(); });
+  $("btnResultBack").addEventListener("click", () => { playSound("click"); renderScreen("startScreen"); });
+  $("btnResultCollection").addEventListener("click", () => {
+    playSound("click");
+    collectionReturnTo = "resultScreen";
+    renderCollection();
+    renderScreen("collectionScreen");
+  });
+  $("btnRetry").addEventListener("click", () => {
+    playSound("click");
+    resetProgress();
+    renderScreen("startScreen");
+    toast("🔄 새로운 탐사를 시작할 준비 완료!");
+  });
+  /* 모달 배경 클릭으로 닫기 (발견/퀴즈 모달은 버튼으로만 진행) */
+  ["itemModal","layerModal","badgeModal"].forEach(id => {
+    $(id).addEventListener("click", e => { if(e.target === $(id)) closeModal(id); });
+  });
+}
+
+/* ---------- 초기화 ---------- */
+function initGame(){
+  game.reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  game.smallScreen = window.innerWidth < 760;
+  window.addEventListener("resize", () => { game.smallScreen = window.innerWidth < 760; });
+  loadState();
+  preloadAssets();
+  bindUI();
+  bindInputs();
+  renderStartProgress();
+  renderHelpMissions();
+  updateHud();
+  renderScreen("startScreen");
+  requestAnimationFrame(gameLoop);
+}
+document.addEventListener("DOMContentLoaded", initGame);
+</script>
+</body>
+</html>

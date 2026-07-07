@@ -346,6 +346,20 @@ h1,h2,h3{margin:.3em 0;}
   transform-style:preserve-3d; /* 세워진 오브젝트가 바닥면에 눌리지 않게 */
   pointer-events:none;
 }
+.plane-obj.interactive{pointer-events:auto; cursor:pointer;}
+/* 구불구불한 좁은 길: 짧은 조각들을 곡선을 따라 이어 붙임 */
+.road-seg{
+  position:absolute;
+  background:linear-gradient(90deg,#c9a165 0 16px, #f0d9a4 16px calc(100% - 16px), #c9a165 calc(100% - 16px) 100%);
+  box-shadow:0 0 26px rgba(120,80,40,.25);
+  border-radius:10px;
+}
+/* 3D 오브젝트로 세워진 노두: 산책길용 .outcrop 스타일 재사용 + 위치 오버라이드 */
+.plane-obj .outcrop{
+  position:absolute; inset:0;
+  width:auto; height:auto;
+  bottom:0;
+}
 /* 오브젝트를 바닥에서 일으켜 세움 */
 .plane-obj .stand{
   width:100%; height:100%;
@@ -1571,9 +1585,9 @@ h1,h2,h3{margin:.3em 0;}
       <h2 class="screen-title">📖 게임 방법</h2>
     </div>
     <div class="panel-card">
-      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br>처음 길에서는 <b>W(▲)</b>로 앞으로 걸어가요. 탐사길에 도착하면 <b>A/D(◀▶)</b>로 좌우로 산책해요. 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>🏞 길을 따라 탐사 현장으로!</b><br>3D 시점으로 길을 쭉 걸어가면 <b>"탐사 현장 발견!"</b> 연출과 함께 아기자기한 탐사길이 펼쳐져요. 길 옆에는 작은 <b>노두</b>(지층이 드러난 곳)들이 늘어서 있어요. 처음에는 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 확대 조사!</b><br>반짝이는 노두를 <b>클릭/탭</b>하면 확대 조사창이 열려요. 그 안에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴을 시작해요! (가까이 가서 E키/조사 버튼도 OK)</div></div>
+      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br><b>W(▲)</b>로 앞으로 걸어가고, <b>S(▼)</b>로 뒤로, <b>A/D(◀▶)</b>로 좌우로 살짝 비켜 걸어요. 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>🏞 구불구불 모험길을 따라 전진!</b><br>3D 시점으로 좁고 구불구불한 탐사길을 걸어가다 보면, 길 <b>왼쪽과 오른쪽에 작은 노두</b>(지층이 드러난 곳)들이 자연스럽게 나타나요. 처음에는 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 확대 조사!</b><br>길가의 반짝이는 노두를 <b>클릭/탭</b>하면 캐릭터가 걸어가 확대 조사창이 열려요. 그 안에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴을 시작해요! (가까이에서 E키/조사 버튼도 OK)</div></div>
       <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
       <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
       <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
@@ -2536,40 +2550,50 @@ function renderRoadScene(){
   const scroll = $("planeScroll");
   const plane = world.querySelector(".road3d-ground-plane");
   game.roadObjs = [];
+  game.outcrops = [];
 
-  /* 바닥 질감 + 가운데 길: 성능을 위해 바닥에 '고정'(스크롤하지 않음).
-     전진감은 길 위 점선/옆 풍경 오브젝트의 이동으로 표현한다. */
+  /* 바닥 질감: 성능을 위해 바닥에 '고정'(스크롤하지 않음). */
   const tex = document.createElement("div");
   tex.className = "plane-texture";
   tex.style.left = "0px";
   tex.style.top = "-3400px";
   tex.style.height = "4200px";
   plane.insertBefore(tex, scroll);
-  const roadStrip = document.createElement("div");
-  roadStrip.className = "plane-road";
-  roadStrip.style.left = "1350px";
-  roadStrip.style.top = "-3400px";
-  roadStrip.style.height = "4200px";
-  plane.insertBefore(roadStrip, scroll);
 
-  /* 길 위 점선 대시: 지나가면 앞으로 순환 배치 */
+  /* 구불구불한 좁은 모험길: 짧은 조각을 곡선을 따라 이어 붙임 */
+  const SEG = 150, ROADW = 250;
+  for(let z = -700; z < L + 1100; z += SEG - 24){
+    const cx = roadCurve(z + SEG/2);
+    const dx = roadCurve(z + SEG) - roadCurve(z);
+    const seg = document.createElement("div");
+    seg.className = "road-seg";
+    seg.style.width = ROADW + "px";
+    seg.style.height = (SEG + 30) + "px";
+    seg.style.left = (cx - ROADW/2) + "px";
+    seg.style.top = (-z - SEG) + "px";
+    seg.style.transform = "rotate(" + (-Math.atan2(dx, SEG) * 180 / Math.PI) + "deg)";
+    scroll.appendChild(seg);
+  }
+
+  /* 길 위 점선 대시: 곡선을 따라 배치, 지나가면 앞으로 순환 */
   const WRAP = 2400;
   for(let i=0;i<12;i++){
     const dz = i * 200;
     const dash = document.createElement("div");
     dash.className = "plane-dash";
-    dash.style.width = "64px";
-    dash.style.height = "120px";
-    dash.style.left = "-32px";
-    dash.style.top = (-dz - 120) + "px";
+    dash.style.width = "52px";
+    dash.style.height = "100px";
+    dash.style.left = (roadCurve(dz) - 26) + "px";
+    dash.style.top = (-dz - 100) + "px";
     scroll.appendChild(dash);
-    game.roadObjs.push({ z: dz, el: dash, wrap: WRAP, h: 120 });
+    game.roadObjs.push({ z: dz, el: dash, wrap: WRAP, h: 100, isDash: true });
   }
 
-  /* 3D 오브젝트 배치: z(전진 거리), lat(중앙 기준 좌우 px), w/h(기본 크기) */
-  function addObj(z, lat, w, h, inner, cls){
+  /* 3D 오브젝트 배치: z(전진 거리), lat(도로 중심 기준 좌우 px), w/h(기본 크기) */
+  function addObj(z, latOff, w, h, inner, cls){
     const o = document.createElement("div");
     o.className = "plane-obj" + (cls ? " " + cls : "");
+    const lat = roadCurve(z) + latOff;
     o.style.width = w + "px";
     o.style.height = h + "px";
     o.style.left = (lat - w/2) + "px";
@@ -2579,64 +2603,128 @@ function renderRoadScene(){
     game.roadObjs.push({ z: z, el: o });
     return o;
   }
-  /* 길 양옆 바위/나무/풀/반짝 포인트 */
-  for(let i=0;i<12;i++){
-    const z = 320 + i*190 + (i*67)%110;
+  /* 길 양옆 바위/나무/풀/반짝 포인트 (도로 곡선을 따라 자유분방하게) */
+  for(let i=0;i<14;i++){
+    const z = 260 + i*170 + (i*67)%110;
     const side = (i%2 === 0) ? -1 : 1;
-    const lat = side * (330 + (i*53)%260);
+    const off = side * (200 + (i*53)%230);
     const kind = i % 3;
-    if(kind === 0) addObj(z, lat, 110, 78, '<div class="obj-rock3d"></div>');
-    else if(kind === 1) addObj(z, lat, 120, 170, '<div class="obj-tree3d"><div class="trunk"></div><div class="crown"></div></div>');
-    else addObj(z, lat, 90, 66, '<div class="obj-grass3d"><span></span><span></span><span></span></div>');
+    if(kind === 0) addObj(z, off, 110, 78, '<div class="obj-rock3d"></div>');
+    else if(kind === 1) addObj(z, off, 120, 170, '<div class="obj-tree3d"><div class="trunk"></div><div class="crown"></div></div>');
+    else addObj(z, off, 90, 66, '<div class="obj-grass3d"><span></span><span></span><span></span></div>');
   }
-  for(let i=0;i<5;i++){
-    addObj(430 + i*420, ((i%2)? -1:1) * (140 + (i*37)%90), 70, 70, '<div class="obj-spark3d"></div>');
+  for(let i=0;i<6;i++){
+    addObj(380 + i*380, ((i%2)? -1:1) * (40 + (i*37)%60), 70, 70, '<div class="obj-spark3d"></div>');
   }
   /* 표지판 (교사 데이터) */
   (roadSceneData.signs || []).forEach(s => {
     const side = (Number(safe(s.side, 1)) < 0) ? -1 : 1;
-    addObj(Number(safe(s.z, 400)) || 400, side * 300, 260, 150,
+    addObj(Number(safe(s.z, 400)) || 400, side * 240, 260, 150,
       '<div class="obj-sign3d"><div class="plate">' + escapeHTML(safe(s.text,"→")) + '</div><div class="pole"></div></div>');
   });
-  /* 길 옆 지층 절벽: 다가갈수록 화면을 가득 채우며 커짐 */
-  const dp = Number(safe(roadSceneData.discoveryPoint, L - 400)) || (L - 400);
-  let bands = "";
-  const n = Math.max(1, layerData.length);
+
+  /* ★ 길 왼쪽/오른쪽에 자유분방하게 놓인 작은 노두들 (아케이드 탐사 포인트) ★ */
+  const nL = Math.max(1, layerData.length);
+  const sidePattern = [1, -1, -1, 1, 1, -1];
   layerData.forEach((ly, i) => {
-    bands += '<div class="strata-line" style="top:' + (i*100/n) + '%; height:' + (100/n + 2) + '%;' +
+    const z = 560 + (L - 1100) * i / Math.max(1, nL - 1);
+    const side = sidePattern[i % sidePattern.length];
+    const off = side * (300 + (i*41)%90);
+    const obj = addObj(z, off, 310, 250, buildOutcrop3D(ly), "interactive");
+    obj.addEventListener("click", () => {
+      playSound("click");
+      if(Math.abs(z - game.player.z) < 320){
+        openOutcropModal(ly.id);
+      }else{
+        /* 멀리 있는 노두를 클릭하면 자동으로 걸어가서 조사 */
+        game.autoTarget = { z: Math.max(0, z - 180), layerId: ly.id };
+        toast("🚶 노두 " + safe(ly.id, "?") + "(으)로 걸어가는 중…");
+      }
+    });
+    game.outcrops.push({ layerId: ly.id, z: z, obj: obj, el: obj.querySelector(".outcrop") });
+  });
+
+  /* 길 끝 풍경: 먼 절벽 실루엣 (장식) */
+  let bands = "";
+  layerData.forEach((ly, i) => {
+    bands += '<div class="strata-line" style="top:' + (i*100/nL) + '%; height:' + (100/nL + 2) + '%;' +
       'background:repeating-linear-gradient(' + (177 - i) + 'deg, ' + safe(ly.color1,"#b98a5e") + ' 0 18px, ' + safe(ly.color2,"#8a5a3c") + ' 18px 26px);"></div>';
   });
-  addObj(dp + 260, 760, 1500, 780,
-    '<div class="obj-cliff3d">' + bands + '<div class="cliff-glow"></div><div class="cliff-q">?</div></div>');
-  /* 절벽 반대편 먼 산 느낌 바위들 */
-  addObj(dp + 420, -900, 480, 300, '<div class="obj-rock3d"></div>');
-  addObj(dp + 100, -560, 220, 150, '<div class="obj-rock3d"></div>');
+  addObj(L + 420, 420, 1100, 560, '<div class="obj-cliff3d">' + bands + '<div class="cliff-glow"></div></div>');
+  addObj(L + 560, -760, 480, 300, '<div class="obj-rock3d"></div>');
 
   game.sites = [];
   game.nearSite = null;
+  game.autoTarget = null;
   $("actionHint").classList.remove("on");
-  game.player.z = state.roadDone ? Math.max(0, dp - 260) : 0;
+  game.player.z = 0;
   game.player.lat = 0;
   game.player.dir = 1;
-  $("controlGuide").textContent = "🎮 W(▲) 앞으로 · A/D(◀▶) 좌우 · 길 끝 절벽을 찾아가요!";
+  $("controlGuide").textContent = "🎮 W(▲) 앞으로 · A/D(◀▶) 좌우 · 길가의 노두를 클릭해 조사!";
   applyBgPhoto();
   renderPlayerCharacter("idle");
   updateHud();
 }
 
-/* 3D 길 화면 갱신: 스크롤 이동 + 지나간 오브젝트 숨김 */
+/* 도로 곡선: z 위치에서 도로 중심의 좌우 오프셋(px) — 구불구불한 모험길 */
+function roadCurve(z){
+  return 260 * Math.sin(z * 0.0011) + 120 * Math.sin(z * 0.0028 + 1.3);
+}
+
+/* 3D 노두 마크업: 산책길 노두와 같은 깜찍 디자인 재사용 */
+function buildOutcrop3D(ly){
+  const unlocked = state.unlockedLayers.includes(ly.id);
+  const done = outcropDone(ly.id);
+  const c1 = safe(ly.color1, "#d8b070"), c2 = safe(ly.color2, "#a07850");
+  let html = '<div class="outcrop' + (unlocked ? " unlocked" : "") + (done ? " done" : "") + '" id="outcrop3d_' + escapeHTML(safe(ly.id,"?")) + '">';
+  html += '<div class="mound">';
+  const bandColors = [c1, mixColor(c1, c2), c2];
+  bandColors.forEach((c, k) => {
+    html += '<div class="band" style="top:' + (k*34) + '%; height:36%; background:' +
+      'repeating-linear-gradient(' + (176 + k) + 'deg, transparent 0 14px, rgba(70,40,20,.14) 14px 18px, transparent 18px 30px), ' +
+      'linear-gradient(' + c + ', ' + c + ');"></div>';
+  });
+  for(let k=0;k<4;k++){
+    const s = 8 + (k*5)%9;
+    html += '<div class="pebble" style="left:' + (12 + (k*211)%72) + '%; top:' + (16 + (k*29)%62) + '%; width:' + s + 'px; height:' + Math.round(s*0.72) + 'px;"></div>';
+  }
+  html += '</div>' +
+    '<div class="grass-tuft" style="left:26%;"><span style="left:0;"></span><span style="left:11px; height:75%;"></span><span style="left:22px; height:88%;"></span></div>' +
+    '<div class="glint">✦</div>' +
+    '<div class="complete-sticker">✔ 완료!</div>' +
+    '<div class="outcrop-label">' + (unlocked ? "🔓 " : "🪨 ") + "노두 " + escapeHTML(safe(ly.id, "?")) +
+      " · " + (unlocked ? escapeHTML(safe(ly.hiddenName, "???")) : "???") + '</div></div>';
+  return html;
+}
+/* 노두 상태 갱신 (도감 등록/층 해금 후 다시 그림) */
+function refreshRoadOutcrops(){
+  (game.outcrops || []).forEach(o => {
+    if(!o.obj) return;
+    const ly = layerData.find(l => l.id === o.layerId);
+    if(!ly) return;
+    const stand = o.obj.querySelector(".stand");
+    if(stand){
+      stand.innerHTML = buildOutcrop3D(ly);
+      o.el = stand.querySelector(".outcrop");
+    }
+  });
+}
+
+/* 3D 길 화면 갱신: 도로 곡선을 따라 시야 이동 + 지나간 오브젝트 숨김 */
 function updateRoad3D(){
   const scroll = $("planeScroll");
   if(!scroll) return;
   const z = game.player.z;
-  scroll.style.transform = "translateX(" + (-game.player.lat) + "px) translateY(" + (z + ROAD3D.camOffset) + "px)";
+  /* 카메라가 도로 곡선을 따라가서 길이 좌우로 휘어 보임 */
+  scroll.style.transform = "translateX(" + (-(roadCurve(z) + game.player.lat)) + "px) translateY(" + (z + ROAD3D.camOffset) + "px)";
   for(let i=0;i<game.roadObjs.length;i++){
     const o = game.roadObjs[i];
     let d = o.z - z;
-    /* 순환 오브젝트(길 점선): 지나가면 앞으로 다시 배치 */
+    /* 순환 오브젝트(길 점선): 지나가면 앞으로 다시 배치 (곡선 위치로) */
     if(o.wrap && d < 20){
       o.z += o.wrap;
       o.el.style.top = (-o.z - (o.h || 0)) + "px";
+      if(o.isDash) o.el.style.left = (roadCurve(o.z) - 26) + "px";
       d = o.z - z;
     }
     const vis = (d > 30 && d < 3400);
@@ -2644,6 +2732,16 @@ function updateRoad3D(){
       o.visible = vis;
       o.el.style.visibility = vis ? "visible" : "hidden";
     }
+  }
+  /* "조사 가능!" 말풍선을 가까운 노두 위에 표시 */
+  const hint = $("actionHint");
+  if(hint && hint.classList.contains("on") && game.nearSite && game.nearSite.el){
+    const rect = game.nearSite.el.getBoundingClientRect();
+    const vp = $("sceneViewport").getBoundingClientRect();
+    const x = clamp(rect.left - vp.left + rect.width/2, 140, vp.width - 160);
+    const y = clamp(rect.top - vp.top, 110, vp.height - 190);
+    hint.style.left = x + "px";
+    hint.style.top = y + "px";
   }
 }
 
@@ -3037,6 +3135,20 @@ function gameLoop(t){
       if(game.input.down){ game.player.z -= speed*0.7*dt; moving = true; }
       if(game.input.left){ game.player.lat -= 300*dt; moving = true; }
       if(game.input.right){ game.player.lat += 300*dt; moving = true; }
+      /* 수동 조작이 있으면 자동 걷기 취소 */
+      if(moving) game.autoTarget = null;
+      /* 노두 클릭 → 자동으로 걸어가서 조사창 열기 */
+      if(game.autoTarget){
+        const dz = game.autoTarget.z - game.player.z;
+        if(Math.abs(dz) < 40){
+          const layerId = game.autoTarget.layerId;
+          game.autoTarget = null;
+          openOutcropModal(layerId);
+        }else{
+          game.player.z += Math.sign(dz) * speed * 1.15 * dt;
+          moving = true;
+        }
+      }
       game.player.z = clamp(game.player.z, 0, game.worldLen);
       game.player.lat = clamp(game.player.lat, -ROAD3D.maxLat, ROAD3D.maxLat);
     }else{
@@ -3083,14 +3195,8 @@ function gameLoop(t){
   const sh = document.querySelector(game.mode === "road" ? "#roadPlayer .player-shadow" : "#player .player-shadow");
   if(sh){ sh.style.width = moving ? "70%" : "80%"; }
 
-  /* 길 구간: 발견 지점 도달 체크 */
-  if(game.mode === "road" && !game.discoveryShown){
-    const dp = Number(safe(roadSceneData.discoveryPoint, game.worldLen - 400)) || (game.worldLen - 400);
-    if(game.player.z >= dp) showDiscoveryCinematic();
-  }
-
-  /* 산책길: 가까운 노두 체크 */
-  if(game.mode === "trail") updateNearSite();
+  /* 가까운 노두 체크 (3D 길에서 모든 탐구가 이루어짐) */
+  if(game.mode === "road") updateNearSite();
 
   /* 발굴 진행 */
   if(game.digging) tickDigging(dt);
@@ -3101,17 +3207,17 @@ function gameLoop(t){
 function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
 }
-/* 가까운 노두 감지: 근처에 오면 통통 튀며 "조사 가능!" 말풍선 */
+/* 가까운 노두 감지: 걸어가다 옆에 노두가 보이면 통통 + "조사 가능!" 말풍선 */
 function updateNearSite(){
-  let best = null, bestDist = 190;
+  let best = null, bestDist = 340;
   (game.outcrops || []).forEach(o => {
-    const d = Math.abs(o.x - game.player.x);
+    const d = Math.abs(safe(o.z, 0) - game.player.z);
     if(d < bestDist){ best = o; bestDist = d; }
   });
   if(best !== game.nearSite){
-    if(game.nearSite) game.nearSite.el.classList.remove("near");
+    if(game.nearSite && game.nearSite.el) game.nearSite.el.classList.remove("near");
     game.nearSite = best;
-    if(best) best.el.classList.add("near");
+    if(best && best.el) best.el.classList.add("near");
   }
   const hint = $("actionHint");
   const show = !!best && !game.digging && !anyModalOpen();
@@ -3154,7 +3260,7 @@ function cameraShake(){
 /* ---------- 조사/발굴 시스템 ---------- */
 /* E/스페이스/조사 버튼: 가까운 노두의 확대 조사창 열기 */
 function tryAction(){
-  if(game.mode !== "trail" || anyModalOpen()) return;
+  if(anyModalOpen()) return;
   const o = game.nearSite;
   if(!o) return;
   playSound("click");
@@ -3443,9 +3549,9 @@ function completeItem(itemId){
     s.el.classList.remove("discovered","digging","near");
     s.el.classList.add("collected");
   }
-  /* 산책길의 노두들(완료 스티커/해금 이름표) 갱신 */
-  if(game.mode === "trail" && $("outcropRow")){
-    renderLayers($("outcropRow"), game.worldLen);
+  /* 길가 노두들(완료 스티커/해금 이름표) 갱신 */
+  if(game.mode === "road"){
+    refreshRoadOutcrops();
     if($("outcropModal").classList.contains("on") && game.currentOutcrop){
       openOutcropModal(game.currentOutcrop); /* 확대 조사창도 최신 상태로 다시 그림 */
     }
@@ -3479,7 +3585,7 @@ function showAllCollected(){
   openCinematic();
   spawnConfetti();
 }
-function defaultCinematicGo(){ playSound("click"); enterExplorationArea(); }
+function defaultCinematicGo(){ playSound("click"); $("cinematicOverlay").classList.remove("on"); }
 
 /* ---------- 층 정보 모달 ---------- */
 function openLayerModal(layerId){
@@ -3823,15 +3929,9 @@ function bindUI(){
   $("btnStart").addEventListener("click", () => {
     playSound("click");
     renderScreen("gameScreen");
-    game.discoveryShown = false;
-    if(state.enteredSite){
-      /* 이미 본 탐사 구간에 진입한 적이 있으면 바로 지층 구간에서 이어하기 */
-      renderGame();
-      toast("🧭 탐사를 이어서 진행합니다!");
-    }else{
-      renderRoadScene();
-      toast("🚶 W키(또는 ▲ 버튼)를 눌러 길을 따라 앞으로 걸어가 보세요!");
-    }
+    /* 모든 탐구는 하나의 3D 공간에서: 구불길을 걸으며 좌우 노두를 조사 */
+    renderRoadScene();
+    toast("🚶 W(▲)로 앞으로! 길 왼쪽·오른쪽의 노두를 클릭해 조사해요!");
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
   $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });

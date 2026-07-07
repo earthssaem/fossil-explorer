@@ -140,6 +140,48 @@ h1,h2,h3{margin:.3em 0;}
   pointer-events:none;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.15));
 }
+/* 시작 화면 하단: 굽은 산책길 + 미니 노두 + 표지판 장면 */
+.start-scene{
+  position:absolute; left:0; right:0; bottom:0; height:26%;
+  pointer-events:none;
+  overflow:hidden;
+}
+.start-scene .curve-path{
+  position:absolute; left:-10%; right:-10%; bottom:-58%;
+  height:120%;
+  border-radius:50% 50% 0 0;
+  background:linear-gradient(180deg,#f5e3b4 0%, #e8cf98 100%);
+  box-shadow:inset 0 10px 14px rgba(150,110,60,.3);
+}
+.start-scene .curve-path::before{
+  content:"";
+  position:absolute; left:6%; right:6%; top:16px;
+  height:10px;
+  border-radius:999px;
+  background:repeating-linear-gradient(90deg, rgba(150,110,60,.35) 0 34px, transparent 34px 70px);
+}
+.start-scene .mini-outcrop{
+  position:absolute; bottom:34%;
+  width:96px; height:74px;
+  border-radius:46% 52% 10px 10px / 62% 66% 8px 8px;
+  border:3px solid rgba(120,85,50,.5);
+  overflow:hidden;
+  box-shadow:0 6px 10px rgba(120,90,50,.25);
+  animation:heroBob 4s ease-in-out infinite;
+}
+.start-scene .mini-outcrop i{position:absolute; left:0; right:0; display:block;}
+.start-scene .start-sign{
+  position:absolute; bottom:36%;
+  text-align:center;
+  animation:heroBob 3.4s ease-in-out infinite;
+}
+.start-scene .start-sign .plate{
+  background:#a06e46; color:#fff3d8;
+  border:3px solid #6f4a2e; border-radius:10px;
+  padding:4px 10px; font-weight:900; font-size:.8rem;
+  white-space:nowrap;
+}
+.start-scene .start-sign .pole{width:8px; height:26px; margin:0 auto; background:#6f4a2e; border-radius:0 0 4px 4px;}
 #startScreen::before{
   content:"";
   position:absolute; inset:0;
@@ -508,72 +550,181 @@ h1,h2,h3{margin:.3em 0;}
   100%{transform:translateY(-140px) translateX(40px); opacity:0;}
 }
 
-/* --- 지층 구간 CSS fallback 배경 --- */
-.strata-sky{
+/* ==========================================================
+   산책길 탐사 구간 (거대 절벽 등반 → 아기자기한 산책길 + 작은 노두들)
+   ========================================================== */
+.trail-sky{
   position:absolute; inset:0;
-  background:linear-gradient(180deg,#f6c98a 0%, #e8a76a 30%, #c98d5a 55%, #8a5a3c 100%);
+  background:linear-gradient(180deg,#a5ddf2 0%, #cdf0e6 34%, #fdf2d8 56%, #f5e0b8 100%);
 }
-.strata-lightbeam{
-  position:absolute; top:-10%; left:20%;
-  width:34%; height:70%;
-  background:linear-gradient(195deg, rgba(255,244,200,.5), transparent 70%);
-  transform:skewX(-14deg);
-  filter:blur(6px);
-  pointer-events:none;
+.trail-hill{
+  position:absolute; bottom:26%;
+  border-radius:50% 50% 0 0;
+  background:linear-gradient(180deg,#bfe3b4 0%, #94c98e 100%);
+  opacity:.85;
 }
-.cliff-wall{
-  position:absolute; top:0; bottom:26%;
-  left:0;
-  transform-style:preserve-3d;
+.trail-hill.far{background:linear-gradient(180deg,#cfe8dd 0%, #a8cfc0 100%); opacity:.7;}
+.mini-cliff-far{
+  position:absolute; bottom:27%;
+  width:130px; height:80px;
+  border-radius:16px 30px 4px 4px;
+  background:repeating-linear-gradient(178deg,#dcb888 0 12px,#c49a68 12px 22px);
+  opacity:.55;
+  filter:blur(1px);
 }
-.strata-band{
-  position:absolute; left:0; right:0;
-  box-shadow:
-    inset 0 14px 18px rgba(255,235,190,.18),
-    inset 0 -18px 26px rgba(40,20,8,.45);
-  overflow:hidden;
-}
-.strata-band .band-crack{
-  position:absolute;
-  background:rgba(35,18,8,.4);
-  border-radius:4px;
-  transform:rotate(var(--rot,4deg));
-}
-.strata-band .band-pebble{
-  position:absolute;
-  border-radius:50% 45% 55% 50%;
-  background:rgba(60,35,18,.35);
-  box-shadow:inset 2px 2px 3px rgba(255,240,200,.25);
-}
-.layer-tag{
-  position:absolute; left:14px;
-  z-index:4;
-  display:flex; align-items:center; gap:8px;
-  background:rgba(22,36,61,.82);
-  color:#ffe9c4;
-  border-radius:999px;
-  padding:7px 16px;
-  font-weight:800;
-  font-size:var(--font-base);
-  box-shadow:0 4px 10px rgba(0,0,0,.35);
-  border:2px solid rgba(255,233,196,.5);
-  cursor:pointer;
-  transition:transform .15s ease;
-}
-.layer-tag:hover{transform:scale(1.06);}
-.layer-tag .lock{font-size:.9em;}
-.layer-tag.unlocked{background:rgba(29,122,114,.9);}
-.strata-ground{
-  position:absolute; left:0; right:0; bottom:0; height:26%;
+.trail-ground{
+  position:absolute; left:0; right:0; bottom:0; height:30%;
   background:
-    radial-gradient(circle at 15% 30%, rgba(255,255,255,.1) 0 3px, transparent 4px),
-    linear-gradient(180deg,#9a6a44 0%, #7a5236 55%, #5c3f2a 100%);
-  box-shadow:inset 0 10px 16px rgba(30,15,5,.5);
+    radial-gradient(circle at 18% 36%, rgba(255,255,255,.25) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 62%, rgba(150,110,70,.18) 0 4px, transparent 5px),
+    linear-gradient(180deg,#cfe6a8 0%, #c3dc9a 14%, #d9c08e 46%, #c4a874 100%);
+  clip-path:polygon(0 10%, 5% 4%, 13% 9%, 24% 2%, 36% 8%, 49% 3%, 62% 9%, 75% 3%, 87% 8%, 95% 4%, 100% 9%, 100% 100%, 0 100%);
 }
-.strata-ground::before{
+.trail-path{
+  position:absolute; left:0; right:0; bottom:0; height:24%;
+  background:linear-gradient(180deg,#f5e3b4 0%, #e8cf98 100%);
+  clip-path:polygon(0 42%, 6% 34%, 15% 42%, 28% 30%, 42% 40%, 58% 28%, 72% 40%, 86% 30%, 100% 38%, 100% 100%, 0 100%);
+  box-shadow:inset 0 8px 12px rgba(150,110,60,.3);
+}
+.trail-path::before{
   content:"";
   position:absolute; inset:0;
-  background:repeating-linear-gradient(92deg, transparent 0 120px, rgba(255,230,180,.05) 120px 128px);
+  background:repeating-linear-gradient(96deg, transparent 0 90px, rgba(150,110,60,.16) 90px 100px);
+  clip-path:inherit;
+}
+.trail-flower{
+  position:absolute; bottom:6%;
+  width:26px; height:34px;
+}
+.trail-flower .stem{position:absolute; bottom:0; left:11px; width:5px; height:18px; background:#5f9c52; border-radius:4px;}
+.trail-flower .bloom{
+  position:absolute; top:0; left:2px;
+  width:22px; height:22px; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #fff 0 5px, var(--fc,#ff9eb5) 6px 100%);
+  box-shadow:0 2px 4px rgba(0,0,0,.15);
+  animation:grassSway 3.6s ease-in-out infinite;
+}
+/* --- 길 옆 작은 노두 (클릭해서 확대 조사) --- */
+.outcrop{
+  position:absolute; bottom:19%;
+  width:210px; height:170px;
+  cursor:pointer;
+  transform-origin:50% 100%;
+  transition:transform .25s cubic-bezier(.3,1.7,.4,1);
+  z-index:3;
+}
+.outcrop:hover{transform:scale(1.07) rotate(-1deg);}
+.outcrop.near{animation:outcropBounce 1s ease-in-out infinite;}
+@keyframes outcropBounce{0%,100%{transform:scale(1) translateY(0);}50%{transform:scale(1.05) translateY(-7px);}}
+.outcrop .mound{
+  position:absolute; left:0; right:0; bottom:22px; top:14px;
+  border-radius:46% 52% 14px 14px / 60% 66% 10px 10px;
+  overflow:hidden;
+  box-shadow:
+    inset -14px -8px 20px rgba(90,55,30,.35),
+    inset 10px 8px 16px rgba(255,244,210,.4),
+    0 10px 18px rgba(120,90,50,.3);
+  border:4px solid rgba(120,85,50,.55);
+}
+.outcrop .mound .band{
+  position:absolute; left:-6%; width:112%;
+  box-shadow:inset 0 5px 8px rgba(255,240,200,.3), inset 0 -7px 10px rgba(70,40,20,.3);
+}
+.outcrop .mound .pebble{
+  position:absolute;
+  border-radius:50% 45% 55% 50%;
+  background:rgba(70,40,20,.3);
+  box-shadow:inset 1px 1px 2px rgba(255,240,200,.35);
+}
+.outcrop .grass-tuft{
+  position:absolute; top:2px;
+  width:44px; height:22px;
+}
+.outcrop .grass-tuft span{
+  position:absolute; bottom:0; width:9px; height:100%;
+  background:linear-gradient(180deg,#8fd47a,#5faf5c);
+  border-radius:8px 8px 0 0;
+}
+.outcrop .glint{
+  position:absolute; top:-4px; right:16px;
+  font-size:26px; color:#ffdf6e;
+  text-shadow:0 0 12px #ffce4a;
+  animation:sparkleTwinkle 1.5s ease-in-out infinite;
+  pointer-events:none;
+}
+.outcrop.done .glint{display:none;}
+.outcrop .outcrop-label{
+  position:absolute; left:50%; bottom:-6px;
+  transform:translateX(-50%);
+  background:#fffdf6;
+  border:3px solid #d8b880;
+  color:#7a5a36;
+  border-radius:999px;
+  padding:5px 14px;
+  font-weight:900;
+  font-size:.92rem;
+  white-space:nowrap;
+  box-shadow:0 4px 8px rgba(120,90,50,.25);
+}
+.outcrop.unlocked .outcrop-label{border-color:var(--teal); color:var(--teal-dark);}
+.outcrop .complete-sticker{
+  position:absolute; top:-12px; left:-10px;
+  width:56px; height:56px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #8ee6c8, var(--teal));
+  border:3px solid #fff;
+  color:#fff;
+  font-weight:900;
+  font-size:.78rem;
+  display:none;
+  align-items:center; justify-content:center;
+  text-align:center;
+  transform:rotate(-14deg);
+  box-shadow:0 4px 10px rgba(30,120,105,.4);
+  animation:stickerStamp .45s cubic-bezier(.2,1.8,.4,1) both;
+}
+@keyframes stickerStamp{from{transform:rotate(-14deg) scale(2.2); opacity:0;} to{transform:rotate(-14deg) scale(1); opacity:1;}}
+.outcrop.done .complete-sticker{display:flex;}
+/* --- 노두 확대 조사창 --- */
+#outcropModal .modal-card{max-width:600px;}
+.xsec-wrap{
+  position:relative;
+  width:100%;
+  height:min(52vh, 380px);
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:5px solid #d8b880;
+  box-shadow:inset 0 6px 14px rgba(90,55,30,.3);
+}
+.xsec-wrap .band{
+  position:absolute; left:0; right:0;
+  box-shadow:inset 0 8px 12px rgba(255,240,200,.28), inset 0 -10px 16px rgba(70,40,20,.32);
+}
+.xsec-wrap .crack{
+  position:absolute;
+  background:rgba(45,24,10,.35);
+  border-radius:4px;
+  transform:rotate(var(--rot,6deg));
+}
+.xsec-wrap .pebble{
+  position:absolute;
+  border-radius:50% 45% 55% 50%;
+  background:rgba(70,40,20,.3);
+  box-shadow:inset 2px 2px 3px rgba(255,240,200,.3);
+}
+.xsec-note{
+  text-align:center;
+  font-weight:800;
+  color:#a58a5e;
+  margin:10px 0 0;
+  font-size:.95rem;
+}
+.mini-explorer{
+  position:absolute; right:6px; bottom:2px;
+  width:74px; height:94px;
+  pointer-events:none;
+  z-index:5;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.25));
 }
 
 /* --- 전경 장식 레이어 --- */
@@ -725,17 +876,10 @@ h1,h2,h3{margin:.3em 0;}
 @keyframes pInspect{0%,100%{transform:rotate(0deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-3px);}}
 .anim-discover .player-anim{animation:pDiscover .55s cubic-bezier(.3,1.6,.5,1) infinite;}
 @keyframes pDiscover{0%,100%{transform:translateY(0) scale(1);}45%{transform:translateY(-18px) scale(1.05,.97) rotate(3deg);}}
-.anim-climb .player-anim{animation:pClimb .5s ease-in-out infinite;}
-@keyframes pClimb{0%,100%{transform:rotate(-4deg) translateY(0);}50%{transform:rotate(4deg) translateY(-6px);}}
-#sceneViewport.mode-strata{perspective:900px; perspective-origin:50% 42%;}
-/* 절벽 위 등반 발판(사다리 느낌 홈) — 등반 가능함을 시각적으로 안내 */
-.climb-groove{
-  position:absolute;
-  width:34px; height:12px;
-  border-radius:8px;
-  background:rgba(40,20,8,.35);
-  box-shadow:inset 0 3px 4px rgba(0,0,0,.4), 0 1px 0 rgba(255,235,190,.25);
-}
+#sceneViewport.mode-trail{perspective:900px; perspective-origin:50% 42%;}
+/* 산책 모드에서는 상하 이동이 없으므로 ▲▼ 버튼 숨김 */
+#gameScreen.mode-trail #btnUp,
+#gameScreen.mode-trail #btnDown{display:none;}
 
 /* ---------- 조사 안내 말풍선 ---------- */
 #actionHint{
@@ -1145,6 +1289,20 @@ h1,h2,h3{margin:.3em 0;}
   animation:cardShine 3.2s ease-in-out infinite;
   pointer-events:none;
 }
+.collect-card .card-new{
+  position:absolute; top:44px; left:-4px;
+  background:linear-gradient(180deg,var(--pink),var(--pink-dark));
+  color:#fff;
+  font-weight:900; font-size:.7rem;
+  padding:3px 12px;
+  border-radius:999px;
+  border:2px solid #fff;
+  transform:rotate(-10deg);
+  box-shadow:0 3px 6px rgba(210,90,120,.4);
+  animation:newPulse 1.4s ease-in-out infinite;
+  z-index:3;
+}
+@keyframes newPulse{0%,100%{transform:rotate(-10deg) scale(1);}50%{transform:rotate(-10deg) scale(1.14);}}
 .collect-card.completed .card-get{
   position:absolute; top:38px; right:-34px;
   background:linear-gradient(180deg,var(--sun),#ffb84d);
@@ -1284,12 +1442,27 @@ h1,h2,h3{margin:.3em 0;}
     <div class="start-deco" style="top:16%; right:14%; animation-delay:.7s;">✨</div>
     <div class="start-deco" style="top:30%; left:7%; animation-delay:1.2s;">🦴</div>
     <div class="start-deco" style="top:26%; right:7%; animation-delay:.4s;">🐚</div>
-    <div class="start-deco" style="bottom:18%; left:10%; animation-delay:1s;">⛏️</div>
-    <div class="start-deco" style="bottom:22%; right:11%; animation-delay:1.5s;">🔍</div>
+    <div class="start-deco" style="bottom:30%; left:10%; animation-delay:1s;">⛏️</div>
+    <div class="start-deco" style="bottom:33%; right:11%; animation-delay:1.5s;">🔍</div>
+    <div class="start-scene">
+      <div class="curve-path"></div>
+      <div class="mini-outcrop" style="left:7%;">
+        <i style="top:0; height:36%; background:#e0bd8a;"></i>
+        <i style="top:34%; height:36%; background:#c49a68;"></i>
+        <i style="top:68%; height:34%; background:#a07850;"></i>
+      </div>
+      <div class="mini-outcrop" style="right:6%; width:78px; height:60px; animation-delay:.8s;">
+        <i style="top:0; height:40%; background:#d4b088;"></i>
+        <i style="top:38%; height:34%; background:#b08a5e;"></i>
+        <i style="top:70%; height:32%; background:#8a6a46;"></i>
+      </div>
+      <div class="start-sign" style="left:24%;"><div class="plate">🧭 탐사길</div><div class="pole"></div></div>
+      <div class="start-sign" style="right:22%; animation-delay:.6s;"><div class="plate">✨ 단서 발견!</div><div class="pole"></div></div>
+    </div>
     <div class="start-card">
       <div class="start-hero" id="startHero"></div>
       <h1 class="start-title">탐사대<br><span class="accent">숨겨진 층의 비밀을 찾아라</span></h1>
-      <p class="start-sub">길을 따라 탐험하며 단서를 발견하고, 기록하고,<br>숨겨진 정보를 해금하라!</p>
+      <p class="start-sub">길을 따라 숨겨진 단서를 찾아보세요!<br>반짝이는 곳을 눌러 조사하고, 도감을 하나씩 채워 볼까요? 🌟</p>
       <div class="start-badge-row" id="startProgressRow"></div>
       <div class="start-buttons">
         <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
@@ -1307,9 +1480,9 @@ h1,h2,h3{margin:.3em 0;}
       <h2 class="screen-title">📖 게임 방법</h2>
     </div>
     <div class="panel-card">
-      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br>길에서는 <b>W(▲)</b>로 앞으로 걸어가고, <b>A/D(◀▶)</b>로 좌우로 비켜 걸어요. 지층 절벽에서는 <b>A/D</b>로 좌우 이동, <b>W/S(▲▼)</b>로 절벽을 직접 오르내려요! 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>🏞 길을 따라 앞으로 탐험!</b><br>3D 시점으로 길을 따라 쭉 걸어가다 보면, 길 옆에 층층이 쌓인 신비한 절벽(층상 단면)이 점점 가까워져요. 다가가면 <b>"탐사 현장 발견!"</b> 연출과 함께 본격 탐사가 시작돼요. 처음에는 층의 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>🧗 절벽을 올라 반짝이는 조사 지점을 찾아라!</b><br>층 곳곳에 ✦ 반짝이는 조사 지점이 숨어 있어요. <b>W/S로 절벽을 기어올라</b> 가까이 간 다음, <b>E키 / 스페이스 / 조사 버튼 / 지점 클릭</b>으로 발굴을 시작!</div></div>
+      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br>처음 길에서는 <b>W(▲)</b>로 앞으로 걸어가요. 탐사길에 도착하면 <b>A/D(◀▶)</b>로 좌우로 산책해요. 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>🏞 길을 따라 탐사 현장으로!</b><br>3D 시점으로 길을 쭉 걸어가면 <b>"탐사 현장 발견!"</b> 연출과 함께 아기자기한 탐사길이 펼쳐져요. 길 옆에는 작은 <b>노두</b>(지층이 드러난 곳)들이 늘어서 있어요. 처음에는 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 확대 조사!</b><br>반짝이는 노두를 <b>클릭/탭</b>하면 확대 조사창이 열려요. 그 안에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴을 시작해요! (가까이 가서 E키/조사 버튼도 OK)</div></div>
       <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
       <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
       <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
@@ -1363,6 +1536,20 @@ h1,h2,h3{margin:.3em 0;}
       </div>
     </div>
   </section>
+
+  <!-- ============ 노두 확대 조사창 ============ -->
+  <div class="modal-backdrop" id="outcropModal">
+    <div class="modal-card">
+      <button class="modal-close" data-close="outcropModal">✕</button>
+      <h3 class="modal-title" id="outcropModalTitle">🔎 노두 조사</h3>
+      <div class="xsec-wrap" id="outcropXsec"></div>
+      <p class="xsec-note" id="outcropNote">✨ 반짝이는 곳을 눌러 조사해요!</p>
+      <div class="modal-actions">
+        <button class="btn navy small" id="btnOutcropLayerInfo">🧩 층 정보 보기</button>
+        <button class="btn ghost small" data-close="outcropModal">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ============ 5. 아이템 관찰 모달 ============ -->
   <div class="modal-backdrop" id="itemModal">
@@ -1748,6 +1935,7 @@ function defaultState(){
     completed: [],       // 퀴즈까지 완료한 아이템 id
     unlockedLayers: [],  // 해금된 층 id
     badges: [],          // 획득 배지 id
+    seenInDex: [],       // 도감에서 확인한 아이템 id (NEW 스티커 표시용)
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -1761,12 +1949,13 @@ function defaultState(){
 
 /* 게임 진행용 런타임 변수 */
 const game = {
-  mode: "road",              // "road" | "strata"
+  mode: "road",              // "road"(3D 도입 길) | "trail"(산책길 탐사)
   running: false,
   worldLen: 3000,
-  /* x: 지층 구간 가로 위치 / elev: 지층 절벽 등반 높이(%)
-     z: 길 구간 전진 거리 / lat: 길 구간 좌우 치우침(px) */
-  player: { x: 200, dir: 1, moving: false, anim: "idle", z: 0, lat: 0, elev: 0 },
+  /* x: 산책길 가로 위치 / z: 길 구간 전진 거리 / lat: 길 구간 좌우 치우침(px) */
+  player: { x: 200, dir: 1, moving: false, anim: "idle", z: 0, lat: 0 },
+  outcrops: [],              // 산책길의 작은 노두들
+  currentOutcrop: null,      // 열려 있는 확대 조사창의 층 id
   cameraX: 0,
   input: { left: false, right: false, up: false, down: false },
   sites: [],                 // 조사 지점 런타임 정보
@@ -1803,7 +1992,7 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","badges"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","badges","seenInDex"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
     }
@@ -1873,7 +2062,7 @@ function playSound(type){
   switch(type){
     case "click":    tone(660, .08, "triangle", .1); break;
     case "step":     tone(220 + Math.random()*40, .05, "triangle", .04); break;
-    case "dig":      tone(140, .09, "square", .08); tone(90, .12, "sawtooth", .05, .04); break;
+    case "dig":      tone(320, .05, "triangle", .09); tone(260, .06, "triangle", .07, .08); break; /* 톡톡 */
     case "found":    tone(523, .12, "triangle", .12); tone(659, .12, "triangle", .12, .1); tone(784, .2, "triangle", .13, .2); break;
     case "correct":  tone(523, .1, "sine", .12); tone(784, .18, "sine", .13, .1); break;
     case "wrong":    tone(220, .18, "sawtooth", .08); tone(180, .22, "sawtooth", .07, .12); break;
@@ -1929,40 +2118,82 @@ function itemColor(item){
   return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
 }
 function fallbackShapeSVG(shape, color, silhouette){
-  const c  = silhouette ? "#6b6b6b" : color;
-  const c2 = silhouette ? "#585858" : "#5c3f2a";
-  const q  = silhouette ? '<text x="60" y="72" text-anchor="middle" font-size="34" font-weight="900" fill="#3d3d3d">?</text>' : "";
+  /* 귀여운 스티커 일러스트 느낌: 두꺼운 외곽선 + 하이라이트 + 반짝이 + 작은 표정 */
+  const c  = silhouette ? "#9aa0ab" : color;
+  const c2 = silhouette ? "#71777f" : "#4a3b5e";
+  const q  = silhouette ? '<text x="60" y="74" text-anchor="middle" font-size="36" font-weight="900" fill="#565c66">?</text>' : "";
+  /* 작은 카와이 얼굴 (실루엣일 때는 표시하지 않음) */
+  function kf(x, y){
+    if(silhouette) return "";
+    return '<circle cx="' + (x-8) + '" cy="' + y + '" r="3" fill="#3a3350"/>' +
+      '<circle cx="' + (x+8) + '" cy="' + y + '" r="3" fill="#3a3350"/>' +
+      '<circle cx="' + (x-6.8) + '" cy="' + (y-1.2) + '" r="1.1" fill="#fff"/>' +
+      '<circle cx="' + (x+9.2) + '" cy="' + (y-1.2) + '" r="1.1" fill="#fff"/>' +
+      '<path d="M' + (x-4) + ' ' + (y+6) + ' Q' + x + ' ' + (y+10) + ' ' + (x+4) + ' ' + (y+6) + '" stroke="#3a3350" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="' + (x-14) + '" cy="' + (y+5) + '" rx="3.4" ry="2.2" fill="#ffb3a0" opacity=".85"/>' +
+      '<ellipse cx="' + (x+14) + '" cy="' + (y+5) + '" rx="3.4" ry="2.2" fill="#ffb3a0" opacity=".85"/>';
+  }
+  const sparkle = silhouette ? "" :
+    '<path d="M97 18 l2.6 6.4 6.4 2.6 -6.4 2.6 -2.6 6.4 -2.6 -6.4 -6.4 -2.6 6.4 -2.6 Z" fill="#fff" opacity=".95"/>' +
+    '<circle cx="24" cy="30" r="2.6" fill="#fff" opacity=".8"/>';
   let body = "";
   switch(shape){
-    case "spiral":
-      body = '<path d="M60 60 m0 -3 a3 3 0 0 1 3 3 a6 6 0 0 1 -6 6 a10 10 0 0 1 -10 -10 a15 15 0 0 1 15 -15 a21 21 0 0 1 21 21 a27 27 0 0 1 -27 27 a33 33 0 0 1 -33 -33 a38 38 0 0 1 38 -38" fill="none" stroke="' + c + '" stroke-width="9" stroke-linecap="round"/>';
+    case "spiral": /* 동글동글 소라 나선 */
+      body = '<circle cx="60" cy="62" r="37" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<path d="M60 62 a7 7 0 0 1 7 7 a13 13 0 0 1 -13 6 a19 19 0 0 1 -12 -19 a25 25 0 0 1 25 -18 a30 30 0 0 1 23 24" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5.5" stroke-linecap="round"/>' +
+        '<ellipse cx="44" cy="40" rx="9" ry="5" fill="rgba(255,255,255,.55)" transform="rotate(-24 44 40)"/>' +
+        kf(60, 66);
       break;
-    case "segmented":
-      body = '<ellipse cx="60" cy="60" rx="42" ry="26" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-             '<path d="M34 40 q4 20 0 40 M48 36 q4 24 0 48 M62 35 q4 25 0 50 M76 37 q4 23 0 46 M88 44 q3 16 0 32" stroke="' + c2 + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+    case "segmented": /* 마디가 있는 통통 벌레 느낌 */
+      body = '<circle cx="34" cy="66" r="21" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="86" cy="66" r="21" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="60" cy="58" r="26" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<path d="M46 30 q-4 -10 -11 -13 M74 30 q4 -10 11 -13" stroke="' + c2 + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="35" cy="16" r="4" fill="' + c + '" stroke="' + c2 + '" stroke-width="3"/>' +
+        '<circle cx="85" cy="16" r="4" fill="' + c + '" stroke="' + c2 + '" stroke-width="3"/>' +
+        '<ellipse cx="48" cy="42" rx="8" ry="4.5" fill="rgba(255,255,255,.55)" transform="rotate(-20 48 42)"/>' +
+        kf(60, 58);
       break;
-    case "bone":
-      body = '<path d="M35 45 a10 10 0 1 1 12 -12 a10 10 0 1 1 12 12 L52 52 L85 85 a10 10 0 1 1 -12 12 a10 10 0 1 1 -12 -12 L68 68 Z" transform="rotate(8 60 60)" fill="' + c + '" stroke="' + c2 + '" stroke-width="4" stroke-linejoin="round"/>';
+    case "bone": /* 말랑한 뼈다귀 */
+      body = '<circle cx="30" cy="48" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="42" cy="38" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="78" cy="84" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="90" cy="74" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<rect x="30" y="46" width="60" height="22" rx="11" transform="rotate(38 60 60)" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<rect x="38" y="52" width="44" height="10" rx="5" transform="rotate(38 60 60)" fill="rgba(255,255,255,.4)"/>' +
+        kf(60, 58);
       break;
-    case "disk":
-      body = '<circle cx="60" cy="60" r="38" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-             '<circle cx="60" cy="60" r="26" fill="none" stroke="' + c2 + '" stroke-width="3" opacity=".7"/>' +
-             '<circle cx="60" cy="60" r="14" fill="none" stroke="' + c2 + '" stroke-width="3" opacity=".7"/>' +
-             '<circle cx="60" cy="60" r="4" fill="' + c2 + '"/>';
+    case "disk": /* 동글동글 쿠키/원반 */
+      body = '<circle cx="60" cy="60" r="38" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<circle cx="60" cy="60" r="27" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>' +
+        '<ellipse cx="44" cy="40" rx="10" ry="5.5" fill="rgba(255,255,255,.55)" transform="rotate(-26 44 40)"/>' +
+        '<circle cx="82" cy="72" r="3" fill="rgba(255,255,255,.7)"/>' +
+        '<circle cx="38" cy="78" r="2.6" fill="rgba(255,255,255,.7)"/>' +
+        kf(60, 58);
       break;
-    case "branch":
-      body = '<path d="M60 100 L60 58 M60 58 L38 34 M60 74 L82 52 M38 34 L30 20 M38 34 L52 24 M82 52 L92 38 M82 52 L70 40" stroke="' + c + '" stroke-width="9" fill="none" stroke-linecap="round"/>';
+    case "branch": /* 몽글몽글 산호 가지 */
+      body = '<path d="M60 104 L60 62 M60 62 Q52 44 38 36 M60 74 Q72 60 82 54 M38 36 Q34 26 26 22 M38 36 Q48 30 50 20 M82 54 Q90 44 96 40 M82 54 Q74 44 72 34" stroke="' + c + '" stroke-width="13" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="26" cy="20" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+        '<circle cx="51" cy="18" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+        '<circle cx="97" cy="38" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+        '<circle cx="72" cy="32" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
+        '<path d="M60 104 L60 62 M60 62 Q52 44 38 36 M60 74 Q72 60 82 54" stroke="rgba(255,255,255,.35)" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+        kf(60, 88);
       break;
-    case "leaf":
-      body = '<path d="M60 18 C 92 40 92 80 60 102 C 28 80 28 40 60 18 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-             '<path d="M60 24 L60 96 M60 44 L42 56 M60 44 L78 56 M60 64 L44 74 M60 64 L76 74" stroke="' + c2 + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    case "leaf": /* 방긋 잎사귀 */
+      body = '<path d="M60 16 C 94 38 94 82 60 104 C 26 82 26 38 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<path d="M60 26 L60 96 M60 46 Q50 50 44 58 M60 46 Q70 50 76 58 M60 68 Q52 72 47 78 M60 68 Q68 72 73 78" stroke="rgba(255,255,255,.6)" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="47" cy="36" rx="7" ry="4" fill="rgba(255,255,255,.5)" transform="rotate(-32 47 36)"/>' +
+        kf(60, 56);
       break;
-    default: // unknown
-      body = '<path d="M60 16 C 90 16 104 42 100 64 C 96 88 80 104 60 104 C 40 104 24 88 20 64 C 16 42 30 16 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>';
+    default: /* unknown: 몽글 젤리 */
+      body = '<path d="M60 16 C 90 16 104 42 100 64 C 96 88 80 104 60 104 C 40 104 24 88 20 64 C 16 42 30 16 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
+        '<ellipse cx="44" cy="34" rx="9" ry="5" fill="rgba(255,255,255,.5)" transform="rotate(-22 44 34)"/>' +
+        (silhouette ? "" : kf(60, 58));
       break;
   }
   return '<svg class="item-fallback-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-         '<ellipse cx="60" cy="106" rx="34" ry="7" fill="rgba(0,0,0,.15)"/>' + body + q + '</svg>';
+         '<ellipse cx="60" cy="108" rx="34" ry="6.5" fill="rgba(0,0,0,.13)"/>' + body + sparkle + q + '</svg>';
 }
 /* fallback 플레이스홀더 표시 (item id/group/shape에 따라 다른 그림) */
 function renderFallbackItem(container, item, silhouette){
@@ -1992,44 +2223,51 @@ function renderAssetImage(container, item, type){
 
 /* ---------- 플레이어 캐릭터 ---------- */
 function playerFallbackSVG(){
-  /* 꼬마 탐사대원: 노란 안전모 + 조끼 + 가방 + 루페 + 망치 (CSS/SVG 기본 캐릭터) */
+  /* 꼬마 탐사대원 2.0: 머리가 크고 눈이 반짝이는 깜찍 버전
+     (노란 안전모 + 조끼 + 가방 + 루페 + 망치, CSS/SVG 기본 캐릭터) */
   return '<svg class="player-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    // 가방 (등 뒤)
-    '<rect x="14" y="72" width="26" height="34" rx="9" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
-    '<rect x="19" y="80" width="16" height="10" rx="4" fill="#c9a468"/>' +
-    // 다리
-    '<rect x="42" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<rect x="63" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<ellipse cx="48" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
-    '<ellipse cx="70" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
-    // 몸통(조끼)
-    '<rect x="36" y="70" width="46" height="48" rx="16" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
-    '<rect x="52" y="70" width="14" height="48" fill="#ffe9c4" stroke="#b35a1f" stroke-width="3"/>' +
-    '<circle cx="59" cy="84" r="3" fill="#b35a1f"/><circle cx="59" cy="98" r="3" fill="#b35a1f"/>' +
-    '<rect x="40" y="78" width="9" height="12" rx="3" fill="#ffd166" stroke="#b35a1f" stroke-width="2.5"/>' +
-    // 왼팔 + 망치
-    '<rect x="24" y="76" width="14" height="30" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4" transform="rotate(18 31 91)"/>' +
-    '<circle cx="24" cy="106" r="7" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
-    '<rect x="8" y="103" width="24" height="7" rx="3.5" fill="#a97b50" stroke="#5c3f2a" stroke-width="3" transform="rotate(-30 20 106)"/>' +
-    '<rect x="2" y="88" width="13" height="12" rx="3" fill="#8c9bab" stroke="#4c5866" stroke-width="3" transform="rotate(-30 8 94)"/>' +
-    // 오른팔 + 루페
-    '<rect x="80" y="76" width="14" height="30" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4" transform="rotate(-18 87 91)"/>' +
-    '<circle cx="95" cy="104" r="7" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
-    '<circle cx="106" cy="90" r="11" fill="rgba(180,230,255,.55)" stroke="#22385c" stroke-width="4.5"/>' +
-    '<line x1="99" y1="99" x2="94" y2="106" stroke="#22385c" stroke-width="5" stroke-linecap="round"/>' +
-    // 얼굴
-    '<circle cx="59" cy="46" r="26" fill="#ffd9b0" stroke="#b3763d" stroke-width="4"/>' +
-    '<circle cx="50" cy="46" r="3.6" fill="#22385c"/>' +
-    '<circle cx="68" cy="46" r="3.6" fill="#22385c"/>' +
-    '<circle cx="51.4" cy="44.8" r="1.2" fill="#fff"/>' +
-    '<circle cx="69.4" cy="44.8" r="1.2" fill="#fff"/>' +
-    '<path d="M52 57 Q59 63 66 57" stroke="#b3763d" stroke-width="3.5" fill="none" stroke-linecap="round"/>' +
-    '<circle cx="42" cy="54" r="4.5" fill="#ffb3a0" opacity=".8"/>' +
-    '<circle cx="76" cy="54" r="4.5" fill="#ffb3a0" opacity=".8"/>' +
-    // 안전모
-    '<path d="M32 40 a27 27 0 0 1 54 0 l0 4 l-54 0 Z" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
-    '<rect x="28" y="40" width="62" height="9" rx="4.5" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
-    '<rect x="53" y="16" width="12" height="14" rx="5" fill="#ffe08c" stroke="#c98d1a" stroke-width="3"/>' +
+    // 가방 (등 뒤로 살짝)
+    '<rect x="16" y="80" width="24" height="30" rx="10" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
+    '<rect x="21" y="87" width="14" height="9" rx="4" fill="#c9a468"/>' +
+    // 짧은 다리 + 통통한 부츠
+    '<rect x="45" y="116" width="12" height="18" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<rect x="63" y="116" width="12" height="18" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<ellipse cx="50" cy="137" rx="11" ry="7.5" fill="#7a5236" stroke="#4a3020" stroke-width="4"/>' +
+    '<ellipse cx="70" cy="137" rx="11" ry="7.5" fill="#7a5236" stroke="#4a3020" stroke-width="4"/>' +
+    // 작은 몸통(조끼)
+    '<rect x="40" y="86" width="40" height="34" rx="14" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4"/>' +
+    '<rect x="54" y="86" width="12" height="34" fill="#fff2d8" stroke="#c96a2a" stroke-width="3"/>' +
+    '<circle cx="60" cy="97" r="2.6" fill="#c96a2a"/><circle cx="60" cy="108" r="2.6" fill="#c96a2a"/>' +
+    '<rect x="43" y="92" width="8" height="10" rx="3" fill="#ffd166" stroke="#c96a2a" stroke-width="2.5"/>' +
+    // 왼팔 + 콩콩 망치
+    '<rect x="28" y="90" width="12" height="24" rx="6" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4" transform="rotate(20 34 102)"/>' +
+    '<circle cx="26" cy="114" r="6.5" fill="#ffd9b0" stroke="#c96a2a" stroke-width="3.5"/>' +
+    '<rect x="9" y="110" width="22" height="7" rx="3.5" fill="#b98a5e" stroke="#6f4a2e" stroke-width="3" transform="rotate(-28 20 113)"/>' +
+    '<rect x="3" y="96" width="13" height="12" rx="4" fill="#9fb2c4" stroke="#4c5866" stroke-width="3" transform="rotate(-28 9 102)"/>' +
+    // 오른팔 + 반짝 루페
+    '<rect x="80" y="90" width="12" height="24" rx="6" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4" transform="rotate(-20 86 102)"/>' +
+    '<circle cx="94" cy="114" r="6.5" fill="#ffd9b0" stroke="#c96a2a" stroke-width="3.5"/>' +
+    '<circle cx="104" cy="100" r="10" fill="rgba(185,235,255,.6)" stroke="#3a4a75" stroke-width="4.5"/>' +
+    '<path d="M100 96 a5 5 0 0 1 5 -2" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+    '<line x1="98" y1="108" x2="95" y2="113" stroke="#3a4a75" stroke-width="5" stroke-linecap="round"/>' +
+    // 크고 둥근 얼굴
+    '<circle cx="60" cy="54" r="33" fill="#ffdcb8" stroke="#c98d5a" stroke-width="4"/>' +
+    // 반짝이는 큰 눈
+    '<circle cx="47" cy="56" r="6" fill="#3a3350"/>' +
+    '<circle cx="73" cy="56" r="6" fill="#3a3350"/>' +
+    '<circle cx="49" cy="53.6" r="2.4" fill="#fff"/>' +
+    '<circle cx="75" cy="53.6" r="2.4" fill="#fff"/>' +
+    '<circle cx="45.4" cy="58.4" r="1.1" fill="#fff" opacity=".9"/>' +
+    '<circle cx="71.4" cy="58.4" r="1.1" fill="#fff" opacity=".9"/>' +
+    // 볼터치 + 방긋 미소
+    '<ellipse cx="38" cy="66" rx="5.5" ry="4" fill="#ffb3a0" opacity=".85"/>' +
+    '<ellipse cx="82" cy="66" rx="5.5" ry="4" fill="#ffb3a0" opacity=".85"/>' +
+    '<path d="M52 68 Q60 75 68 68" stroke="#b3763d" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
+    // 노란 안전모 (동그란 챙 + 꼭지)
+    '<path d="M28 46 a32 32 0 0 1 64 0 l0 5 l-64 0 Z" fill="#ffd166" stroke="#e0a32e" stroke-width="4"/>' +
+    '<rect x="22" y="46" width="76" height="10" rx="5" fill="#ffd166" stroke="#e0a32e" stroke-width="4"/>' +
+    '<rect x="53" y="17" width="14" height="14" rx="6" fill="#ffe08c" stroke="#e0a32e" stroke-width="3"/>' +
+    '<path d="M36 34 a26 26 0 0 1 12 -9" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>' +
     '</svg>';
 }
 /* 뒷모습 꼬마 탐사대원 (3D 길 구간용): 큰 배낭 + 안전모 + 조끼 */
@@ -2074,10 +2312,9 @@ function renderPlayerCharacter(animState){
   const vis = el.querySelector(".player-visual");
   if(!vis) return;
   // 방향 반전 (캐릭터만 반전, UI는 반전 금지) — 길 구간 뒷모습은 반전하지 않음
-  vis.classList.toggle("flip", game.mode === "strata" && game.player.dir < 0);
+  vis.classList.toggle("flip", game.mode !== "road" && game.player.dir < 0);
   const inner = vis.querySelector(".player-anim");
-  /* climb 상태는 전용 이미지가 없으면 walk 이미지 사용 */
-  const imgState = (stateName === "climb") ? "walk" : stateName;
+  const imgState = stateName;
   let src = null;
   if(assetStatus.player[imgState] === "ok") src = gameAssets.player[imgState];
   else if(assetStatus.player.idle === "ok") src = gameAssets.player.idle;
@@ -2160,7 +2397,8 @@ function renderRoadScene(){
   game.worldLen = Math.max(1200, Number(safe(roadSceneData.length, 2600)) || 2600);
   const vp = $("sceneViewport");
   vp.classList.add("mode-road");
-  vp.classList.remove("mode-strata");
+  vp.classList.remove("mode-trail");
+  $("gameScreen").classList.remove("mode-trail");
   const world = $("sceneWorld");
   const L = game.worldLen;
 
@@ -2301,13 +2539,14 @@ function updateRoad3D(){
   }
 }
 
-/* --- 지층(층상 단면) 씬 --- */
+/* --- 산책길 탐사 씬: 길 옆에 작은 노두들이 늘어선 아기자기한 탐사길 --- */
 function renderGame(){
-  game.mode = "strata";
-  game.worldLen = 2600;
+  game.mode = "trail";
+  game.worldLen = 2800;
   const vp = $("sceneViewport");
-  vp.classList.add("mode-strata");
+  vp.classList.add("mode-trail");
   vp.classList.remove("mode-road");
+  $("gameScreen").classList.add("mode-trail");
   /* 길 구간이 씬을 통째로 바꾸므로 패럴랙스 레이어 골격을 다시 만든다 */
   $("sceneWorld").innerHTML =
     '<div class="parallax-layer" id="farLayer"></div>' +
@@ -2317,131 +2556,247 @@ function renderGame(){
   const far = $("farLayer"), mid = $("midLayer"), play = $("playLayer"), fore = $("foreLayer");
   const W = game.worldLen;
 
-  /* far: 저녁빛 하늘 + 빛줄기 */
+  /* far: 파스텔 하늘 + 구름 + 먼 언덕 + 먼 미니 절벽 */
   far.style.width = (W + 1200) + "px";
-  far.innerHTML =
-    '<div class="strata-sky"></div>' +
-    '<div class="bg-photo"></div>' +
-    '<div class="strata-lightbeam"></div>' +
-    '<div class="strata-lightbeam" style="left:62%; width:22%; opacity:.6;"></div>';
-  makeDust(far, 14, W);
+  far.innerHTML = '<div class="trail-sky"></div><div class="bg-photo"></div><div class="sun" style="top:8%; left:880px;"></div>';
+  for(let i=0;i<5;i++){
+    const cl = document.createElement("div");
+    cl.className = "cloud";
+    cl.style.width = (86 + i*30) + "px";
+    cl.style.height = (24 + (i%3)*9) + "px";
+    cl.style.top = (5 + (i*8)%22) + "%";
+    cl.style.left = ((i*617)%(W+500)) + "px";
+    cl.style.animationDuration = (32 + i*8) + "s";
+    far.appendChild(cl);
+  }
+  for(let i=0;i<6;i++){
+    const h = document.createElement("div");
+    h.className = "trail-hill" + (i%2 ? " far" : "");
+    h.style.width = (340 + (i*97)%260) + "px";
+    h.style.height = (90 + (i*53)%70) + "px";
+    h.style.left = ((i*523+100)%W) + "px";
+    far.appendChild(h);
+  }
+  for(let i=0;i<3;i++){
+    const mc = document.createElement("div");
+    mc.className = "mini-cliff-far";
+    mc.style.left = ((i*887+420)%W) + "px";
+    far.appendChild(mc);
+  }
+  makeDust(far, 10, W);
 
-  /* mid: 층상 단면 절벽 */
+  /* mid: 중간 거리 언덕 장식 (노두는 캐릭터와 같은 레이어에 배치해 좌표를 일치시킴) */
   mid.style.width = W + "px";
-  renderLayers(mid, W);
+  for(let i=0;i<4;i++){
+    const h = document.createElement("div");
+    h.className = "trail-hill";
+    h.style.width = (300 + (i*83)%180) + "px";
+    h.style.height = (70 + (i*41)%50) + "px";
+    h.style.left = ((i*677+240)%W) + "px";
+    h.style.bottom = "28%";
+    mid.appendChild(h);
+  }
 
-  /* play: 바닥 + 조사 지점 + 플레이어 */
+  /* play: 풀밭 + 굽은 산책길 + 노두들 + 플레이어 */
   play.style.width = W + "px";
   const ground = document.createElement("div");
-  ground.className = "strata-ground";
+  ground.className = "trail-ground";
   play.appendChild(ground);
-  renderDigSites(play, W);
+  const path = document.createElement("div");
+  path.className = "trail-path";
+  play.appendChild(path);
+  const row = document.createElement("div");
+  row.id = "outcropRow";
+  row.style.cssText = "position:absolute; inset:0;";
+  play.appendChild(row);
+  renderLayers(row, W);
   const player = document.createElement("div");
   player.id = "player";
   player.innerHTML = '<div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div>';
-  player.style.bottom = "5%";
+  player.style.bottom = "6%";
   play.appendChild(player);
 
-  /* fore: 전경 바위/풀 (모바일에서는 CSS로 자동 숨김) */
+  /* fore: 앞쪽 풀 + 꽃 + 작은 바위 */
   fore.style.width = (W + 800) + "px";
-  for(let i=0;i<4;i++){
-    const fr = document.createElement("div");
-    fr.className = "fore-rock";
-    fr.style.left = ((i*719+300)%W) + "px";
-    fr.style.transform = "scale(" + (0.8 + (i%3)*0.35) + ")";
-    fore.appendChild(fr);
+  const flowerColors = ["#ff9eb5","#ffd97a","#b9a7f2","#8ee6c8"];
+  for(let i=0;i<8;i++){
     const fg = document.createElement("div");
     fg.className = "fore-grass";
-    fg.style.left = ((i*577+520)%W) + "px";
+    fg.style.left = ((i*397+260)%W) + "px";
     fg.innerHTML = '<span style="left:0;"></span><span style="left:15px; height:72%; animation-delay:.4s;"></span><span style="left:30px; height:86%; animation-delay:.8s;"></span>';
     fore.appendChild(fg);
+    const fl = document.createElement("div");
+    fl.className = "trail-flower";
+    fl.style.left = ((i*463+120)%W) + "px";
+    fl.innerHTML = '<div class="stem"></div><div class="bloom" style="--fc:' + flowerColors[i%4] + '; animation-delay:' + (i*0.3) + 's;"></div>';
+    fore.appendChild(fl);
+  }
+  for(let i=0;i<3;i++){
+    const fr = document.createElement("div");
+    fr.className = "fore-rock";
+    fr.style.left = ((i*941+520)%W) + "px";
+    fr.style.transform = "scale(" + (0.45 + (i%2)*0.2) + ")";
+    fore.appendChild(fr);
   }
 
-  game.player.x = 220;
+  game.player.x = 200;
   game.player.dir = 1;
-  game.player.elev = 0;
   game.cameraX = 0;
-  $("controlGuide").textContent = "🎮 A/D(◀▶) 좌우 · W/S(▲▼) 절벽 오르내리기 · E/클릭 조사";
+  $("controlGuide").textContent = "🎮 A/D(◀▶)로 산책 · 반짝이는 노두를 클릭해 조사!";
   applyBgPhoto();
   renderPlayerCharacter("idle");
   updateHud();
 }
 
-/* 층상 단면 렌더링: 층 A~D를 위에서 아래로 쌓아 표현 (질감/균열/자갈 포함) */
-function renderLayers(midEl, W){
-  const cliff = document.createElement("div");
-  cliff.className = "cliff-wall";
-  cliff.style.width = W + "px";
-  const n = Math.max(1, layerData.length);
-  const bandH = 100 / n;
-  layerData.forEach((ly, i) => {
-    const band = document.createElement("div");
-    band.className = "strata-band";
-    band.style.top = (i * bandH) + "%";
-    band.style.height = (bandH + 1.5) + "%";
-    const c1 = safe(ly.color1, "#b98a5e"), c2 = safe(ly.color2, "#8a5a3c");
-    /* 사선 경계 + 질감: 살짝 기울어진 반복 무늬로 자연스러운 층리 표현 */
-    band.style.background =
-      "repeating-linear-gradient(" + (178 - i) + "deg, " + c1 + " 0 26px, " + c2 + " 26px 34px, " + c1 + " 34px 60px), " +
-      "linear-gradient(180deg," + c1 + "," + c2 + ")";
-    band.style.transform = "skewY(" + ((i % 2 === 0 ? -1 : 1) * 0.4) + "deg)";
-    /* 균열 */
-    for(let k=0;k<4;k++){
-      const cr = document.createElement("div");
-      cr.className = "band-crack";
-      cr.style.left = ((k*613 + i*257) % (W-80)) + "px";
-      cr.style.top = (12 + (k*23)%55) + "%";
-      cr.style.width = (2 + k%2) + "px";
-      cr.style.height = (26 + (k*17)%34) + "px";
-      cr.style.setProperty("--rot", ((k%2? -1:1)*(6+k*4)) + "deg");
-      band.appendChild(cr);
-    }
-    /* 작은 자갈 */
-    for(let k=0;k<7;k++){
-      const pb = document.createElement("div");
-      pb.className = "band-pebble";
-      pb.style.left = ((k*389 + i*151 + 60) % (W-40)) + "px";
-      pb.style.top = (15 + (k*31)%60) + "%";
-      const s = 6 + (k*5)%10;
-      pb.style.width = s + "px"; pb.style.height = (s*0.7) + "px";
-      band.appendChild(pb);
-    }
-    cliff.appendChild(band);
-  });
-  midEl.appendChild(cliff);
-  /* 층 이름표 (해금 전에는 ??? 로 숨김) */
-  layerData.forEach((ly, i) => {
-    const tag = document.createElement("button");
-    tag.className = "layer-tag" + (state.unlockedLayers.includes(ly.id) ? " unlocked" : "");
-    tag.style.top = (i * bandH * 0.74 + bandH * 0.3) + "%"; // cliff이 화면 위쪽 74%를 차지하므로 보정
-    const unlocked = state.unlockedLayers.includes(ly.id);
-    tag.innerHTML = '<span class="lock">' + (unlocked ? "🔓" : "🔒") + '</span> ' +
-      escapeHTML(safe(ly.label, "층")) + " · " + (unlocked ? escapeHTML(safe(ly.hiddenName,"???")) : "???");
-    tag.addEventListener("click", () => { playSound("click"); openLayerModal(ly.id); });
-    midEl.appendChild(tag);
-  });
+/* 해당 층(노두)에 속한 아이템 목록 */
+function itemsOfLayer(layerId){
+  return itemData.filter(i => safe(i.layer, null) === layerId);
+}
+function outcropDone(layerId){
+  const items = itemsOfLayer(layerId);
+  return items.length > 0 && items.every(i => state.completed.includes(i.id));
 }
 
-/* 조사 지점 렌더링 */
-function renderDigSites(playEl, W){
+/* 길 옆 작은 노두들 렌더링 (기존 renderLayers 재정의) */
+function renderLayers(midEl, W){
+  midEl.innerHTML = "";
+  game.outcrops = [];
+  const n = Math.max(1, layerData.length);
+  const startX = 520, endX = W - 420;
+  layerData.forEach((ly, i) => {
+    const x = n > 1 ? startX + (endX - startX) * i / (n - 1) : (startX + endX) / 2;
+    const unlocked = state.unlockedLayers.includes(ly.id);
+    const done = outcropDone(ly.id);
+    const oc = document.createElement("div");
+    oc.className = "outcrop" + (unlocked ? " unlocked" : "") + (done ? " done" : "");
+    oc.id = "outcrop_" + ly.id;
+    oc.style.left = (x - 105) + "px";
+    const c1 = safe(ly.color1, "#d8b070"), c2 = safe(ly.color2, "#a07850");
+    /* 3단 층리 미니 단면 (앞면) + 자갈 + 풀 포인트 */
+    let inner = '<div class="mound">';
+    const bands = [c1, mixColor(c1, c2), c2];
+    bands.forEach((c, k) => {
+      inner += '<div class="band" style="top:' + (k*34) + '%; height:36%; background:' +
+        'repeating-linear-gradient(' + (176 + k) + 'deg, transparent 0 14px, rgba(70,40,20,.14) 14px 18px, transparent 18px 30px), ' +
+        'linear-gradient(' + c + ', ' + c + ');"></div>';
+    });
+    for(let k=0;k<4;k++){
+      const s = 7 + (k*5)%8;
+      inner += '<div class="pebble" style="left:' + (12 + (k*211 + i*67)%72) + '%; top:' + (16 + (k*29)%62) + '%; width:' + s + 'px; height:' + Math.round(s*0.72) + 'px;"></div>';
+    }
+    inner += '</div>' +
+      '<div class="grass-tuft" style="left:' + (22 + i*9) + 'px;"><span style="left:0;"></span><span style="left:11px; height:75%;"></span><span style="left:22px; height:88%;"></span></div>' +
+      '<div class="glint">✦</div>' +
+      '<div class="complete-sticker">✔ 완료!</div>' +
+      '<div class="outcrop-label">' + (unlocked ? "🔓 " : "🪨 ") + "노두 " + escapeHTML(safe(ly.id, "?")) +
+        " · " + (unlocked ? escapeHTML(safe(ly.hiddenName, "???")) : "???") + '</div>';
+    oc.innerHTML = inner;
+    oc.addEventListener("click", () => { playSound("click"); openOutcropModal(ly.id); });
+    midEl.appendChild(oc);
+    game.outcrops.push({ layerId: ly.id, x: x, el: oc });
+  });
+  /* 노두 사이 표지판/나무 장식 */
+  const sg = document.createElement("div");
+  sg.className = "deco-sign";
+  sg.style.left = "180px";
+  sg.style.bottom = "22%";
+  sg.innerHTML = '<div class="plate">🌿 탐사길 산책로</div><div class="pole"></div>';
+  midEl.appendChild(sg);
+  const sg2 = document.createElement("div");
+  sg2.className = "deco-sign";
+  sg2.style.left = (W - 260) + "px";
+  sg2.style.bottom = "22%";
+  sg2.innerHTML = '<div class="plate">✨ 도감을 완성해요!</div><div class="pole"></div>';
+  midEl.appendChild(sg2);
+}
+/* 두 색상 중간값 (노두 가운데 층 색) */
+function mixColor(a, b){
+  const pa = hexRGB(a), pb = hexRGB(b);
+  if(!pa || !pb) return a;
+  const m = pa.map((v, i) => Math.round((v + pb[i]) / 2));
+  return "rgb(" + m[0] + "," + m[1] + "," + m[2] + ")";
+}
+function hexRGB(h){
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim());
+  if(!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/* --- 노두 확대 조사창 --- */
+function openOutcropModal(layerId){
+  const ly = layerData.find(l => l.id === layerId);
+  if(!ly) return;
+  game.currentOutcrop = layerId;
+  const unlocked = state.unlockedLayers.includes(layerId);
+  $("outcropModalTitle").textContent = "🔎 노두 " + safe(ly.id, "?") + " 확대 조사" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
+  const xsec = $("outcropXsec");
+  xsec.innerHTML = "";
+  /* 확대 단면: 층리 + 균열 + 자갈 질감 */
+  const c1 = safe(ly.color1, "#d8b070"), c2 = safe(ly.color2, "#a07850");
+  const bands = [c1, mixColor(c1, c2), c2, mixColor(c2, "#6e523a")];
+  bands.forEach((c, k) => {
+    const b = document.createElement("div");
+    b.className = "band";
+    b.style.top = (k * 26) + "%";
+    b.style.height = "28%";
+    b.style.background =
+      "repeating-linear-gradient(" + (177 + k) + "deg, transparent 0 22px, rgba(70,40,20,.16) 22px 28px, transparent 28px 46px), " +
+      "linear-gradient(" + c + ", " + c + ")";
+    xsec.appendChild(b);
+  });
+  for(let k=0;k<5;k++){
+    const cr = document.createElement("div");
+    cr.className = "crack";
+    cr.style.left = (8 + (k*191)%80) + "%";
+    cr.style.top = (10 + (k*23)%62) + "%";
+    cr.style.width = (2 + k%2) + "px";
+    cr.style.height = (24 + (k*17)%30) + "px";
+    cr.style.setProperty("--rot", ((k%2 ? -1 : 1)*(5 + k*4)) + "deg");
+    xsec.appendChild(cr);
+  }
+  for(let k=0;k<8;k++){
+    const pb = document.createElement("div");
+    pb.className = "pebble";
+    pb.style.left = (4 + (k*277)%88) + "%";
+    pb.style.top = (8 + (k*31)%78) + "%";
+    const s = 7 + (k*5)%11;
+    pb.style.width = s + "px";
+    pb.style.height = Math.round(s*0.7) + "px";
+    xsec.appendChild(pb);
+  }
+  /* 반짝이는 조사 지점 + 미니 탐사대원 */
+  renderDigSites(xsec, layerId);
+  const mini = document.createElement("div");
+  mini.className = "mini-explorer anim-inspect";
+  mini.id = "miniExplorer";
+  mini.innerHTML = '<div class="player-anim">' + playerFallbackSVG() + '</div>';
+  xsec.appendChild(mini);
+  const items = itemsOfLayer(layerId);
+  const left = items.filter(i => !state.completed.includes(i.id)).length;
+  $("outcropNote").textContent = left > 0
+    ? "✨ 반짝이는 곳을 눌러 조사해요! (남은 단서 " + left + "개)"
+    : "🎉 이 노두의 단서를 모두 찾았어요!";
+  openModal("outcropModal");
+  playSound("place");
+}
+
+/* 확대 조사창 안의 조사 지점 렌더링 (기존 renderDigSites 재정의) */
+function renderDigSites(container, layerId){
   game.sites = [];
-  const n = itemData.length;
-  const startX = 380, endX = W - 320;
-  const layerIds = layerData.map(l => l.id);
-  itemData.forEach((item, i) => {
-    const x = n > 1 ? startX + (endX - startX) * i / (n - 1) + ((i * 137) % 90 - 45) : (startX + endX) / 2;
-    const li = Math.max(0, layerIds.indexOf(safe(item.layer, layerIds[0])));
-    const bandH = 74 / Math.max(1, layerIds.length);          // 절벽은 화면 위 74%
-    const y = bandH * li + bandH * 0.55;                       // 층 안쪽 중간쯤
+  const items = itemsOfLayer(layerId);
+  /* 지점 위치 프리셋: 겹치지 않게 큼직큼직하게 배치 (모바일 터치 고려) */
+  const POS = [ {l:26, t:34}, {l:66, t:56}, {l:44, t:22}, {l:20, t:66}, {l:72, t:26}, {l:50, t:70} ];
+  items.forEach((item, i) => {
     let status = "undiscovered";
     if(state.completed.includes(item.id)) status = "collected";
     else if(state.discovered.includes(item.id)) status = "discovered";
-
+    const p = POS[i % POS.length];
     const site = document.createElement("div");
     site.className = "dig-site " + status;
-    site.id = "site_" + item.id;
-    site.style.left = x + "px";
-    site.style.top = y + "%";
+    site.id = "spot_" + item.id;
+    site.style.left = p.l + "%";
+    site.style.top = p.t + "%";
     site.innerHTML =
       '<div class="socket"></div>' +
       '<div class="glint">✦</div>' +
@@ -2452,29 +2807,14 @@ function renderDigSites(playEl, W){
     if(status === "undiscovered") renderAssetImage(slot, item, "silhouette");
     else renderAssetImage(slot, item, "normal");
     site.addEventListener("click", () => {
-      const s = game.sites.find(s2 => s2.id === item.id);
-      if(!s) return;
-      if(isNearSite(s)) tryAction();
-      else toast("🧗 W/S로 절벽을 올라 조사 지점 가까이 가서 눌러 보세요!");
+      if(game.digging) return;
+      if(site.classList.contains("collected")) openItemModal(item.id, false);
+      else if(site.classList.contains("discovered")) openDiscoveryPopup(item.id);
+      else if(site.classList.contains("undiscovered")) startDigging(item.id);
     });
-    /* 조사 지점 아래로 등반 홈(발판) 표시: 절벽을 오를 수 있다는 시각적 안내 */
-    for(let g = y + 8; g < 72; g += 7){
-      const groove = document.createElement("div");
-      groove.className = "climb-groove";
-      groove.style.left = (x - 17 + ((g*13)%3 - 1) * 8) + "px";
-      groove.style.top = g + "%";
-      playEl.appendChild(groove);
-    }
-    playEl.appendChild(site);
-    game.sites.push({ id: item.id, x: x, yPct: y, el: site, status: status });
+    container.appendChild(site);
+    game.sites.push({ id: item.id, x: 0, el: site, status: status });
   });
-}
-/* 캐릭터-조사지점 2D 근접 판정 (가로 px + 세로 화면비율) */
-function isNearSite(s){
-  const H = $("sceneViewport").clientHeight || window.innerHeight;
-  const playerCenterY = H * (1 - (5 + game.player.elev)/100) - 62;
-  const siteY = H * s.yPct / 100;
-  return Math.abs(s.x - game.player.x) < 135 && Math.abs(siteY - playerCenterY) < H * 0.15;
 }
 
 /* ---------- 2.5D 패럴랙스 / 카메라 ---------- */
@@ -2488,9 +2828,9 @@ function updateCamera(){
 }
 function renderParallaxScene(){
   if(game.mode === "road"){ updateRoad3D(); return; }
-  updateStrataParallax();
+  updateTrailParallax();
 }
-function updateStrataParallax(){
+function updateTrailParallax(){
   const cam = game.cameraX;
   const lite = game.reducedMotion;
   const farL = $("farLayer");
@@ -2505,16 +2845,11 @@ function updateStrataParallax(){
     ? "translate3d(" + (-cam*1.25) + "px,0,0)"
     : "translate3d(" + (-cam*1.25) + "px,0,60px) scale(0.94)";
 
-  /* 플레이어 위치 (가로 + 등반 높이) */
+  /* 플레이어 위치 */
   const p = $("player");
-  if(p){
-    p.style.left = game.player.x + "px";
-    p.style.bottom = (5 + game.player.elev) + "%";
-    const sh = p.querySelector(".player-shadow");
-    if(sh) sh.style.opacity = game.player.elev > 3 ? "0.25" : "1";
-  }
+  if(p) p.style.left = game.player.x + "px";
 
-  /* 조사 안내 말풍선 위치 */
+  /* "조사 가능!" 말풍선 위치 (가까운 노두 위) */
   const hint = $("actionHint");
   if(hint && game.nearSite){
     const rect = game.nearSite.el.getBoundingClientRect();
@@ -2537,7 +2872,6 @@ function gameLoop(t){
 
   const speed = 340;
   let moving = false;
-  let climbing = false;
   if(!game.digging && !anyModalOpen()){
     if(game.mode === "road"){
       /* 3D 길: W(▲) 앞으로, S(▼) 뒤로, A/D(◀▶) 좌우로 비켜 걷기 */
@@ -2548,13 +2882,10 @@ function gameLoop(t){
       game.player.z = clamp(game.player.z, 0, game.worldLen);
       game.player.lat = clamp(game.player.lat, -ROAD3D.maxLat, ROAD3D.maxLat);
     }else{
-      /* 지층: A/D 좌우 이동, W/S 절벽 등반 */
+      /* 산책길: A/D 좌우로 가볍게 산책 (상하 이동 없음) */
       if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
       if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
-      if(game.input.up){ game.player.elev += 36*dt; moving = true; climbing = true; }
-      if(game.input.down){ game.player.elev -= 40*dt; moving = true; climbing = true; }
       game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
-      game.player.elev = clamp(game.player.elev, 0, 68);
     }
   }
 
@@ -2564,15 +2895,13 @@ function gameLoop(t){
     if(game.stepSoundTimer <= 0){ playSound("step"); game.stepSoundTimer = 0.28; }
   }
 
-  /* 캐릭터 상태: 벽에 매달려 있으면 climb, 이동 중이면 walk */
-  const onWall = game.mode === "strata" && game.player.elev > 3;
+  /* 캐릭터 상태 */
   let wantAnim;
   if(game.digging) wantAnim = "dig";
-  else if(onWall || climbing) wantAnim = "climb";
   else if(moving) wantAnim = "walk";
-  else wantAnim = (game.player.anim === "walk" || game.player.anim === "dig" || game.player.anim === "climb") ? "idle" : game.player.anim;
+  else wantAnim = (game.player.anim === "walk" || game.player.anim === "dig") ? "idle" : game.player.anim;
   if(game.player.anim !== wantAnim) renderPlayerCharacter(wantAnim);
-  else if(game.mode === "strata"){
+  else if(game.mode === "trail"){
     const vis = document.querySelector("#player .player-visual");
     if(vis) vis.classList.toggle("flip", game.player.dir < 0);
   }
@@ -2587,8 +2916,8 @@ function gameLoop(t){
     if(game.player.z >= dp) showDiscoveryCinematic();
   }
 
-  /* 지층 구간: 조사 지점 근접 체크 */
-  if(game.mode === "strata") updateNearSite();
+  /* 산책길: 가까운 노두 체크 */
+  if(game.mode === "trail") updateNearSite();
 
   /* 발굴 진행 */
   if(game.digging) tickDigging(dt);
@@ -2599,13 +2928,12 @@ function gameLoop(t){
 function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
 }
+/* 가까운 노두 감지: 근처에 오면 통통 튀며 "조사 가능!" 말풍선 */
 function updateNearSite(){
-  let best = null, bestDist = 1e9;
-  game.sites.forEach(s => {
-    if(s.status === "collected") return;
-    if(!isNearSite(s)) return;
-    const d = Math.abs(s.x - game.player.x);
-    if(d < bestDist){ best = s; bestDist = d; }
+  let best = null, bestDist = 190;
+  (game.outcrops || []).forEach(o => {
+    const d = Math.abs(o.x - game.player.x);
+    if(d < bestDist){ best = o; bestDist = d; }
   });
   if(best !== game.nearSite){
     if(game.nearSite) game.nearSite.el.classList.remove("near");
@@ -2616,8 +2944,8 @@ function updateNearSite(){
   const show = !!best && !game.digging && !anyModalOpen();
   hint.classList.toggle("on", show);
   if(show){
-    const label = best.status === "discovered" ? "🔍 다시 관찰하기 (E / 스페이스)" : "⛏ 조사하기 (E / 스페이스)";
-    hint.querySelector(".bubble").textContent = label;
+    const done = outcropDone(best.layerId);
+    hint.querySelector(".bubble").textContent = done ? "✅ 조사 완료! 다시 볼까요? (E)" : "🔍 조사 가능! 눌러 보세요 (E)";
   }
 }
 
@@ -2639,7 +2967,7 @@ function enterExplorationArea(){
   state.enteredSite = true;
   saveState();
   renderGame();
-  toast("🧗 층상 단면 탐사 시작! W/S로 절벽을 올라 반짝이는 곳을 조사해요.");
+  toast("🌿 탐사길 도착! 길 옆 반짝이는 노두를 눌러 조사해 보세요.");
 }
 function cameraShake(){
   if(game.reducedMotion) return;
@@ -2651,13 +2979,15 @@ function cameraShake(){
 }
 
 /* ---------- 조사/발굴 시스템 ---------- */
+/* E/스페이스/조사 버튼: 가까운 노두의 확대 조사창 열기 */
 function tryAction(){
-  if(game.mode !== "strata" || anyModalOpen()) return;
-  const s = game.nearSite;
-  if(!s) return;
-  if(s.status === "undiscovered" && !game.digging) startDigging(s.id);
-  else if(s.status === "discovered") openDiscoveryPopup(s.id);
+  if(game.mode !== "trail" || anyModalOpen()) return;
+  const o = game.nearSite;
+  if(!o) return;
+  playSound("click");
+  openOutcropModal(o.layerId);
 }
+/* 확대 조사창 안 반짝이는 지점 발굴 시작 */
 function startDigging(siteId){
   const s = game.sites.find(x => x.id === siteId);
   if(!s || s.status !== "undiscovered") return;
@@ -2665,6 +2995,8 @@ function startDigging(siteId){
   s.status = "digging";
   s.el.classList.remove("undiscovered");
   s.el.classList.add("digging");
+  const mini = $("miniExplorer");
+  if(mini) mini.className = "mini-explorer anim-dig";
   renderPlayerCharacter("dig");
   playSound("dig");
 }
@@ -2713,6 +3045,8 @@ function completeDigging(siteId){
     state.score = safe(state.score,0) + 10;
     saveState();
   }
+  const mini = $("miniExplorer");
+  if(mini) mini.className = "mini-explorer anim-discover";
   renderPlayerCharacter("discover");
   playSound("found");
   cameraShake();
@@ -2815,7 +3149,7 @@ function renderQuizQuestion(){
   const qs = item.quiz;
   const q = qs[quiz.index];
   quiz.attempts = 0;
-  $("quizItemName").textContent = "🧠 " + safe(item.name,"단서") + " 추론 퀴즈";
+  $("quizItemName").textContent = "🔍 " + safe(item.name,"단서") + " · 단서를 보고 추리해 볼까요?";
   /* 진행 점 */
   let dots = "";
   qs.forEach((_, i) => {
@@ -2866,7 +3200,7 @@ function checkAnswer(answer, btnEl){
     saveState();
     updateHud();
     fb.className = "quiz-feedback explain";
-    fb.textContent = "🎉 정답! " + safe(q.explanation, "");
+    fb.textContent = "🎉 좋아요! 정보가 해금되었어요. 📝 탐사 기록: " + safe(q.explanation, "");
     afterQuestionSolved(false);
   }else{
     playSound("wrong");
@@ -2877,14 +3211,14 @@ function checkAnswer(answer, btnEl){
     quiz.attempts++;
     if(quiz.attempts === 1){
       fb.className = "quiz-feedback hint";
-      fb.textContent = "💡 힌트: " + safe(q.hint, "다시 한번 생각해 보세요!") + " (한 번 더 도전!)";
+      fb.textContent = "🌱 아쉽지만 다시 관찰해 봐요! 💡 탐사 노트: " + safe(q.hint, "다시 한번 생각해 보세요!") + " (한 번 더 도전!)";
     }else{
       /* 두 번째 오답: 정답과 해설 공개 후 다음으로 */
       document.querySelectorAll("#quizChoices .quiz-choice").forEach(b => b.disabled = true);
       state.quizAnswered = safe(state.quizAnswered,0) + 1;
       saveState();
       fb.className = "quiz-feedback explain";
-      fb.textContent = "정답은 「" + safe(q.answer,"?") + "」! " + safe(q.explanation, "");
+      fb.textContent = "정답은 「" + safe(q.answer,"?") + "」! 📝 탐사 기록: " + safe(q.explanation, "");
       afterQuestionSolved(false);
     }
   }
@@ -2896,7 +3230,7 @@ function afterQuestionSolved(){
   actions.innerHTML = "";
   const b = document.createElement("button");
   b.className = "btn teal";
-  b.textContent = isLast ? "✅ 단서 정보 해금!" : "➡ 다음 문제";
+  b.textContent = isLast ? "📚 도감에 새 기록 추가!" : "➡ 다음 단서 보기";
   b.addEventListener("click", () => {
     playSound("click");
     if(isLast){
@@ -2927,25 +3261,28 @@ function completeItem(itemId){
   }
   saveState();
   playSound("register");
-  toast("📚 「" + safe(item.name,"단서") + "」 도감 등록 완료!");
+  toast("📚 도감에 새 기록이 추가되었어요! 「" + safe(item.name,"단서") + "」");
   spawnConfetti();
-  /* 조사 지점 상태 갱신 */
+  /* 확대 조사창 안의 조사 지점 상태 갱신 */
   const s = game.sites.find(x => x.id === itemId);
   if(s){
     s.status = "collected";
     s.el.classList.remove("discovered","digging","near");
     s.el.classList.add("collected");
   }
-  /* 층 이름표 갱신을 위해 mid 레이어의 층 부분 다시 그림 */
-  if(game.mode === "strata" && newLayer){
-    const mid = $("midLayer");
-    mid.innerHTML = "";
-    renderLayers(mid, game.worldLen);
-    setTimeout(() => {
-      const ly = layerData.find(l => l.id === layerId);
-      toast("🔓 " + safe(ly && ly.label, "층") + " 정보가 해금되었어요!", "gold");
-      playSound("place");
-    }, 900);
+  /* 산책길의 노두들(완료 스티커/해금 이름표) 갱신 */
+  if(game.mode === "trail" && $("outcropRow")){
+    renderLayers($("outcropRow"), game.worldLen);
+    if($("outcropModal").classList.contains("on") && game.currentOutcrop){
+      openOutcropModal(game.currentOutcrop); /* 확대 조사창도 최신 상태로 다시 그림 */
+    }
+    if(newLayer){
+      setTimeout(() => {
+        const ly = layerData.find(l => l.id === layerId);
+        toast("🔓 노두 " + safe(ly && ly.id, "?") + "의 정체가 밝혀졌어요: " + safe(ly && ly.hiddenName, "?"), "gold");
+        playSound("place");
+      }, 900);
+    }
   }
   updateHud();
   checkBadges();
@@ -3079,11 +3416,13 @@ function renderCollection(){
     const stateIcon = completed ? "⭐" : (discovered ? "🔍" : "");
     const layer = layerData.find(l => l.id === item.layer);
     const stars = completed ? "⭐⭐⭐" : (discovered ? "⭐" : "");
+    const isNew = completed && !state.seenInDex.includes(item.id);
     card.innerHTML =
       '<div class="card-top"></div>' +
       '<div class="card-no">No.' + String(idx+1).padStart(2,"0") + '</div>' +
       '<div class="card-state">' + stateIcon + '</div>' +
       (completed ? '<div class="card-get">GET!</div>' : '') +
+      (isNew ? '<div class="card-new">NEW</div>' : '') +
       '<div class="card-ring"><div class="card-visual item-visual-slot"></div></div>' +
       '<div class="card-name">' + (discovered ? escapeHTML(safe(item.name,"단서")) : "???") + '</div>' +
       '<div class="card-sub">' + (discovered ? "🏞 " + escapeHTML(safe(layer && layer.label, "?")) : "🔒 미발견") +
@@ -3092,6 +3431,13 @@ function renderCollection(){
     renderAssetImage(card.querySelector(".card-visual"), item, discovered ? "normal" : "silhouette");
     card.addEventListener("click", () => {
       playSound("click");
+      /* NEW 스티커: 한 번 열어보면 사라짐 */
+      if(isNew){
+        state.seenInDex.push(item.id);
+        saveState();
+        const badge = card.querySelector(".card-new");
+        if(badge) badge.remove();
+      }
       openItemModal(item.id, true);
     });
     grid.appendChild(card);
@@ -3339,6 +3685,10 @@ function bindUI(){
     if(game.soundOn) playSound("click");
   });
   $("btnCinematicGo").onclick = defaultCinematicGo;
+  $("btnOutcropLayerInfo").addEventListener("click", () => {
+    playSound("click");
+    if(game.currentOutcrop) openLayerModal(game.currentOutcrop);
+  });
   $("btnObserve").addEventListener("click", () => {
     playSound("click");
     closeModal("discoveryModal");
@@ -3386,7 +3736,7 @@ function bindUI(){
     toast("🔄 새로운 탐사를 시작할 준비 완료!");
   });
   /* 모달 배경 클릭으로 닫기 (발견/퀴즈 모달은 버튼으로만 진행) */
-  ["itemModal","layerModal","badgeModal"].forEach(id => {
+  ["itemModal","layerModal","badgeModal","outcropModal"].forEach(id => {
     $(id).addEventListener("click", e => { if(e.target === $(id)) closeModal(id); });
   });
 }

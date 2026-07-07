@@ -1004,6 +1004,73 @@ h1,h2,h3{margin:.3em 0;}
 /* 산책 모드에서는 상하 이동이 없으므로 ▲▼ 버튼 숨김 */
 #gameScreen.mode-trail #btnUp,
 #gameScreen.mode-trail #btnDown{display:none;}
+/* --- 탑다운 공원 맵 (Canvas 2D) --- */
+#parkCanvas{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  display:block;
+  image-rendering:pixelated;
+  cursor:pointer;
+}
+#miniMap{
+  position:absolute; top:72px; right:14px;
+  z-index:21;
+  width:150px; height:105px;
+  border:4px solid var(--ink);
+  background:#22301f;
+  box-shadow:4px 4px 0 rgba(74,59,46,.35);
+  image-rendering:pixelated;
+  pointer-events:none;
+}
+@media (max-width:760px){
+  #miniMap{width:104px; height:73px; top:64px; right:10px;}
+}
+/* --- 조사 모달: 위→아래 지층 스택 --- */
+.xsec-wrap{display:flex; flex-direction:column;}
+.xsec-row{
+  position:relative;
+  flex:1;
+  display:flex; align-items:center; gap:10px;
+  padding:0 12px;
+  border-bottom:3px solid rgba(60,40,20,.4);
+  min-height:0;
+}
+.xsec-row:last-child{border-bottom:none;}
+.xsec-row .row-name{
+  background:#fffdf6;
+  border:3px solid var(--ink);
+  padding:2px 10px;
+  font-weight:900;
+  font-size:.85rem;
+  color:var(--ink);
+  white-space:nowrap;
+}
+.xsec-row.unlocked .row-name{border-color:var(--teal-dark); color:var(--teal-dark);}
+.xsec-row .row-icon{
+  width:40px; height:40px;
+  flex:0 0 auto;
+  position:relative;
+}
+.xsec-row.here{
+  outline:5px solid var(--sun);
+  outline-offset:-5px;
+  z-index:2;
+}
+.xsec-row .here-tag{
+  position:absolute; right:8px; top:50%;
+  transform:translateY(-50%);
+  background:var(--sun);
+  border:3px solid var(--ink);
+  color:var(--ink);
+  font-weight:900;
+  font-size:.78rem;
+  padding:2px 8px;
+  animation:hintBounce 1s steps(2,end) infinite;
+}
+.xsec-row .dig-site{
+  width:64px; height:64px;
+  top:50%;
+}
 
 /* ---------- 조사 안내 말풍선 ---------- */
 #actionHint{
@@ -1748,9 +1815,9 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h2 class="screen-title">📖 게임 방법</h2>
     </div>
     <div class="panel-card">
-      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br><b>W(▲)</b>로 앞으로 걸어가고, <b>S(▼)</b>로 뒤로, <b>A/D(◀▶)</b>로 좌우로 살짝 비켜 걸어요. 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>🏞 구불구불 모험길을 따라 전진!</b><br>3D 시점으로 좁고 구불구불한 탐사길을 걸어가다 보면, 길 <b>왼쪽과 오른쪽에 작은 노두</b>(지층이 드러난 곳)들이 자연스럽게 나타나요. 처음에는 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 확대 조사!</b><br>길가의 반짝이는 노두를 <b>클릭/탭</b>하면 캐릭터가 걸어가 확대 조사창이 열려요. 그 안에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴을 시작해요! (가까이에서 E키/조사 버튼도 OK)</div></div>
+      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br><b>W·A·S·D(또는 방향키)</b>로 공원 맵을 자유롭게 돌아다녀요. 대각선 이동도 OK! 연못은 건널 수 없어요. 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>🗺 공원 곳곳의 노두를 발견!</b><br>넓은 탐험 공원 곳곳에 <b>노두</b>(지층이 드러난 곳) 6개가 숨어 있어요 — 일부는 나무숲 뒤에! 가까이 가면 <b>"새 노두 발견!"</b>과 함께 <b>미니맵</b>에 점이 찍히고, 걸어 다닐수록 지도가 채워져요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 단면 조사!</b><br>노두 가까이에서 <b>클릭/탭 또는 E키</b>를 누르면 지층 단면이 위→아래 스택으로 열려요. <b>📍 여기!</b> 표시된 층에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴! 상단의 <b>노두 조사 카운터(0/6)</b>를 모두 채우면 완료 연출이 나와요.</div></div>
       <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
       <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
       <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
@@ -1773,6 +1840,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     <div id="hud">
       <div class="hud-group">
         <div class="hud-chip">⭐ <span id="hudScore">0</span></div>
+        <div class="hud-chip">⛏ 노두 <span id="hudOutcrops">0/0</span></div>
         <div class="hud-chip">📦 <span id="hudCollect">0/0</span></div>
         <div class="hud-chip" id="hudCombo" style="display:none;">🔥 콤보 <span id="hudComboNum">0</span></div>
       </div>
@@ -1795,6 +1863,8 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       </div>
     </div>
     <div id="controlGuide">🎮 W·A·S·D 또는 방향키로 이동 · E/스페이스 조사</div>
+
+    <canvas id="miniMap" width="150" height="105"></canvas>
 
     <div id="cinematicOverlay">
       <div class="cinematic-card">
@@ -2040,7 +2110,7 @@ const DEFAULT_ITEM_DATA = [
     name: "샘플 단서 03",
     img: "images/item-03.png",
     shape: "leaf",
-    layer: "B",
+    layer: "C",
     group: "샘플 분류 나",
     hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
     hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
@@ -2064,7 +2134,7 @@ const DEFAULT_ITEM_DATA = [
     name: "샘플 단서 04",
     img: "images/item-04.png",
     shape: "disk",
-    layer: "C",
+    layer: "D",
     group: "샘플 분류 나",
     hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
     hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
@@ -2088,7 +2158,7 @@ const DEFAULT_ITEM_DATA = [
     name: "샘플 단서 05",
     img: "images/item-05.png",
     shape: "branch",
-    layer: "C",
+    layer: "E",
     group: "샘플 분류 다",
     hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
     hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
@@ -2111,7 +2181,7 @@ const DEFAULT_ITEM_DATA = [
     name: "샘플 단서 06",
     img: "images/item-06.png",
     shape: "bone",
-    layer: "D",
+    layer: "F",
     group: "샘플 분류 다",
     hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
     hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
@@ -2135,18 +2205,24 @@ const DEFAULT_ITEM_DATA = [
 /* --- 층 데이터 (교사가 수정할 데이터 영역)
    hiddenName / hiddenInfo는 그 층의 아이템 퀴즈를 완료해야 해금됩니다. --- */
 const DEFAULT_LAYER_DATA = [
-  { id: "A", label: "층 A", color1: "#d8b070", color2: "#c09050",
+  { id: "A", label: "층 A", color1: "#e0c084", color2: "#c8a060",
     hiddenName: "미확인 층 A의 정체 (교사가 수정)",
     hiddenInfo: "층 A의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "B", label: "층 B", color1: "#b98a5e", color2: "#a06e46",
+  { id: "B", label: "층 B", color1: "#c89a6a", color2: "#ae7e4e",
     hiddenName: "미확인 층 B의 정체 (교사가 수정)",
     hiddenInfo: "층 B의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "C", label: "층 C", color1: "#96704e", color2: "#7c583c",
+  { id: "C", label: "층 C", color1: "#b0805a", color2: "#946746",
     hiddenName: "미확인 층 C의 정체 (교사가 수정)",
     hiddenInfo: "층 C의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "D", label: "층 D", color1: "#6e523a", color2: "#57402d",
+  { id: "D", label: "층 D", color1: "#96704e", color2: "#7c583c",
     hiddenName: "미확인 층 D의 정체 (교사가 수정)",
-    hiddenInfo: "층 D의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." }
+    hiddenInfo: "층 D의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
+  { id: "E", label: "층 E", color1: "#7c5c40", color2: "#644830",
+    hiddenName: "미확인 층 E의 정체 (교사가 수정)",
+    hiddenInfo: "층 E의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
+  { id: "F", label: "층 F", color1: "#644832", color2: "#4e3624",
+    hiddenName: "미확인 층 F의 정체 (교사가 수정)",
+    hiddenInfo: "층 F의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." }
 ];
 
 /* --- 배지 데이터 (교사가 수정할 데이터 영역) --- */
@@ -2168,17 +2244,19 @@ const DEFAULT_MISSION_DATA = {
   ]
 };
 
-/* --- 길 구간 설정 (교사가 수정할 데이터 영역)
-   z: 길에서의 거리(앞으로 걸어간 정도), side: -1 왼쪽 / 1 오른쪽 --- */
+/* --- 탐험 공원 맵 설정 (교사가 수정할 데이터 영역)
+   width/height: 맵 크기(px, 화면보다 크게 — 카메라가 플레이어를 따라감)
+   outcrops: 노두 위치 [{layer, x, y}] — 층 id와 맵 좌표 --- */
 const DEFAULT_ROAD_SCENE_DATA = {
-  length: 2600,            // 길 구간 전체 거리
-  discoveryPoint: 2150,    // 이 거리에 도달하면 "탐사 현장 발견!" 연출
-  discoveryTitle: "탐사 현장 발견!",
-  discoverySub: "길 옆에 층층이 쌓인 신비한 절벽이 나타났다…!",
-  signs: [
-    { z: 350,  side: 1,  text: "🧭 탐사로 입구" },
-    { z: 1100, side: -1, text: "⛰ 미확인 절벽 1.2km" },
-    { z: 1800, side: 1,  text: "⚠ 탐사 구역" }
+  width: 1500,
+  height: 1050,
+  outcrops: [
+    { layer: "A", x: 250,  y: 210 },
+    { layer: "B", x: 760,  y: 150 },
+    { layer: "C", x: 1300, y: 260 },   /* 나무숲 뒤에 살짝 숨김 */
+    { layer: "D", x: 210,  y: 780 },
+    { layer: "E", x: 700,  y: 900 },   /* 나무숲 뒤에 살짝 숨김 */
+    { layer: "F", x: 1330, y: 880 }
   ]
 };
 
@@ -2204,6 +2282,9 @@ function defaultState(){
     unlockedLayers: [],  // 해금된 층 id
     badges: [],          // 획득 배지 id
     seenInDex: [],       // 도감에서 확인한 아이템 id (NEW 스티커 표시용)
+    foundOutcrops: [],   // 근접해서 '발견'한 노두(층 id) — 미니맵에 표시
+    visitedCells: [],    // 지나간 맵 칸 (미니맵 안개 걷힘)
+    parkDone: false,     // 노두 6개 모두 조사 완료 연출을 봤는지
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -2217,14 +2298,15 @@ function defaultState(){
 
 /* 게임 진행용 런타임 변수 */
 const game = {
-  mode: "road",              // "road"(3D 도입 길) | "trail"(산책길 탐사)
+  mode: "park",              // "park": 탑다운 자유 이동 공원 맵
   running: false,
   worldLen: 3000,
-  /* x: 산책길 가로 위치 / z: 길 구간 전진 거리 / lat: 길 구간 좌우 치우침(px) */
-  player: { x: 200, dir: 1, moving: false, anim: "idle", z: 0, lat: 0 },
-  outcrops: [],              // 산책길의 작은 노두들
+  /* x/y: 공원 맵 좌표, face: 바라보는 방향(up/down/left/right) */
+  player: { x: 200, y: 500, dir: 1, moving: false, anim: "idle", face: "down", z: 0, lat: 0 },
+  camX: 0, camY: 0,          // 카메라 (플레이어 추적, 경계 clamp)
+  outcrops: [],              // 공원의 노두들 {layerId, x, y}
   currentOutcrop: null,      // 열려 있는 확대 조사창의 층 id
-  autoTarget: null,          // 노두 클릭 시 자동으로 걸어갈 목표 {x, layerId}
+  autoTarget: null,          // 노두 클릭 시 자동으로 걸어갈 목표 {x, y, layerId}
   cameraX: 0,
   input: { left: false, right: false, up: false, down: false },
   sites: [],                 // 조사 지점 런타임 정보
@@ -2261,7 +2343,7 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","badges","seenInDex"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
     }
@@ -2722,234 +2804,413 @@ function makeDust(layerEl, count, areaW){
    바닥 평면을 rotateX로 눕히고, 오브젝트는 counter-rotate로 세워서
    W키로 앞으로 걸어가면 길 옆 풍경과 지층 절벽이 다가오는 구조 --- */
 function renderRoadScene(){
-  game.mode = "road";
-  game.worldLen = Math.max(1200, Number(safe(roadSceneData.length, 2600)) || 2600);
+  /* ★ 게더타운식 탑다운 자유 이동 공원 맵 (Canvas 2D) ★
+     맵은 화면보다 크고, 카메라가 플레이어를 따라가며 경계에서 멈춘다. */
+  game.mode = "park";
   const vp = $("sceneViewport");
-  vp.classList.add("mode-road");
-  vp.classList.remove("mode-trail");
+  vp.classList.remove("mode-road", "mode-trail");
   $("gameScreen").classList.remove("mode-trail");
-  const world = $("sceneWorld");
-  const L = game.worldLen;
-
-  /* 하늘(화면 고정) + 3D 바닥 평면 + 안개 + 뒷모습 플레이어 */
-  world.innerHTML =
-    '<div class="road3d-sky">' +
-      '<div class="bg-photo"></div>' +
-      '<div class="sun" style="top:9%; right:16%;"></div>' +
-    '</div>' +
-    '<div class="road3d-persp"><div class="road3d-ground-plane"><div class="plane-scroll" id="planeScroll"></div></div></div>' +
-    '<div class="road3d-fog"></div>' +
-    '<div id="roadPlayer"><div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div></div>';
-
-  const sky = world.querySelector(".road3d-sky");
-  for(let i=0;i<5;i++){
-    const cl = document.createElement("div");
-    cl.className = "cloud";
-    cl.style.top = (5 + (i*7)%22) + "%";
-    cl.style.left = (6 + i*19) + "%";
-    cl.style.setProperty("--cs", String(0.7 + (i%3)*0.35));
-    cl.style.animationDuration = (30 + i*9) + "s";
-    sky.appendChild(cl);
-  }
-  makeDust(sky, 8, window.innerWidth);
-
-  const scroll = $("planeScroll");
-  const plane = world.querySelector(".road3d-ground-plane");
-  game.roadObjs = [];
+  PARK.W = clamp(Number(safe(roadSceneData.width, 1500)) || 1500, 900, 4000);
+  PARK.H = clamp(Number(safe(roadSceneData.height, 1050)) || 1050, 700, 3000);
+  $("sceneWorld").innerHTML = '<canvas id="parkCanvas"></canvas>';
+  park.canvas = $("parkCanvas");
+  park.ctx = park.canvas.getContext("2d");
+  resizeParkCanvas();
+  buildParkSprites();
+  buildParkLayout();
+  buildParkTerrain();
+  /* 노두 목록 (교사 데이터의 layer/x/y 사용, 없는 층은 자동 배치) */
   game.outcrops = [];
-
-  /* 바닥 질감: 성능을 위해 바닥에 '고정'(스크롤하지 않음). */
-  const tex = document.createElement("div");
-  tex.className = "plane-texture";
-  tex.style.left = "0px";
-  tex.style.top = "-3400px";
-  tex.style.height = "4200px";
-  plane.insertBefore(tex, scroll);
-
-  /* 구불구불한 좁은 모험길: 짧은 조각을 곡선을 따라 이어 붙임 */
-  const SEG = 150, ROADW = 250;
-  for(let z = -700; z < L + 1100; z += SEG - 24){
-    const cx = roadCurve(z + SEG/2);
-    const dx = roadCurve(z + SEG) - roadCurve(z);
-    const seg = document.createElement("div");
-    seg.className = "road-seg";
-    seg.style.width = ROADW + "px";
-    seg.style.height = (SEG + 30) + "px";
-    seg.style.left = (cx - ROADW/2) + "px";
-    seg.style.top = (-z - SEG) + "px";
-    seg.style.transform = "rotate(" + (-Math.atan2(dx, SEG) * 180 / Math.PI) + "deg)";
-    scroll.appendChild(seg);
-  }
-
-  /* 길 위 점선 대시: 곡선을 따라 배치, 지나가면 앞으로 순환 */
-  const WRAP = 2400;
-  for(let i=0;i<12;i++){
-    const dz = i * 200;
-    const dash = document.createElement("div");
-    dash.className = "plane-dash";
-    dash.style.width = "52px";
-    dash.style.height = "100px";
-    dash.style.left = (roadCurve(dz) - 26) + "px";
-    dash.style.top = (-dz - 100) + "px";
-    scroll.appendChild(dash);
-    game.roadObjs.push({ z: dz, el: dash, wrap: WRAP, h: 100, isDash: true });
-  }
-
-  /* 3D 오브젝트 배치: z(전진 거리), lat(도로 중심 기준 좌우 px), w/h(기본 크기) */
-  function addObj(z, latOff, w, h, inner, cls){
-    const o = document.createElement("div");
-    o.className = "plane-obj" + (cls ? " " + cls : "");
-    const lat = roadCurve(z) + latOff;
-    o.style.width = w + "px";
-    o.style.height = h + "px";
-    o.style.left = (lat - w/2) + "px";
-    o.style.top = (-z - h) + "px";
-    o.innerHTML = '<div class="stand">' + inner + '</div>';
-    scroll.appendChild(o);
-    game.roadObjs.push({ z: z, el: o });
-    return o;
-  }
-  /* 길 양옆 바위/나무/풀/반짝 포인트 (도로 곡선을 따라 자유분방하게) */
-  for(let i=0;i<14;i++){
-    const z = 260 + i*170 + (i*67)%110;
-    const side = (i%2 === 0) ? -1 : 1;
-    const off = side * (200 + (i*53)%230);
-    const kind = i % 3;
-    if(kind === 0) addObj(z, off, 110, 78, '<div class="obj-rock3d"></div>');
-    else if(kind === 1) addObj(z, off, 120, 170, '<div class="obj-tree3d"><div class="trunk"></div><div class="crown"></div></div>');
-    else addObj(z, off, 90, 66, '<div class="obj-grass3d"><span></span><span></span><span></span></div>');
-  }
-  for(let i=0;i<6;i++){
-    addObj(380 + i*380, ((i%2)? -1:1) * (40 + (i*37)%60), 70, 70, '<div class="obj-spark3d"></div>');
-  }
-  /* 표지판 (교사 데이터) */
-  (roadSceneData.signs || []).forEach(s => {
-    const side = (Number(safe(s.side, 1)) < 0) ? -1 : 1;
-    addObj(Number(safe(s.z, 400)) || 400, side * 240, 260, 150,
-      '<div class="obj-sign3d"><div class="plate">' + escapeHTML(safe(s.text,"→")) + '</div><div class="pole"></div></div>');
-  });
-
-  /* ★ 길 왼쪽/오른쪽에 자유분방하게 놓인 작은 노두들 (아케이드 탐사 포인트) ★ */
-  const nL = Math.max(1, layerData.length);
-  const sidePattern = [1, -1, -1, 1, 1, -1];
+  const spots = Array.isArray(roadSceneData.outcrops) ? roadSceneData.outcrops : [];
   layerData.forEach((ly, i) => {
-    const z = 560 + (L - 1100) * i / Math.max(1, nL - 1);
-    const side = sidePattern[i % sidePattern.length];
-    const off = side * (300 + (i*41)%90);
-    const obj = addObj(z, off, 310, 250, buildOutcrop3D(ly), "interactive");
-    obj.addEventListener("click", () => {
-      playSound("click");
-      if(Math.abs(z - game.player.z) < 320){
-        openOutcropModal(ly.id);
-      }else{
-        /* 멀리 있는 노두를 클릭하면 자동으로 걸어가서 조사 */
-        game.autoTarget = { z: Math.max(0, z - 180), layerId: ly.id };
-        toast("🚶 노두 " + safe(ly.id, "?") + "(으)로 걸어가는 중…");
-      }
+    const s = spots.find(o => o && o.layer === ly.id);
+    const n = Math.max(1, layerData.length);
+    const gx = 200 + (PARK.W - 400) * (i % 3) / 2;
+    const gy = 220 + (PARK.H - 440) * Math.floor(i / 3) / Math.max(1, Math.ceil(n / 3) - 1 || 1);
+    game.outcrops.push({
+      layerId: ly.id,
+      x: clamp(Number(safe(s && s.x, gx)) || gx, 90, PARK.W - 90),
+      y: clamp(Number(safe(s && s.y, gy)) || gy, 80, PARK.H - 60)
     });
-    game.outcrops.push({ layerId: ly.id, z: z, obj: obj, el: obj.querySelector(".outcrop") });
   });
-
-  /* 길 끝 풍경: 먼 절벽 실루엣 (장식) */
-  let bands = "";
-  layerData.forEach((ly, i) => {
-    bands += '<div class="strata-line" style="top:' + (i*100/nL) + '%; height:' + (100/nL + 2) + '%;' +
-      'background:' + safe(i % 2 ? ly.color2 : ly.color1, "#b98a5e") + ';"></div>';
-  });
-  addObj(L + 420, 420, 1100, 560, '<div class="obj-cliff3d">' + bands + '<div class="cliff-glow"></div></div>');
-  addObj(L + 560, -760, 480, 300, '<div class="obj-rock3d"></div>');
-
-  game.sites = [];
+  game.player.x = 140;
+  game.player.y = PARK.H / 2;
+  game.player.dir = 1;
+  game.player.face = "down";
   game.nearSite = null;
   game.autoTarget = null;
+  game.camX = clamp(game.player.x - viewportW()/2, 0, Math.max(0, PARK.W - viewportW()));
+  game.camY = clamp(game.player.y - viewportH()/2, 0, Math.max(0, PARK.H - viewportH()));
   $("actionHint").classList.remove("on");
-  game.player.z = 0;
-  game.player.lat = 0;
-  game.player.dir = 1;
-  $("controlGuide").textContent = "🎮 W(▲) 앞으로 · A/D(◀▶) 좌우 · 길가의 노두를 클릭해 조사!";
+  $("controlGuide").textContent = "🎮 W·A·S·D(방향키)로 자유롭게 탐험 · 숨은 노두를 찾아 클릭/E로 조사!";
+  /* 캔버스 클릭: 노두를 누르면 가까우면 조사, 멀면 걸어가서 조사 */
+  park.canvas.onclick = (e) => {
+    ensureAudioOnce();
+    if(anyModalOpen()) return;
+    const r = park.canvas.getBoundingClientRect();
+    const wx = (e.clientX - r.left) * (park.canvas.width / r.width) + game.camX;
+    const wy = (e.clientY - r.top) * (park.canvas.height / r.height) + game.camY;
+    let best = null, bd = 90;
+    game.outcrops.forEach(o => {
+      const d = Math.hypot(o.x - wx, o.y - wy);
+      if(d < bd){ best = o; bd = d; }
+    });
+    if(!best) return;
+    playSound("click");
+    if(Math.hypot(best.x - game.player.x, best.y - game.player.y) < 150){
+      openOutcropModal(best.layerId);
+    }else{
+      game.autoTarget = { x: best.x, y: best.y + 60, layerId: best.layerId };
+      toast("🚶 노두 " + safe(best.layerId, "?") + "(으)로 걸어가는 중…");
+    }
+  };
+  if(!park.resizeBound){
+    park.resizeBound = true;
+    window.addEventListener("resize", resizeParkCanvas);
+  }
   applyBgPhoto();
-  renderPlayerCharacter("idle");
   updateHud();
 }
 
-/* 도로 곡선: z 위치에서 도로 중심의 좌우 오프셋(px) — 구불구불한 모험길 */
-function roadCurve(z){
-  return 260 * Math.sin(z * 0.0011) + 120 * Math.sin(z * 0.0028 + 1.3);
+/* 공원 월드 상수/런타임 */
+const PARK = { W: 1500, H: 1050 };
+const park = { canvas: null, ctx: null, terrain: null, trees: [], sprites: {}, walkT: 0 };
+function viewportH(){ return $("sceneViewport").clientHeight || window.innerHeight; }
+function resizeParkCanvas(){
+  if(!park.canvas) return;
+  park.canvas.width = viewportW();
+  park.canvas.height = viewportH();
+  park.ctx.imageSmoothingEnabled = false;
 }
 
-/* 3D 노두 마크업: 산책길 노두와 같은 깜찍 디자인 재사용 */
-function buildOutcrop3D(ly){
-  const unlocked = state.unlockedLayers.includes(ly.id);
-  const done = outcropDone(ly.id);
-  const c1 = safe(ly.color1, "#d8b070"), c2 = safe(ly.color2, "#a07850");
-  let html = '<div class="outcrop' + (unlocked ? " unlocked" : "") + (done ? " done" : "") + '" id="outcrop3d_' + escapeHTML(safe(ly.id,"?")) + '">';
-  html += '<div class="mound">';
-  const bandColors = [c1, mixColor(c1, c2), c2];
-  bandColors.forEach((c, k) => {
-    /* 도트 층리: 플랫 컬러 + 가로 층리 라인 */
-    html += '<div class="band" style="top:' + (k*34) + '%; height:36%; background:' +
-      'repeating-linear-gradient(0deg, rgba(70,40,20,.16) 0 4px, transparent 4px 16px), ' +
-      'linear-gradient(' + c + ', ' + c + ');"></div>';
-  });
-  for(let k=0;k<4;k++){
-    const s = 8 + (k*5)%9;
-    html += '<div class="pebble" style="left:' + (12 + (k*211)%72) + '%; top:' + (16 + (k*29)%62) + '%; width:' + s + 'px; height:' + Math.round(s*0.72) + 'px;"></div>';
-  }
-  html += '</div>' +
-    '<div class="grass-tuft" style="left:26%;"><span style="left:0;"></span><span style="left:11px; height:75%;"></span><span style="left:22px; height:88%;"></span></div>' +
-    '<div class="glint">✦</div>' +
-    '<div class="complete-sticker">✔ 완료!</div>' +
-    '<div class="outcrop-label">' + (unlocked ? "🔓 " : "🪨 ") + "노두 " + escapeHTML(safe(ly.id, "?")) +
-      " · " + (unlocked ? escapeHTML(safe(ly.hiddenName, "???")) : "???") + '</div></div>';
-  return html;
+/* 연못 (이동 불가 지형) */
+function pondAt(){ return { cx: PARK.W * 0.7, cy: PARK.H * 0.62, rx: 170, ry: 105 }; }
+function inPond(x, y){
+  const p = pondAt();
+  const dx = (x - p.cx) / (p.rx + 18), dy = (y - p.cy) / (p.ry + 18);
+  return dx*dx + dy*dy < 1;
 }
-/* 노두 상태 갱신 (도감 등록/층 해금 후 다시 그림) */
-function refreshRoadOutcrops(){
-  (game.outcrops || []).forEach(o => {
-    if(!o.obj) return;
-    const ly = layerData.find(l => l.id === o.layerId);
-    if(!ly) return;
-    const stand = o.obj.querySelector(".stand");
-    if(stand){
-      stand.innerHTML = buildOutcrop3D(ly);
-      o.el = stand.querySelector(".outcrop");
+
+/* 픽셀 맵 → 캔버스 스프라이트 */
+function spriteFromMap(rows, palette, scale){
+  const c = document.createElement("canvas");
+  c.width = rows[0].length * scale;
+  c.height = rows.length * scale;
+  const g = c.getContext("2d");
+  for(let y = 0; y < rows.length; y++){
+    for(let x = 0; x < rows[y].length; x++){
+      const col = palette[rows[y][x]];
+      if(!col) continue;
+      g.fillStyle = col;
+      g.fillRect(x*scale, y*scale, scale, scale);
+    }
+  }
+  return c;
+}
+/* 걷기 2프레임: 다리/부츠 줄만 벌어진 변형 맵 생성 */
+function walkFrameOf(rows){
+  const out = rows.slice();
+  for(let i = 0; i < out.length; i++){
+    if(out[i] === "....PP..PP....") out[i] = "...PP....PP...";
+    else if(out[i] === "...oo....oo...") out[i] = "..oo......oo..";
+  }
+  return out;
+}
+const PLAYER_FRONT_MAP = [
+  "....HHHHHH....",
+  "...HHHHHHHH...",
+  "...HHHHHHHH...",
+  "..HHHHHHHHHH..",
+  ".hhhhhhhhhhhh.",
+  "..ffffffffff..",
+  "..fDDffffDDf..",
+  "..fWDffffDWf..",
+  ".RffffffffffR.",
+  "...fffMMfff...",
+  "...VVVVVVVV...",
+  "ggfVVCCCCVVfLL",
+  ".gfVVCCCCVVfL.",
+  "...VVVVVVVV...",
+  "....PP..PP....",
+  "....PP..PP....",
+  "...oo....oo...",
+  ".............."
+];
+const PLAYER_BACK_MAP = [
+  "....HHHHHH....",
+  "...HHHHHHHH...",
+  "...HHHHHHHH...",
+  "..HHHHHHHHHH..",
+  ".hhhhhhhhhhhh.",
+  "..aaaaaaaaaa..",
+  "..aaaaaaaaaa..",
+  "..faaaaaaaaf..",
+  "...aaaaaaaa...",
+  "..VVVVVVVVVV..",
+  ".fVKKKKKKKKVf.",
+  ".fVKKKkkKKKVf.",
+  ".fVKKKkkKKKVf.",
+  "..VKKKKKKKKV..",
+  "....PP..PP....",
+  "....PP..PP....",
+  "...oo....oo...",
+  ".............."
+];
+const TREE_MAP = [
+  "...GGGG...",
+  "..GGGGGG..",
+  ".GGGGGGGG.",
+  ".GGgGGGGG.",
+  "GGGGGGgGGG",
+  "GgGGGGGGGg",
+  ".GGgGGgGG.",
+  "..GGGGGG..",
+  "....TT....",
+  "....TT....",
+  "....TT...."
+];
+const TREE_PAL = { G:"#5faf5c", g:"#468a4a", T:"#8a5f3e" };
+function buildParkSprites(){
+  const S = 4;
+  park.sprites.down  = spriteFromMap(PLAYER_FRONT_MAP, PLAYER_PAL, S);
+  park.sprites.down2 = spriteFromMap(walkFrameOf(PLAYER_FRONT_MAP), PLAYER_PAL, S);
+  park.sprites.up    = spriteFromMap(PLAYER_BACK_MAP, PLAYER_PAL, S);
+  park.sprites.up2   = spriteFromMap(walkFrameOf(PLAYER_BACK_MAP), PLAYER_PAL, S);
+  park.sprites.tree  = spriteFromMap(TREE_MAP, TREE_PAL, 6);
+  park.sprites.outcrop = {};
+  layerData.forEach(ly => {
+    const c1 = safe(ly.color1, "#c8a060"), c2 = safe(ly.color2, "#946746");
+    const pal = { B:"#4a3b2e", "1":c1, "2":mixColor(c1, c2), "3":c2 };
+    park.sprites.outcrop[ly.id] = spriteFromMap([
+      "....BBBBBB....",
+      "..BB111111BB..",
+      ".B1111111111B.",
+      ".B2222222222B.",
+      "B222222222222B",
+      "B333333333333B",
+      "B333333333333B",
+      ".BBBBBBBBBBBB."
+    ], pal, 7);
+  });
+}
+
+/* 나무 클러스터 배치 (일부는 노두를 가려서 '발견'의 재미를 만든다) */
+function buildParkLayout(){
+  park.trees = [];
+  const clusters = [
+    { x: 520,  y: 330, n: 5 },
+    { x: 1210, y: 330, n: 6 },   /* 노두 C를 남쪽에서 가림 */
+    { x: 320,  y: 560, n: 4 },
+    { x: 640,  y: 980, n: 6 },   /* 노두 E를 남쪽에서 가림 */
+    { x: 980,  y: 200, n: 3 },
+    { x: 1350, y: 620, n: 4 }
+  ];
+  clusters.forEach((cl, ci) => {
+    for(let i = 0; i < cl.n; i++){
+      const a = (i * 137 + ci * 61) % 360 / 180 * Math.PI;
+      const r = 40 + (i * 53 + ci * 29) % 90;
+      park.trees.push({
+        x: clamp(cl.x + Math.cos(a) * r * 1.4, 50, PARK.W - 50),
+        y: clamp(cl.y + Math.sin(a) * r, 60, PARK.H - 40)
+      });
     }
   });
 }
 
-/* 3D 길 화면 갱신: 도로 곡선을 따라 시야 이동 + 지나간 오브젝트 숨김 */
-function updateRoad3D(){
-  const scroll = $("planeScroll");
-  if(!scroll) return;
-  const z = game.player.z;
-  /* 카메라가 도로 곡선을 따라가서 길이 좌우로 휘어 보임 */
-  scroll.style.transform = "translateX(" + (-(roadCurve(z) + game.player.lat)) + "px) translateY(" + (z + ROAD3D.camOffset) + "px)";
-  for(let i=0;i<game.roadObjs.length;i++){
-    const o = game.roadObjs[i];
-    let d = o.z - z;
-    /* 순환 오브젝트(길 점선): 지나가면 앞으로 다시 배치 (곡선 위치로) */
-    if(o.wrap && d < 20){
-      o.z += o.wrap;
-      o.el.style.top = (-o.z - (o.h || 0)) + "px";
-      if(o.isDash) o.el.style.left = (roadCurve(o.z) - 26) + "px";
-      d = o.z - z;
-    }
-    const vis = (d > 30 && d < 3400);
-    if(o.visible !== vis){
-      o.visible = vis;
-      o.el.style.visibility = vis ? "visible" : "hidden";
+/* 지형을 오프스크린 캔버스에 1회 렌더 (잔디/흙길/연못/언덕) — 전부 fillRect 도트 */
+function buildParkTerrain(){
+  const t = document.createElement("canvas");
+  t.width = PARK.W; t.height = PARK.H;
+  const g = t.getContext("2d");
+  /* 잔디 + 체커 타일 */
+  g.fillStyle = "#9ccb72";
+  g.fillRect(0, 0, PARK.W, PARK.H);
+  g.fillStyle = "#a6d47c";
+  for(let y = 0; y < PARK.H; y += 30)
+    for(let x = (y/30 % 2) * 30; x < PARK.W; x += 60)
+      g.fillRect(x, y, 30, 30);
+  /* 언덕(밝게)/계곡(어둡게) 패치 — 계단형 블롭 */
+  function blob(cx, cy, w, h, col){
+    g.fillStyle = col;
+    for(let i = 0; i < 4; i++){
+      const ww = w * (1 - i * 0.18), hh = h * 0.34;
+      g.fillRect(Math.round((cx - ww/2)/10)*10, Math.round((cy - h/2 + i*hh*0.8)/10)*10, Math.round(ww/10)*10, Math.round(hh/10)*10);
     }
   }
-  /* "조사 가능!" 말풍선을 가까운 노두 위에 표시 */
+  blob(380, 180, 340, 150, "#b4dc8e");
+  blob(1150, 860, 300, 130, "#b4dc8e");
+  blob(180, 950, 260, 120, "#86b862");
+  blob(900, 420, 260, 110, "#86b862");
+  /* 흙길: 가로 큰길 + 세로 갈래길 */
+  g.fillStyle = "#e8d19c";
+  g.fillRect(0, PARK.H/2 - 45, PARK.W, 90);
+  g.fillRect(230, 160, 80, PARK.H - 320);
+  g.fillRect(PARK.W - 260, 200, 80, PARK.H - 400);
+  g.fillRect(700, PARK.H/2, 80, PARK.H/2 - 90);
+  g.fillStyle = "#d9bd82";
+  for(let x = 0; x < PARK.W; x += 46) g.fillRect(x, PARK.H/2 - 45, 10, 90);
+  /* 연못 (이동 불가) — 도트 스캔라인 타원 */
+  const p = pondAt();
+  for(let ry = -p.ry; ry <= p.ry; ry += 8){
+    const half = p.rx * Math.sqrt(Math.max(0, 1 - (ry/p.ry)*(ry/p.ry)));
+    const yy = Math.round((p.cy + ry)/8)*8;
+    g.fillStyle = "#4da3cf";
+    g.fillRect(Math.round((p.cx - half)/8)*8 - 8, yy, Math.round(half/4)*8 + 16, 8);
+    g.fillStyle = "#7ec8e8";
+    g.fillRect(Math.round((p.cx - half)/8)*8, yy, Math.round(half/4)*8, 8);
+  }
+  g.fillStyle = "#b6e6f5";
+  g.fillRect(p.cx - 70, p.cy - 40, 46, 8);
+  g.fillRect(p.cx - 40, p.cy - 24, 24, 8);
+  /* 꽃/자갈 점 */
+  const fc = ["#ff9d85", "#ffd97a", "#b6e6f5", "#fff"];
+  for(let i = 0; i < 90; i++){
+    const x = (i * 331 + 47) % PARK.W, y = (i * 613 + 83) % PARK.H;
+    if(inPond(x, y)) continue;
+    g.fillStyle = fc[i % 4];
+    g.fillRect(x, y, 6, 6);
+  }
+  park.terrain = t;
+  /* 미니맵용 축소본 */
+  const m = document.createElement("canvas");
+  m.width = 150; m.height = 105;
+  const mg = m.getContext("2d");
+  mg.imageSmoothingEnabled = false;
+  mg.drawImage(t, 0, 0, 150, 105);
+  park.terrainMini = m;
+}
+
+/* 조사한 노두 수 (해당 층의 단서를 모두 발굴하면 조사 완료) */
+function exploredOutcropCount(){
+  return layerData.filter(ly => {
+    const items = itemsOfLayer(ly.id);
+    return items.length > 0 && items.every(i => state.discovered.includes(i.id));
+  }).length;
+}
+
+/* 매 프레임 공원 그리기 */
+function drawPark(){
+  const ctx = park.ctx;
+  if(!ctx || !park.terrain) return;
+  const cw = park.canvas.width, ch = park.canvas.height;
+  ctx.clearRect(0, 0, cw, ch);
+  ctx.save();
+  ctx.translate(-Math.round(game.camX), -Math.round(game.camY));
+  ctx.drawImage(park.terrain, 0, 0);
+  /* y-정렬로 나무/노두/플레이어를 그려 자연스러운 가림 표현 */
+  const ents = [];
+  game.outcrops.forEach(o => ents.push({ y: o.y + 26, type: "outcrop", o: o }));
+  park.trees.forEach(tr => ents.push({ y: tr.y + 30, type: "tree", o: tr }));
+  ents.push({ y: game.player.y + 34, type: "player" });
+  ents.sort((a, b) => a.y - b.y);
+  const blink = Math.floor(performance.now() / 400) % 2 === 0;
+  ents.forEach(e => {
+    if(e.type === "tree"){
+      const s = park.sprites.tree;
+      ctx.drawImage(s, Math.round(e.o.x - s.width/2), Math.round(e.o.y - s.height + 32));
+    }else if(e.type === "outcrop"){
+      const o = e.o;
+      const s = park.sprites.outcrop[o.layerId];
+      if(s) ctx.drawImage(s, Math.round(o.x - s.width/2), Math.round(o.y - s.height + 26));
+      const items = itemsOfLayer(o.layerId);
+      const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
+      const unlocked = state.unlockedLayers.includes(o.layerId);
+      /* 이름표 */
+      const label = (dug ? "✔ " : "") + "노두 " + o.layerId + (unlocked ? "·" + safe(layerData.find(l=>l.id===o.layerId).hiddenName,"") : " · ???");
+      ctx.font = "900 13px sans-serif";
+      const tw = ctx.measureText(label).width + 14;
+      ctx.fillStyle = "#fffdf6";
+      ctx.fillRect(Math.round(o.x - tw/2), o.y + 30, Math.round(tw), 22);
+      ctx.strokeStyle = dug ? "#1d9184" : "#4a3b2e";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(Math.round(o.x - tw/2), o.y + 30, Math.round(tw), 22);
+      ctx.fillStyle = dug ? "#1d9184" : "#4a3b2e";
+      ctx.fillText(label, Math.round(o.x - tw/2) + 7, o.y + 46);
+      /* 미조사 반짝임 */
+      if(!dug && blink){
+        ctx.fillStyle = "#ffce4a";
+        ctx.fillRect(o.x + 34, o.y - 66, 10, 10);
+        ctx.fillRect(o.x + 30, o.y - 70, 4, 4);
+      }
+      /* 근접 하이라이트 */
+      if(game.nearSite && game.nearSite.layerId === o.layerId && blink){
+        ctx.strokeStyle = "#ffce4a";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(Math.round(o.x - 56), Math.round(o.y - 62), 112, 92);
+      }
+    }else{
+      /* 플레이어 스프라이트 (그림자 + 2프레임 걷기 + 방향) */
+      ctx.fillStyle = "rgba(60,40,20,.3)";
+      ctx.fillRect(Math.round(game.player.x - 20), Math.round(game.player.y + 26), 40, 8);
+      const frame = game.player.moving && Math.floor(park.walkT * 6) % 2 === 1 ? "2" : "";
+      const base = game.player.face === "up" ? "up" : "down";
+      const s = park.sprites[base + frame] || park.sprites[base];
+      ctx.save();
+      if(game.player.face === "left"){
+        ctx.translate(Math.round(game.player.x), 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(s, Math.round(-s.width/2), Math.round(game.player.y - s.height + 34));
+      }else{
+        ctx.drawImage(s, Math.round(game.player.x - s.width/2), Math.round(game.player.y - s.height + 34));
+      }
+      ctx.restore();
+    }
+  });
+  ctx.restore();
+  /* "조사 가능 (E)" 말풍선 위치 (HTML 오버레이) */
   const hint = $("actionHint");
-  if(hint && hint.classList.contains("on") && game.nearSite && game.nearSite.el){
-    const rect = game.nearSite.el.getBoundingClientRect();
-    const vp = $("sceneViewport").getBoundingClientRect();
-    const x = clamp(rect.left - vp.left + rect.width/2, 140, vp.width - 160);
-    const y = clamp(rect.top - vp.top, 110, vp.height - 190);
-    hint.style.left = x + "px";
-    hint.style.top = y + "px";
+  if(hint && hint.classList.contains("on") && game.nearSite){
+    hint.style.left = clamp(game.nearSite.x - game.camX, 140, cw - 160) + "px";
+    hint.style.top = clamp(game.nearSite.y - 90 - game.camY, 100, ch - 180) + "px";
   }
+  drawMiniMap();
+}
+
+/* 미니맵: 탐험한 칸이 밝아지고, 발견한 노두가 점으로 찍힌다 */
+function drawMiniMap(){
+  const mm = $("miniMap");
+  if(!mm) return;
+  const g = mm.getContext("2d");
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = "#22301f";
+  g.fillRect(0, 0, 150, 105);
+  const sx = 150 / PARK.W, sy = 105 / PARK.H;
+  /* 방문한 칸만 지형 공개 (안개 걷힘) */
+  const cellW = 150 / 15, cellH = 105 / 10;
+  state.visitedCells.forEach(ci => {
+    const cx = ci % 15, cy = Math.floor(ci / 15);
+    g.drawImage(park.terrainMini, cx*cellW, cy*cellH, cellW, cellH, cx*cellW, cy*cellH, cellW, cellH);
+  });
+  /* 발견한 노두 점 */
+  game.outcrops.forEach(o => {
+    if(!state.foundOutcrops.includes(o.layerId)) return;
+    const items = itemsOfLayer(o.layerId);
+    const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
+    g.fillStyle = dug ? "#3ec6b5" : "#ffce4a";
+    g.fillRect(Math.round(o.x*sx) - 3, Math.round(o.y*sy) - 3, 6, 6);
+  });
+  /* 플레이어 점 (깜빡) */
+  if(Math.floor(performance.now() / 300) % 2 === 0){
+    g.fillStyle = "#fff";
+    g.fillRect(Math.round(game.player.x*sx) - 2, Math.round(game.player.y*sy) - 2, 5, 5);
+  }
+}
+
+/* 6개 노두 모두 조사 시 완료 연출 (모달이 닫힌 뒤에 표시) */
+function maybeParkComplete(){
+  if(state.parkDone) return;
+  if(exploredOutcropCount() < layerData.length) return;
+  state.parkDone = true;
+  saveState();
+  const show = () => {
+    if(anyModalOpen()){ setTimeout(show, 800); return; }
+    $("cinematicTitle").textContent = "🎉 모든 노두 조사 완료!";
+    $("cinematicSub").textContent = "공원의 노두 " + layerData.length + "곳을 전부 조사했어요! 이제 퀴즈를 풀어 도감을 완성해요.";
+    openCinematic();
+    playSound("badge");
+    spawnConfetti();
+  };
+  setTimeout(show, 900);
 }
 
 /* --- 산책길 탐사 씬: 길 옆에 작은 노두들이 늘어선 아기자기한 탐사길 --- */
@@ -3188,57 +3449,60 @@ function hexRGB(h){
 
 /* --- 노두 확대 조사창 --- */
 function openOutcropModal(layerId){
+  /* 단순한 조사 화면: 지층 단면을 위→아래 스택으로.
+     각 층 = 색 밴드 + 이름 + 아이템 아이콘. 이 노두의 층이 하이라이트되고
+     그 줄에서 반짝이는 조사 지점을 눌러 발굴한다. */
   const ly = layerData.find(l => l.id === layerId);
   if(!ly) return;
   game.currentOutcrop = layerId;
   const unlocked = state.unlockedLayers.includes(layerId);
-  $("outcropModalTitle").textContent = "🔎 노두 " + safe(ly.id, "?") + " 확대 조사" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
+  $("outcropModalTitle").textContent = "🔎 노두 " + safe(ly.id, "?") + " 단면 조사" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
   const xsec = $("outcropXsec");
   xsec.innerHTML = "";
-  /* 확대 단면: 층리 + 균열 + 자갈 질감 */
-  const c1 = safe(ly.color1, "#d8b070"), c2 = safe(ly.color2, "#a07850");
-  const bands = [c1, mixColor(c1, c2), c2, mixColor(c2, "#6e523a")];
-  bands.forEach((c, k) => {
-    const b = document.createElement("div");
-    b.className = "band";
-    b.style.top = (k * 26) + "%";
-    b.style.height = "28%";
-    /* 도트 층리: 플랫 컬러 + 가로 층리 라인 + 점 무늬 */
-    b.style.background =
-      "repeating-linear-gradient(0deg, rgba(70,40,20,.18) 0 5px, transparent 5px 22px), " +
-      "repeating-linear-gradient(90deg, transparent 0 46px, rgba(70,40,20,.1) 46px 54px, transparent 54px 120px), " +
+  layerData.forEach(lr => {
+    const row = document.createElement("div");
+    const rowUnlocked = state.unlockedLayers.includes(lr.id);
+    const isHere = lr.id === layerId;
+    row.className = "xsec-row" + (isHere ? " here" : "") + (rowUnlocked ? " unlocked" : "");
+    const c = safe(lr.color1, "#c8a060");
+    row.style.background =
+      "repeating-linear-gradient(0deg, rgba(70,40,20,.16) 0 4px, transparent 4px 18px), " +
       "linear-gradient(" + c + ", " + c + ")";
-    xsec.appendChild(b);
+    /* 색 견본 + 이름 + 아이템 아이콘 */
+    const name = document.createElement("div");
+    name.className = "row-name";
+    name.textContent = safe(lr.label, "층") + " · " + (rowUnlocked ? safe(lr.hiddenName, "???") : "???");
+    row.appendChild(name);
+    const items = itemsOfLayer(lr.id);
+    if(items.length){
+      const it = items[0];
+      const known = state.discovered.includes(it.id) || state.completed.includes(it.id);
+      const icon = document.createElement("div");
+      icon.className = "row-icon item-visual-slot";
+      row.appendChild(icon);
+      renderAssetImage(icon, it, known ? "normal" : "silhouette");
+    }
+    if(isHere){
+      /* 이 노두에서 드러난 층: 조사 지점 배치 + "여기!" 마커 */
+      renderDigSites(row, layerId);
+      const items2 = itemsOfLayer(layerId);
+      const allDug = items2.length > 0 && items2.every(i => state.discovered.includes(i.id));
+      if(allDug){
+        const tag = document.createElement("div");
+        tag.className = "here-tag";
+        tag.textContent = "✔ 조사 완료";
+        row.appendChild(tag);
+      }else{
+        const tag = document.createElement("div");
+        tag.className = "here-tag";
+        tag.textContent = "📍 여기!";
+        row.appendChild(tag);
+      }
+    }
+    xsec.appendChild(row);
   });
-  for(let k=0;k<5;k++){
-    const cr = document.createElement("div");
-    cr.className = "crack";
-    cr.style.left = (8 + (k*191)%80) + "%";
-    cr.style.top = (10 + (k*23)%62) + "%";
-    cr.style.width = (2 + k%2) + "px";
-    cr.style.height = (24 + (k*17)%30) + "px";
-    cr.style.setProperty("--rot", ((k%2 ? -1 : 1)*(5 + k*4)) + "deg");
-    xsec.appendChild(cr);
-  }
-  for(let k=0;k<8;k++){
-    const pb = document.createElement("div");
-    pb.className = "pebble";
-    pb.style.left = (4 + (k*277)%88) + "%";
-    pb.style.top = (8 + (k*31)%78) + "%";
-    const s = 7 + (k*5)%11;
-    pb.style.width = s + "px";
-    pb.style.height = Math.round(s*0.7) + "px";
-    xsec.appendChild(pb);
-  }
-  /* 반짝이는 조사 지점 + 미니 탐사대원 */
-  renderDigSites(xsec, layerId);
-  const mini = document.createElement("div");
-  mini.className = "mini-explorer anim-inspect";
-  mini.id = "miniExplorer";
-  mini.innerHTML = '<div class="player-anim">' + playerFallbackSVG() + '</div>';
-  xsec.appendChild(mini);
-  const items = itemsOfLayer(layerId);
-  const left = items.filter(i => !state.completed.includes(i.id)).length;
+  const itemsHere = itemsOfLayer(layerId);
+  const left = itemsHere.filter(i => !state.completed.includes(i.id)).length;
   $("outcropNote").textContent = left > 0
     ? "✨ 반짝이는 곳을 눌러 조사해요! (남은 단서 " + left + "개)"
     : "🎉 이 노두의 단서를 모두 찾았어요!";
@@ -3250,8 +3514,8 @@ function openOutcropModal(layerId){
 function renderDigSites(container, layerId){
   game.sites = [];
   const items = itemsOfLayer(layerId);
-  /* 지점 위치 프리셋: 겹치지 않게 큼직큼직하게 배치 (모바일 터치 고려) */
-  const POS = [ {l:26, t:34}, {l:66, t:56}, {l:44, t:22}, {l:20, t:66}, {l:72, t:26}, {l:50, t:70} ];
+  /* 지점 위치 프리셋: 층 줄(행) 안에 좌우로 배치 (모바일 터치 고려) */
+  const POS = [ {l:55, t:50}, {l:74, t:50}, {l:38, t:50}, {l:64, t:50}, {l:46, t:50}, {l:82, t:50} ];
   items.forEach((item, i) => {
     let status = "undiscovered";
     if(state.completed.includes(item.id)) status = "collected";
@@ -3282,49 +3546,20 @@ function renderDigSites(container, layerId){
   });
 }
 
-/* ---------- 2.5D 패럴랙스 / 카메라 ---------- */
+/* ---------- 카메라 (플레이어 추적 + 경계 clamp) ---------- */
 function viewportW(){ return $("sceneViewport").clientWidth || window.innerWidth; }
 function updateCamera(){
-  if(game.mode === "road") return; /* 3D 길 구간은 카메라 고정(1인칭 추적) */
-  const target = clamp(game.player.x - viewportW()/2, 0, Math.max(0, game.worldLen - viewportW()));
-  const ease = game.reducedMotion ? 1 : 0.09;
-  game.cameraX += (target - game.cameraX) * ease;
-  if(Math.abs(target - game.cameraX) < 0.4) game.cameraX = target;
+  if(game.mode !== "park") return;
+  const tx = clamp(game.player.x - viewportW()/2, 0, Math.max(0, PARK.W - viewportW()));
+  const ty = clamp(game.player.y - viewportH()/2, 0, Math.max(0, PARK.H - viewportH()));
+  const ease = game.reducedMotion ? 1 : 0.12;
+  game.camX += (tx - game.camX) * ease;
+  game.camY += (ty - game.camY) * ease;
+  if(Math.abs(tx - game.camX) < 0.4) game.camX = tx;
+  if(Math.abs(ty - game.camY) < 0.4) game.camY = ty;
 }
 function renderParallaxScene(){
-  if(game.mode === "road"){ updateRoad3D(); return; }
-  updateTrailParallax();
-}
-function updateTrailParallax(){
-  const cam = game.cameraX;
-  const lite = game.reducedMotion;
-  const farL = $("farLayer");
-  if(!farL) return;
-  /* 각 레이어를 서로 다른 속도로 이동 + 깊이(translateZ) 부여 */
-  farL.style.transform = lite
-    ? "translate3d(" + (-cam*0.25) + "px,0,0)"
-    : "translate3d(" + (-cam*0.25) + "px,0,-140px) scale(1.16)";
-  $("midLayer").style.transform  = "translate3d(" + (-cam*0.6) + "px,0,0)";
-  $("playLayer").style.transform = "translate3d(" + (-cam) + "px,0,0)";
-  $("foreLayer").style.transform = lite
-    ? "translate3d(" + (-cam*1.25) + "px,0,0)"
-    : "translate3d(" + (-cam*1.25) + "px,0,60px) scale(0.94)";
-
-  /* 플레이어 위치 */
-  const p = $("player");
-  if(p) p.style.left = game.player.x + "px";
-
-  /* "조사 가능!" 말풍선 위치 (가까운 노두 위) */
-  const hint = $("actionHint");
-  if(hint && game.nearSite){
-    const rect = game.nearSite.el.getBoundingClientRect();
-    const vp = $("sceneViewport").getBoundingClientRect();
-    /* 말풍선이 화면 밖으로 잘리지 않게 위치 보정 */
-    const x = clamp(rect.left - vp.left + rect.width/2, 120, vp.width - 120);
-    const y = Math.max(rect.top - vp.top, 76);
-    hint.style.left = x + "px";
-    hint.style.top = y + "px";
-  }
+  if(game.mode === "park") drawPark();
 }
 
 /* ---------- 게임 루프 ---------- */
@@ -3335,53 +3570,60 @@ function gameLoop(t){
   lastT = t;
   if(!game.running) return;
 
-  const speed = 340;
+  const speed = 260;
   let moving = false;
-  if(!game.digging && !anyModalOpen()){
-    if(game.mode === "road"){
-      /* 3D 길: W(▲) 앞으로, S(▼) 뒤로, A/D(◀▶) 좌우로 비켜 걷기 */
-      if(game.input.up){ game.player.z += speed*1.15*dt; moving = true; }
-      if(game.input.down){ game.player.z -= speed*0.7*dt; moving = true; }
-      if(game.input.left){ game.player.lat -= 300*dt; moving = true; }
-      if(game.input.right){ game.player.lat += 300*dt; moving = true; }
-      /* 수동 조작이 있으면 자동 걷기 취소 */
-      if(moving) game.autoTarget = null;
-      /* 노두 클릭 → 자동으로 걸어가서 조사창 열기 */
-      if(game.autoTarget){
-        const dz = game.autoTarget.z - game.player.z;
-        if(Math.abs(dz) < 40){
-          const layerId = game.autoTarget.layerId;
-          game.autoTarget = null;
-          openOutcropModal(layerId);
-        }else{
-          game.player.z += Math.sign(dz) * speed * 1.15 * dt;
-          moving = true;
-        }
+  if(game.mode === "park" && !game.digging && !anyModalOpen()){
+    /* 탑다운 자유 이동: WASD/방향키, 대각선 정규화 */
+    let dx = 0, dy = 0;
+    if(game.input.left)  dx -= 1;
+    if(game.input.right) dx += 1;
+    if(game.input.up)    dy -= 1;
+    if(game.input.down)  dy += 1;
+    const manual = dx !== 0 || dy !== 0;
+    if(manual) game.autoTarget = null;
+    /* 노두 클릭 → 자동으로 걸어가기 */
+    if(!manual && game.autoTarget){
+      const ax = game.autoTarget.x - game.player.x;
+      const ay = game.autoTarget.y - game.player.y;
+      const ad = Math.hypot(ax, ay);
+      if(ad < 30){
+        const layerId = game.autoTarget.layerId;
+        game.autoTarget = null;
+        openOutcropModal(layerId);
+      }else{
+        dx = ax / ad; dy = ay / ad;
       }
-      game.player.z = clamp(game.player.z, 0, game.worldLen);
-      game.player.lat = clamp(game.player.lat, -ROAD3D.maxLat, ROAD3D.maxLat);
-    }else{
-      /* 산책길: A/D 좌우로 가볍게 산책 (상하 이동 없음) */
-      if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
-      if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
-      /* 수동 조작이 있으면 자동 걷기 취소 */
-      if(moving) game.autoTarget = null;
-      /* 노두 클릭 → 자동으로 걸어가서 조사창 열기 */
-      if(game.autoTarget){
-        const dx = game.autoTarget.x - game.player.x;
-        if(Math.abs(dx) < 24){
-          const layerId = game.autoTarget.layerId;
-          game.autoTarget = null;
-          openOutcropModal(layerId);
-        }else{
-          game.player.x += Math.sign(dx) * speed * dt;
-          game.player.dir = Math.sign(dx) || 1;
-          moving = true;
-        }
+    }
+    if(dx !== 0 || dy !== 0){
+      const len = Math.hypot(dx, dy);
+      dx /= len; dy /= len;
+      let nx = game.player.x + dx * speed * dt;
+      let ny = game.player.y + dy * speed * dt;
+      nx = clamp(nx, 40, PARK.W - 40);
+      ny = clamp(ny, 60, PARK.H - 30);
+      /* 연못 충돌: 막히면 축별로 미끄러지기 */
+      if(inPond(nx, ny)){
+        if(!inPond(nx, game.player.y)) ny = game.player.y;
+        else if(!inPond(game.player.x, ny)) nx = game.player.x;
+        else { nx = game.player.x; ny = game.player.y; }
       }
-      game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
+      moving = (nx !== game.player.x || ny !== game.player.y);
+      game.player.x = nx;
+      game.player.y = ny;
+      /* 바라보는 방향 (스프라이트 선택) */
+      if(Math.abs(dy) >= Math.abs(dx)) game.player.face = dy < 0 ? "up" : "down";
+      else game.player.face = dx < 0 ? "left" : "right";
+      /* 방문한 칸 기록 (미니맵 안개 걷힘) */
+      const ci = Math.min(14, Math.floor(game.player.x / (PARK.W / 15))) +
+                 15 * Math.min(9, Math.floor(game.player.y / (PARK.H / 10)));
+      if(!state.visitedCells.includes(ci)){
+        state.visitedCells.push(ci);
+        saveState();
+      }
     }
   }
+  game.player.moving = moving;
+  if(moving) park.walkT += dt; else park.walkT = 0;
 
   /* 걷기 효과음 (가볍게) */
   if(moving){
@@ -3389,23 +3631,8 @@ function gameLoop(t){
     if(game.stepSoundTimer <= 0){ playSound("step"); game.stepSoundTimer = 0.28; }
   }
 
-  /* 캐릭터 상태 */
-  let wantAnim;
-  if(game.digging) wantAnim = "dig";
-  else if(moving) wantAnim = "walk";
-  else wantAnim = (game.player.anim === "walk" || game.player.anim === "dig") ? "idle" : game.player.anim;
-  if(game.player.anim !== wantAnim) renderPlayerCharacter(wantAnim);
-  else if(game.mode === "trail"){
-    const vis = document.querySelector("#player .player-visual");
-    if(vis) vis.classList.toggle("flip", game.player.dir < 0);
-  }
-
-  /* 그림자 크기 변화 */
-  const sh = document.querySelector(game.mode === "road" ? "#roadPlayer .player-shadow" : "#player .player-shadow");
-  if(sh){ sh.style.width = moving ? "70%" : "80%"; }
-
-  /* 가까운 노두 체크 (3D 길에서 모든 탐구가 이루어짐) */
-  if(game.mode === "road") updateNearSite();
+  /* 가까운 노두 체크 + 첫 발견 감지 */
+  if(game.mode === "park") updateNearSite();
 
   /* 발굴 진행 */
   if(game.digging) tickDigging(dt);
@@ -3416,24 +3643,29 @@ function gameLoop(t){
 function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
 }
-/* 가까운 노두 감지: 걸어가다 옆에 노두가 보이면 통통 + "조사 가능!" 말풍선 */
+/* 가까운 노두 감지: 첫 근접이면 "새 노두 발견!" 토스트 + 미니맵 점,
+   더 가까우면 "조사 가능 (E)" 말풍선 */
 function updateNearSite(){
-  let best = null, bestDist = 340;
+  let best = null, bestDist = 140;
   (game.outcrops || []).forEach(o => {
-    const d = Math.abs(safe(o.z, 0) - game.player.z);
+    const d = Math.hypot(o.x - game.player.x, o.y - game.player.y);
+    /* 첫 발견 (조금 멀어도 감지) */
+    if(d < 210 && !state.foundOutcrops.includes(o.layerId)){
+      state.foundOutcrops.push(o.layerId);
+      saveState();
+      toast("🗺 새 노두 발견! 미니맵에 표시됐어요 — 노두 " + safe(o.layerId, "?"));
+      playSound("place");
+    }
     if(d < bestDist){ best = o; bestDist = d; }
   });
-  if(best !== game.nearSite){
-    if(game.nearSite && game.nearSite.el) game.nearSite.el.classList.remove("near");
-    game.nearSite = best;
-    if(best && best.el) best.el.classList.add("near");
-  }
+  game.nearSite = best;
   const hint = $("actionHint");
   const show = !!best && !game.digging && !anyModalOpen();
   hint.classList.toggle("on", show);
   if(show){
-    const done = outcropDone(best.layerId);
-    hint.querySelector(".bubble").textContent = done ? "✅ 조사 완료! 다시 볼까요? (E)" : "🔍 조사 가능! 눌러 보세요 (E)";
+    const items = itemsOfLayer(best.layerId);
+    const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
+    hint.querySelector(".bubble").textContent = dug ? "✅ 조사 완료! 다시 볼까요? (E)" : "🔍 조사 가능 (E)";
   }
 }
 
@@ -3540,6 +3772,7 @@ function completeDigging(siteId){
   cameraShake();
   updateHud();
   checkBadges();
+  maybeParkComplete(); /* 노두 6/6 조사 완료 연출 */
   setTimeout(() => openDiscoveryPopup(siteId), 350);
 }
 
@@ -3758,9 +3991,8 @@ function completeItem(itemId){
     s.el.classList.remove("discovered","digging","near");
     s.el.classList.add("collected");
   }
-  /* 길가 노두들(완료 스티커/해금 이름표) 갱신 */
-  if(game.mode === "road"){
-    refreshRoadOutcrops();
+  /* 공원 노두 상태 갱신 (캔버스는 매 프레임 다시 그려지므로 모달만 갱신) */
+  if(game.mode === "park"){
     if($("outcropModal").classList.contains("on") && game.currentOutcrop){
       openOutcropModal(game.currentOutcrop); /* 확대 조사창도 최신 상태로 다시 그림 */
     }
@@ -3817,6 +4049,7 @@ function openLayerModal(layerId){
 /* ---------- HUD ---------- */
 function updateHud(){
   $("hudScore").textContent = safe(state.score, 0);
+  $("hudOutcrops").textContent = exploredOutcropCount() + "/" + layerData.length;
   $("hudCollect").textContent = state.completed.length + "/" + itemData.length;
   const comboEl = $("hudCombo");
   if(safe(state.combo,0) >= 2){
@@ -4138,9 +4371,9 @@ function bindUI(){
   $("btnStart").addEventListener("click", () => {
     playSound("click");
     renderScreen("gameScreen");
-    /* 모든 탐구는 하나의 3D 공간에서: 구불길을 걸으며 좌우 노두를 조사 */
+    /* 탑다운 공원 맵에서 자유 탐험 */
     renderRoadScene();
-    toast("🚶 W(▲)로 앞으로! 길 왼쪽·오른쪽의 노두를 클릭해 조사해요!");
+    toast("🗺 공원을 자유롭게 탐험! 숨어 있는 노두 " + layerData.length + "개를 찾아 조사해요!");
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
   $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });

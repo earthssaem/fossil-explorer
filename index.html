@@ -17,17 +17,23 @@
   --earth:#8a6240;
   --earth-dark:#5c3f2a;
   --brown:#a97b50;
-  --teal:#2ea79c;
-  --teal-dark:#1d7a72;
-  --navy:#22385c;
-  --navy-deep:#16243d;
-  --orange:#ff8c42;
-  --orange-dark:#e06a1f;
-  --card:#fffdf6;
-  --shadow:0 8px 24px rgba(34,56,92,.18);
-  --radius-lg:26px;
-  --radius-md:18px;
-  --radius-sm:12px;
+  --teal:#3ec6b5;
+  --teal-dark:#1d9184;
+  --navy:#3a4a75;
+  --navy-deep:#232f52;
+  --orange:#ffa25c;
+  --orange-dark:#f07c30;
+  --pink:#ff9eb5;
+  --pink-dark:#f2708f;
+  --lav:#b9a7f2;
+  --lav-dark:#8f79d9;
+  --sun:#ffd97a;
+  --mintbg:#eafaf5;
+  --card:#fffdf8;
+  --shadow:0 10px 26px rgba(90,80,140,.18);
+  --radius-lg:30px;
+  --radius-md:22px;
+  --radius-sm:14px;
   --font-big:clamp(1.6rem, 3.5vw, 2.6rem);
   --font-mid:clamp(1.05rem, 2.2vw, 1.4rem);
   --font-base:clamp(.95rem, 1.8vw, 1.15rem);
@@ -61,7 +67,9 @@ body{
 .screen.active{display:flex;}
 
 .panel-screen{
-  background:linear-gradient(180deg,#fdf8ec 0%, #f2e6cd 100%);
+  background:
+    radial-gradient(circle at 90% 6%, rgba(255,217,122,.3), transparent 30%),
+    linear-gradient(180deg,#fdf6ea 0%, #f6e8d2 100%);
   overflow-y:auto;
   padding:20px 16px 90px;
 }
@@ -76,21 +84,25 @@ button{
   display:inline-flex; align-items:center; justify-content:center; gap:10px;
   padding:16px 30px;
   font-size:var(--font-mid);
-  font-weight:800;
+  font-weight:900;
   border-radius:999px;
   color:#fff;
+  border:3px solid rgba(255,255,255,.9);
   background:linear-gradient(180deg,var(--orange) 0%, var(--orange-dark) 100%);
-  box-shadow:0 6px 0 rgba(160,70,10,.55), var(--shadow);
-  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  box-shadow:0 6px 0 rgba(200,100,30,.45), var(--shadow);
+  transition:transform .15s cubic-bezier(.3,1.6,.5,1), box-shadow .12s ease, filter .12s ease;
   letter-spacing:.02em;
+  text-shadow:0 1px 0 rgba(160,80,20,.35);
 }
-.btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(160,70,10,.55);}
-.btn:hover{filter:brightness(1.06);}
-.btn.teal{background:linear-gradient(180deg,var(--teal) 0%, var(--teal-dark) 100%); box-shadow:0 6px 0 rgba(15,80,74,.55), var(--shadow);}
-.btn.teal:active{box-shadow:0 2px 0 rgba(15,80,74,.55);}
-.btn.navy{background:linear-gradient(180deg,#3a5a8c 0%, var(--navy) 100%); box-shadow:0 6px 0 rgba(10,20,40,.55), var(--shadow);}
-.btn.navy:active{box-shadow:0 2px 0 rgba(10,20,40,.55);}
-.btn.ghost{background:rgba(255,255,255,.85); color:var(--navy); box-shadow:0 4px 0 rgba(34,56,92,.25);}
+.btn:active{transform:translateY(4px) scale(.97); box-shadow:0 2px 0 rgba(200,100,30,.45);}
+.btn:hover{filter:brightness(1.06); transform:scale(1.05) rotate(-1deg);}
+.btn.teal{background:linear-gradient(180deg,var(--teal) 0%, var(--teal-dark) 100%); box-shadow:0 6px 0 rgba(20,110,100,.4), var(--shadow); text-shadow:0 1px 0 rgba(20,110,100,.35);}
+.btn.teal:active{box-shadow:0 2px 0 rgba(20,110,100,.4);}
+.btn.navy{background:linear-gradient(180deg,var(--lav) 0%, var(--lav-dark) 100%); box-shadow:0 6px 0 rgba(110,90,180,.4), var(--shadow); text-shadow:0 1px 0 rgba(110,90,180,.35);}
+.btn.navy:active{box-shadow:0 2px 0 rgba(110,90,180,.4);}
+.btn.pink{background:linear-gradient(180deg,var(--pink) 0%, var(--pink-dark) 100%); box-shadow:0 6px 0 rgba(210,90,120,.4), var(--shadow); text-shadow:0 1px 0 rgba(210,90,120,.35);}
+.btn.pink:active{box-shadow:0 2px 0 rgba(210,90,120,.4);}
+.btn.ghost{background:rgba(255,255,255,.9); color:var(--navy); box-shadow:0 4px 0 rgba(140,130,180,.3); text-shadow:none; border-color:#e8e2f5;}
 .btn.small{padding:10px 20px; font-size:var(--font-base);}
 .btn.wide{width:min(340px, 84%);}
 .btn:disabled{filter:grayscale(.7); opacity:.6; cursor:default;}
@@ -117,8 +129,16 @@ h1,h2,h3{margin:.3em 0;}
 #startScreen{
   justify-content:center;
   background:
-    radial-gradient(circle at 70% 18%, rgba(255,240,190,.5), transparent 45%),
-    linear-gradient(180deg,#8fd3e8 0%, #cfe8d8 34%, #e8d9b8 58%, #b98a5e 78%, #7a5236 100%);
+    radial-gradient(circle at 70% 16%, rgba(255,244,190,.65), transparent 40%),
+    radial-gradient(circle at 16% 30%, rgba(255,158,181,.3), transparent 34%),
+    linear-gradient(180deg,#9fdcf2 0%, #cff0e2 34%, #ffe9c9 58%, #c99a6e 80%, #8a5f3e 100%);
+}
+.start-deco{
+  position:absolute;
+  font-size:1.6rem;
+  animation:heroBob 3s ease-in-out infinite;
+  pointer-events:none;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.15));
 }
 #startScreen::before{
   content:"";
@@ -219,7 +239,142 @@ h1,h2,h3{margin:.3em 0;}
 }
 .bg-photo.on{display:block;}
 
-/* --- 길 구간 CSS fallback 배경 --- */
+/* ==========================================================
+   길 구간: 진짜 3D 시점 (앞으로 걸어가는 유사 3D)
+   - 바닥 평면을 rotateX로 눕히고, 오브젝트는 counter-rotate로 세움
+   ========================================================== */
+/* 길 모드: 3D 원근은 전용 래퍼(.road3d-persp)에만 적용해
+   하늘/안개/캐릭터가 바닥면 뒤로 가려지지 않게 분리 */
+#sceneViewport.mode-road{perspective:none;}
+#sceneViewport.mode-road .scene-world{transform-style:flat;}
+.road3d-persp{
+  position:absolute; inset:0;
+  perspective:760px;
+  perspective-origin:50% 34%;
+  overflow:hidden;
+}
+.road3d-sky{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg,#8fd8f0 0%, #bfeee6 30%, #ffe9c9 46%, #ffd9ac 56%, #e8c390 100%);
+}
+.road3d-ground-plane{
+  position:absolute;
+  top:34%; left:50%;
+  width:3200px; height:1px;
+  transform:translateX(-50%) rotateX(85.5deg);
+  transform-origin:50% 0;
+  transform-style:preserve-3d;
+}
+.plane-scroll{
+  position:absolute; top:0; left:50%;
+  width:3200px; height:1px;
+  transform-style:preserve-3d;
+}
+/* 길 위 점선(바닥에 평평하게 붙어 순환하며 전진감을 표현) */
+.plane-dash{
+  position:absolute;
+  background:rgba(125,85,45,.32);
+  border-radius:14px;
+  pointer-events:none;
+}
+.plane-texture{
+  position:absolute; left:-1600px;
+  width:3200px;
+  background:
+    radial-gradient(circle at 22% 30%, rgba(255,255,255,.16) 0 5px, transparent 6px),
+    radial-gradient(circle at 74% 68%, rgba(120,80,45,.2) 0 7px, transparent 8px),
+    repeating-linear-gradient(0deg, #d9b57e 0 110px, #cfa970 110px 220px);
+}
+.plane-road{
+  position:absolute; left:-250px;
+  width:500px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 150px, rgba(120,80,40,.22) 150px 165px),
+    linear-gradient(90deg, #caa165 0 26px, #f0d9a4 26px 474px, #caa165 474px 500px);
+  box-shadow:0 0 40px rgba(120,80,40,.35);
+}
+.plane-obj{
+  position:absolute;
+  transform-origin:50% 100%;
+  transform-style:preserve-3d; /* 세워진 오브젝트가 바닥면에 눌리지 않게 */
+  pointer-events:none;
+}
+/* 오브젝트를 바닥에서 일으켜 세움 */
+.plane-obj .stand{
+  width:100%; height:100%;
+  transform:rotateX(-85.5deg);
+  transform-origin:50% 100%;
+}
+.obj-rock3d{
+  width:100%; height:100%;
+  background:radial-gradient(circle at 35% 28%, #cbb493 0%, #97805f 55%, #6f5c44 100%);
+  border-radius:46% 54% 50% 50% / 72% 66% 34% 38%;
+  box-shadow:inset -10px -10px 16px rgba(60,40,20,.4), 0 8px 10px rgba(60,40,20,.3);
+}
+.obj-tree3d{width:100%; height:100%;}
+.obj-tree3d .trunk{position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:16%; height:42%; background:linear-gradient(90deg,#7a5236,#a97b50); border-radius:8px;}
+.obj-tree3d .crown{position:absolute; top:0; left:50%; transform:translateX(-50%); width:92%; height:70%; background:radial-gradient(circle at 40% 30%, #9fd98a 0%, #5faf5c 55%, #3f7f45 100%); border-radius:50% 50% 46% 54% / 58% 62% 38% 42%; box-shadow:inset -12px -10px 18px rgba(30,70,35,.4);}
+.obj-grass3d{width:100%; height:100%;}
+.obj-grass3d span{position:absolute; bottom:0; width:22%; height:100%; background:linear-gradient(180deg,#8fd47a 0%, #4e9f52 100%); border-radius:50% 50% 0 0; transform-origin:bottom center;}
+.obj-grass3d span:nth-child(1){left:4%; transform:rotate(-10deg);}
+.obj-grass3d span:nth-child(2){left:38%; height:82%;}
+.obj-grass3d span:nth-child(3){left:70%; height:90%; transform:rotate(10deg);}
+.obj-sign3d{width:100%; height:100%; text-align:center;}
+.obj-sign3d .plate{
+  background:#a06e46; color:#fff3d8;
+  border:5px solid #6f4a2e; border-radius:16px;
+  padding:10px 12px; font-weight:900; font-size:30px;
+  box-shadow:0 5px 8px rgba(0,0,0,.3);
+  white-space:nowrap;
+}
+.obj-sign3d .pole{width:14px; height:60px; margin:0 auto; background:linear-gradient(90deg,#6f4a2e,#a06e46); border-radius:0 0 6px 6px;}
+.obj-spark3d{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
+.obj-spark3d::before{content:"✦"; font-size:46px; color:#ffe27a; text-shadow:0 0 18px #ffce4a; animation:sparkleTwinkle 1.4s ease-in-out infinite;}
+/* 길 옆 지층 절벽 (다가갈수록 커짐) */
+.obj-cliff3d{width:100%; height:100%; border-radius:26px 60px 0 0; overflow:hidden;
+  box-shadow:inset 0 -60px 90px rgba(60,35,20,.5), inset 30px 0 60px rgba(255,230,180,.22), 0 20px 30px rgba(60,35,20,.35);}
+.obj-cliff3d .strata-line{position:absolute; left:0; right:0;
+  box-shadow:inset 0 12px 16px rgba(255,235,190,.2), inset 0 -14px 22px rgba(40,20,8,.45);}
+.obj-cliff3d .cliff-glow{position:absolute; inset:0; background:radial-gradient(circle at 32% 22%, rgba(255,244,200,.4), transparent 55%);}
+.obj-cliff3d .cliff-q{position:absolute; top:26%; left:50%; transform:translateX(-50%);
+  font-size:80px; font-weight:900; color:rgba(255,240,200,.95); text-shadow:0 0 26px #ffce4a;
+  animation:hintBounce 1.4s ease-in-out infinite;}
+.road3d-fog{
+  position:absolute; left:0; right:0; top:26%; height:22%;
+  background:linear-gradient(180deg, transparent 0%, rgba(255,236,205,.85) 46%, rgba(255,236,205,.85) 56%, transparent 100%);
+  pointer-events:none;
+}
+/* 뒤에서 본 주인공 (길 구간 고정 위치) */
+#roadPlayer{
+  position:absolute; bottom:5%; left:50%;
+  width:130px; height:165px;
+  transform:translateX(-50%);
+  z-index:6; pointer-events:none;
+}
+#roadPlayer .player-shadow{
+  position:absolute; bottom:-10px; left:50%; transform:translateX(-50%);
+  width:86px; height:18px; border-radius:50%;
+  background:radial-gradient(ellipse, rgba(0,0,0,.35) 0%, transparent 70%);
+}
+/* 조작 안내 칩 (게임 중 하단 중앙) */
+#controlGuide{
+  position:absolute; left:50%; bottom:calc(16px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:21;
+  background:rgba(255,255,255,.92);
+  color:var(--navy);
+  border:3px solid var(--pink);
+  border-radius:999px;
+  padding:9px 20px;
+  font-weight:900;
+  font-size:var(--font-base);
+  box-shadow:var(--shadow);
+  pointer-events:none;
+  white-space:nowrap;
+}
+@media (max-width:760px){ #controlGuide{display:none;} }
+
+/* --- (구) 횡스크롤 길 배경: 시작화면 장식 등에 재사용 --- */
 .road-sky{
   position:absolute; inset:0;
   background:linear-gradient(180deg,#7ec8e3 0%, #a8ddda 40%, #f5e2b8 72%, #eccfa0 100%);
@@ -570,6 +725,17 @@ h1,h2,h3{margin:.3em 0;}
 @keyframes pInspect{0%,100%{transform:rotate(0deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-3px);}}
 .anim-discover .player-anim{animation:pDiscover .55s cubic-bezier(.3,1.6,.5,1) infinite;}
 @keyframes pDiscover{0%,100%{transform:translateY(0) scale(1);}45%{transform:translateY(-18px) scale(1.05,.97) rotate(3deg);}}
+.anim-climb .player-anim{animation:pClimb .5s ease-in-out infinite;}
+@keyframes pClimb{0%,100%{transform:rotate(-4deg) translateY(0);}50%{transform:rotate(4deg) translateY(-6px);}}
+#sceneViewport.mode-strata{perspective:900px; perspective-origin:50% 42%;}
+/* 절벽 위 등반 발판(사다리 느낌 홈) — 등반 가능함을 시각적으로 안내 */
+.climb-groove{
+  position:absolute;
+  width:34px; height:12px;
+  border-radius:8px;
+  background:rgba(40,20,8,.35);
+  box-shadow:inset 0 3px 4px rgba(0,0,0,.4), 0 1px 0 rgba(255,235,190,.25);
+}
 
 /* ---------- 조사 안내 말풍선 ---------- */
 #actionHint{
@@ -613,27 +779,30 @@ h1,h2,h3{margin:.3em 0;}
 #hud > *{pointer-events:auto;}
 .hud-group{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
 .hud-chip{
-  background:rgba(22,36,61,.8);
-  color:#ffe9c4;
+  background:rgba(255,255,255,.92);
+  color:#5a4a6e;
   border-radius:999px;
   padding:8px 16px;
-  font-weight:800;
-  border:2px solid rgba(255,233,196,.4);
-  box-shadow:0 3px 10px rgba(0,0,0,.35);
+  font-weight:900;
+  border:3px solid var(--pink);
+  box-shadow:0 4px 12px rgba(90,80,140,.25);
   font-size:var(--font-base);
   display:flex; align-items:center; gap:8px;
 }
+.hud-chip:nth-child(2){border-color:var(--teal);}
+.hud-chip:nth-child(3){border-color:var(--sun);}
 .hud-btn{
   width:52px; height:52px;
   border-radius:50%;
   font-size:1.4rem;
-  background:rgba(255,253,246,.92);
-  border:3px solid var(--navy);
+  background:rgba(255,255,255,.95);
+  border:3px solid var(--lav);
   color:var(--navy);
-  box-shadow:0 4px 0 rgba(34,56,92,.45);
-  transition:transform .12s ease;
+  box-shadow:0 4px 0 rgba(143,121,217,.45);
+  transition:transform .15s cubic-bezier(.3,1.6,.5,1);
   display:flex; align-items:center; justify-content:center;
 }
+.hud-btn:hover{transform:scale(1.1) rotate(-6deg);}
 .hud-btn:active{transform:translateY(3px);}
 
 /* ---------- 모바일 조작 버튼 ---------- */
@@ -646,25 +815,38 @@ h1,h2,h3{margin:.3em 0;}
 }
 #mobileControls .pad{display:flex; gap:12px; pointer-events:auto;}
 .ctrl-btn{
-  width:74px; height:74px;
+  width:66px; height:66px;
   border-radius:50%;
-  font-size:1.9rem;
+  font-size:1.7rem;
   font-weight:900;
-  background:rgba(255,253,246,.9);
-  color:var(--navy);
-  border:4px solid var(--navy);
-  box-shadow:0 5px 0 rgba(34,56,92,.5);
+  background:rgba(255,255,255,.94);
+  color:#5a4a6e;
+  border:4px solid var(--lav);
+  box-shadow:0 5px 0 rgba(143,121,217,.5);
   touch-action:none;
 }
-.ctrl-btn:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(34,56,92,.5);}
+.ctrl-btn:active{transform:translateY(4px); box-shadow:0 1px 0 rgba(143,121,217,.5);}
 .ctrl-btn.act{
   width:92px; height:92px;
-  background:linear-gradient(180deg,var(--orange),var(--orange-dark));
+  background:linear-gradient(180deg,var(--pink),var(--pink-dark));
   color:#fff;
   border-color:#fff;
-  box-shadow:0 5px 0 rgba(160,70,10,.6);
-  font-size:1.15rem;
+  box-shadow:0 5px 0 rgba(210,90,120,.55);
+  font-size:1.1rem;
 }
+#mobileControls .dpad{
+  pointer-events:auto;
+  display:grid;
+  grid-template-columns:repeat(3, 62px);
+  grid-template-rows:repeat(2, 62px);
+  gap:8px;
+  align-items:end;
+}
+#mobileControls .dpad .ctrl-btn{width:62px; height:62px; font-size:1.4rem;}
+#mobileControls .dpad #btnUp{grid-column:2; grid-row:1;}
+#mobileControls .dpad #btnLeft{grid-column:1; grid-row:2;}
+#mobileControls .dpad #btnDown{grid-column:2; grid-row:2;}
+#mobileControls .dpad #btnRight{grid-column:3; grid-row:2;}
 
 /* ---------- 연출 오버레이 (탐사 현장 발견!) ---------- */
 #cinematicOverlay{
@@ -712,8 +894,8 @@ h1,h2,h3{margin:.3em 0;}
 .modal-card{
   background:var(--card);
   border-radius:var(--radius-lg);
-  border:4px solid #fff;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  border:4px solid #ffd6e0;
+  box-shadow:0 20px 60px rgba(0,0,0,.45), 0 0 0 6px rgba(255,255,255,.6);
   width:min(560px, 96%);
   max-height:min(86vh, 760px);
   overflow-y:auto;
@@ -845,8 +1027,13 @@ h1,h2,h3{margin:.3em 0;}
 .quiz-progress-dots span.done{background:var(--teal);}
 .quiz-progress-dots span.now{background:var(--orange); transform:scale(1.25);}
 
-/* ---------- 도감 ---------- */
-#collectionScreen{background:linear-gradient(180deg,#eaf6f4 0%, #f2e6cd 100%);}
+/* ---------- 도감 (카와이 컬렉션) ---------- */
+#collectionScreen{
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,158,181,.25), transparent 30%),
+    radial-gradient(circle at 88% 14%, rgba(185,167,242,.25), transparent 32%),
+    linear-gradient(180deg,#eafaf5 0%, #fdf2e0 100%);
+}
 .collect-stats{
   display:flex; gap:10px; flex-wrap:wrap;
   justify-content:center;
@@ -854,25 +1041,32 @@ h1,h2,h3{margin:.3em 0;}
 }
 .rate-bar{
   width:min(560px, 92%);
-  height:22px;
+  height:26px;
   margin:8px auto;
   border-radius:999px;
-  background:#e0d3b4;
+  background:#fff;
   overflow:hidden;
-  border:3px solid #fff;
+  border:3px solid #ffd6e0;
   box-shadow:var(--shadow);
+  position:relative;
 }
 .rate-bar .fill{
   height:100%;
-  background:linear-gradient(90deg,var(--teal), #7fd9c0);
+  background:linear-gradient(90deg,var(--pink), var(--sun), var(--teal));
   border-radius:999px;
-  transition:width .6s ease;
+  transition:width .6s cubic-bezier(.3,1.4,.5,1);
+}
+.rate-bar::after{
+  content:"✨";
+  position:absolute; right:10px; top:50%;
+  transform:translateY(-50%);
+  font-size:.9rem;
 }
 .collection-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
-  gap:14px;
-  width:min(900px, 96%);
+  grid-template-columns:repeat(auto-fill, minmax(158px, 1fr));
+  gap:16px;
+  width:min(920px, 96%);
   margin:10px auto 20px;
 }
 .collect-card{
@@ -880,39 +1074,86 @@ h1,h2,h3{margin:.3em 0;}
   border-radius:var(--radius-md);
   border:3px solid #fff;
   box-shadow:var(--shadow);
-  padding:12px 10px 14px;
+  padding:0 10px 14px;
   text-align:center;
   cursor:pointer;
-  transition:transform .18s cubic-bezier(.2,1.5,.4,1), box-shadow .18s ease;
+  transition:transform .22s cubic-bezier(.3,1.7,.4,1), box-shadow .18s ease;
   position:relative;
   overflow:hidden;
 }
-.collect-card:hover{transform:translateY(-6px) scale(1.03);}
+.collect-card:hover{transform:translateY(-8px) scale(1.04) rotate(-1.2deg); box-shadow:0 16px 34px rgba(90,80,140,.28);}
+.collect-card .card-top{
+  height:64px;
+  margin:0 -10px 0;
+  border-radius:0 0 46% 46% / 0 0 60% 60%;
+  background:linear-gradient(135deg, var(--c1,#ffd6e0) 0%, var(--c2,#ffe9c9) 100%);
+}
+.collect-card .card-ring{
+  width:96px; height:96px;
+  margin:-46px auto 6px;
+  border-radius:50%;
+  background:#fff;
+  border:4px solid var(--c1,#ffd6e0);
+  box-shadow:0 6px 14px rgba(90,80,140,.2);
+  padding:12px;
+  position:relative;
+  z-index:1;
+}
 .collect-card .card-no{
   position:absolute; top:8px; left:10px;
-  font-weight:900; color:#b7a88a; font-size:.85rem;
+  font-weight:900; color:#fff; font-size:.78rem;
+  background:rgba(90,80,140,.45);
+  border-radius:999px;
+  padding:2px 10px;
+  z-index:2;
 }
 .collect-card .card-state{
-  position:absolute; top:6px; right:8px;
-  font-size:1.05rem;
+  position:absolute; top:7px; right:9px;
+  font-size:1.15rem;
+  z-index:2;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
 }
-.collect-card .card-visual{
-  width:92px; height:92px;
-  margin:14px auto 8px;
+.collect-card .card-name{font-weight:900; color:#5a4a6e; font-size:1.02rem;}
+.collect-card .card-sub{
+  display:inline-block;
+  font-size:.78rem; color:#8f79d9; font-weight:800; margin-top:5px;
+  background:#f1ecff;
+  border-radius:999px;
+  padding:3px 12px;
 }
-.collect-card .card-name{font-weight:900; color:var(--earth-dark);}
-.collect-card .card-sub{font-size:.85rem; color:#9a8a68; font-weight:700; margin-top:2px;}
-.collect-card.locked{background:#e9e2d2;}
-.collect-card.locked .card-name{color:#9a8a68; letter-spacing:.2em;}
-.collect-card.locked .card-visual{filter:grayscale(1) brightness(.45) contrast(.7); opacity:.75;}
-.collect-card.completed{border-color:var(--teal);}
+.collect-card .card-star{
+  margin-top:6px;
+  font-size:.95rem;
+  letter-spacing:.15em;
+  min-height:1.2em;
+}
+.collect-card.locked{background:#eef0f4;}
+.collect-card.locked .card-top{background:linear-gradient(135deg,#dfe3ea 0%, #cfd5df 100%);}
+.collect-card.locked .card-ring{border-color:#cfd5df; border-style:dashed; background:#f7f8fa;}
+.collect-card.locked .card-name{color:#9aa4b5; letter-spacing:.25em;}
+.collect-card.locked .card-sub{color:#9aa4b5; background:#e5e9ef;}
+.collect-card.locked .card-visual{filter:grayscale(1) brightness(.5) contrast(.6); opacity:.7;}
+.collect-card.discovered .card-ring{animation:ringWiggle 2.6s ease-in-out infinite;}
+@keyframes ringWiggle{0%,100%{transform:rotate(0);}30%{transform:rotate(-3deg);}60%{transform:rotate(3deg);}}
+.collect-card.completed{border-color:var(--sun);}
+.collect-card.completed .card-ring{border-color:var(--sun); box-shadow:0 0 0 4px rgba(255,217,122,.4), 0 6px 14px rgba(90,80,140,.2);}
 .collect-card.completed::after{
   content:"";
   position:absolute; inset:0;
-  background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.5) 46%, transparent 60%);
+  background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.55) 46%, transparent 60%);
   transform:translateX(-120%);
   animation:cardShine 3.2s ease-in-out infinite;
   pointer-events:none;
+}
+.collect-card.completed .card-get{
+  position:absolute; top:38px; right:-34px;
+  background:linear-gradient(180deg,var(--sun),#ffb84d);
+  color:#8a5a10;
+  font-weight:900; font-size:.72rem;
+  padding:3px 38px;
+  transform:rotate(35deg);
+  box-shadow:0 2px 5px rgba(0,0,0,.15);
+  z-index:2;
 }
 @keyframes cardShine{0%,60%{transform:translateX(-120%);}90%,100%{transform:translateX(130%);}}
 .badge-grid{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
@@ -1039,6 +1280,12 @@ h1,h2,h3{margin:.3em 0;}
 
   <!-- ============ 1. 시작 화면 ============ -->
   <section id="startScreen" class="screen active">
+    <div class="start-deco" style="top:10%; left:12%;">☁️</div>
+    <div class="start-deco" style="top:16%; right:14%; animation-delay:.7s;">✨</div>
+    <div class="start-deco" style="top:30%; left:7%; animation-delay:1.2s;">🦴</div>
+    <div class="start-deco" style="top:26%; right:7%; animation-delay:.4s;">🐚</div>
+    <div class="start-deco" style="bottom:18%; left:10%; animation-delay:1s;">⛏️</div>
+    <div class="start-deco" style="bottom:22%; right:11%; animation-delay:1.5s;">🔍</div>
     <div class="start-card">
       <div class="start-hero" id="startHero"></div>
       <h1 class="start-title">탐사대<br><span class="accent">숨겨진 층의 비밀을 찾아라</span></h1>
@@ -1060,9 +1307,9 @@ h1,h2,h3{margin:.3em 0;}
       <h2 class="screen-title">📖 게임 방법</h2>
     </div>
     <div class="panel-card">
-      <div class="help-step"><div class="help-num">1</div><div><b>길을 따라 탐험!</b><br>귀여운 탐사대원을 조작해 길을 걸어요. PC는 <b>←/→ 또는 A/D</b> 키, 모바일은 <b>화면 아래 좌우 버튼</b>으로 움직여요.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>탐사 현장 발견!</b><br>길 끝에 다다르면 층층이 쌓인 신비한 절벽(층상 단면)을 발견하게 돼요. 처음에는 층의 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>반짝이는 조사 지점을 찾아라!</b><br>층 곳곳에 ✦ 반짝이는 조사 지점이 숨어 있어요. 가까이 가면 "조사하기" 표시가 떠요. <b>E키 / 스페이스 / 조사 버튼</b>으로 발굴을 시작!</div></div>
+      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br>길에서는 <b>W(▲)</b>로 앞으로 걸어가고, <b>A/D(◀▶)</b>로 좌우로 비켜 걸어요. 지층 절벽에서는 <b>A/D</b>로 좌우 이동, <b>W/S(▲▼)</b>로 절벽을 직접 오르내려요! 방향키도 똑같이 쓸 수 있고, 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>🏞 길을 따라 앞으로 탐험!</b><br>3D 시점으로 길을 따라 쭉 걸어가다 보면, 길 옆에 층층이 쌓인 신비한 절벽(층상 단면)이 점점 가까워져요. 다가가면 <b>"탐사 현장 발견!"</b> 연출과 함께 본격 탐사가 시작돼요. 처음에는 층의 정보가 모두 <b>???</b>로 숨겨져 있어요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>🧗 절벽을 올라 반짝이는 조사 지점을 찾아라!</b><br>층 곳곳에 ✦ 반짝이는 조사 지점이 숨어 있어요. <b>W/S로 절벽을 기어올라</b> 가까이 간 다음, <b>E키 / 스페이스 / 조사 버튼 / 지점 클릭</b>으로 발굴을 시작!</div></div>
       <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
       <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
       <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
@@ -1096,14 +1343,17 @@ h1,h2,h3{margin:.3em 0;}
     </div>
 
     <div id="mobileControls">
-      <div class="pad move">
+      <div class="dpad">
+        <button class="ctrl-btn" id="btnUp">▲</button>
         <button class="ctrl-btn" id="btnLeft">◀</button>
+        <button class="ctrl-btn" id="btnDown">▼</button>
         <button class="ctrl-btn" id="btnRight">▶</button>
       </div>
       <div class="pad">
         <button class="ctrl-btn act" id="btnAction">🔍 조사</button>
       </div>
     </div>
+    <div id="controlGuide">🎮 W·A·S·D 또는 방향키로 이동 · E/스페이스 조사</div>
 
     <div id="cinematicOverlay">
       <div class="cinematic-card">
@@ -1463,16 +1713,17 @@ const DEFAULT_MISSION_DATA = {
   ]
 };
 
-/* --- 길 구간 설정 (교사가 수정할 데이터 영역) --- */
+/* --- 길 구간 설정 (교사가 수정할 데이터 영역)
+   z: 길에서의 거리(앞으로 걸어간 정도), side: -1 왼쪽 / 1 오른쪽 --- */
 const DEFAULT_ROAD_SCENE_DATA = {
-  length: 3000,            // 길 구간 전체 길이(px)
-  discoveryPoint: 2550,    // 이 지점에 도달하면 "탐사 현장 발견!" 연출
+  length: 2600,            // 길 구간 전체 거리
+  discoveryPoint: 2150,    // 이 거리에 도달하면 "탐사 현장 발견!" 연출
   discoveryTitle: "탐사 현장 발견!",
-  discoverySub: "층층이 쌓인 신비한 절벽이 나타났다…!",
+  discoverySub: "길 옆에 층층이 쌓인 신비한 절벽이 나타났다…!",
   signs: [
-    { x: 500,  text: "탐사로 입구 →" },
-    { x: 1400, text: "미확인 절벽 1.2km" },
-    { x: 2200, text: "⚠ 탐사 구역" }
+    { z: 350,  side: 1,  text: "🧭 탐사로 입구" },
+    { z: 1100, side: -1, text: "⛰ 미확인 절벽 1.2km" },
+    { z: 1800, side: 1,  text: "⚠ 탐사 구역" }
   ]
 };
 
@@ -1513,9 +1764,11 @@ const game = {
   mode: "road",              // "road" | "strata"
   running: false,
   worldLen: 3000,
-  player: { x: 200, dir: 1, moving: false, anim: "idle" },
+  /* x: 지층 구간 가로 위치 / elev: 지층 절벽 등반 높이(%)
+     z: 길 구간 전진 거리 / lat: 길 구간 좌우 치우침(px) */
+  player: { x: 200, dir: 1, moving: false, anim: "idle", z: 0, lat: 0, elev: 0 },
   cameraX: 0,
-  input: { left: false, right: false },
+  input: { left: false, right: false, up: false, down: false },
   sites: [],                 // 조사 지점 런타임 정보
   nearSite: null,
   digging: null,             // {siteId, progress, timer}
@@ -1524,8 +1777,10 @@ const game = {
   reducedMotion: false,
   smallScreen: false,
   stepSoundTimer: 0,
-  playerBaseX: 0             // playLayer 안에서 플레이어 요소 기준
+  roadObjs: [],              // 길 구간 3D 오브젝트
+  playerBaseX: 0
 };
+const ROAD3D = { camOffset: 520, maxLat: 210 }; // 3D 길 상수 (카메라 거리/좌우 한계)
 
 /* 에셋 로드 상태: "loading" | "ok" | "fail" */
 const assetStatus = { road: "loading", strata: "loading", player: {} };
@@ -1777,32 +2032,67 @@ function playerFallbackSVG(){
     '<rect x="53" y="16" width="12" height="14" rx="5" fill="#ffe08c" stroke="#c98d1a" stroke-width="3"/>' +
     '</svg>';
 }
-/* 캐릭터 렌더: 이미지 우선, 실패 시 idle 이미지, 그것도 없으면 SVG fallback */
+/* 뒷모습 꼬마 탐사대원 (3D 길 구간용): 큰 배낭 + 안전모 + 조끼 */
+function playerBackSVG(){
+  return '<svg class="player-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    // 다리 + 신발
+    '<rect x="42" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<rect x="63" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
+    '<ellipse cx="48" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
+    '<ellipse cx="70" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
+    // 팔 (양옆)
+    '<rect x="24" y="76" width="14" height="32" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
+    '<rect x="80" y="76" width="14" height="32" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
+    '<circle cx="31" cy="110" r="6.5" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
+    '<circle cx="87" cy="110" r="6.5" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
+    // 몸통(조끼 뒷면)
+    '<rect x="36" y="70" width="46" height="48" rx="16" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
+    // 큰 배낭
+    '<rect x="38" y="66" width="42" height="50" rx="14" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
+    '<rect x="45" y="74" width="28" height="14" rx="6" fill="#c9a468" stroke="#4a3020" stroke-width="3"/>' +
+    '<rect x="45" y="94" width="28" height="16" rx="6" fill="#a97b50" stroke="#4a3020" stroke-width="3"/>' +
+    '<rect x="47" y="58" width="24" height="10" rx="5" fill="#3ec6b5" stroke="#1d9184" stroke-width="3"/>' +
+    // 뒤통수 + 머리카락
+    '<circle cx="59" cy="46" r="26" fill="#ffd9b0" stroke="#b3763d" stroke-width="4"/>' +
+    '<path d="M33 46 a26 26 0 0 1 52 0 l0 8 q-13 8 -26 8 q-13 0 -26 -8 Z" fill="#7a5236" stroke="#5c3f2a" stroke-width="3"/>' +
+    '<circle cx="38" cy="52" r="4" fill="#ffb3a0" opacity=".6"/>' +
+    '<circle cx="80" cy="52" r="4" fill="#ffb3a0" opacity=".6"/>' +
+    // 안전모 (뒤에서 본 모습)
+    '<path d="M32 40 a27 27 0 0 1 54 0 l0 4 l-54 0 Z" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
+    '<rect x="28" y="40" width="62" height="9" rx="4.5" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
+    '<rect x="52" y="20" width="14" height="12" rx="5" fill="#ffe08c" stroke="#c98d1a" stroke-width="3"/>' +
+    '</svg>';
+}
+/* 캐릭터 렌더: 이미지 우선, 실패 시 idle 이미지, 그것도 없으면 SVG fallback
+   길 구간(#roadPlayer)은 뒷모습, 지층 구간(#player)은 옆/앞모습 */
 function renderPlayerCharacter(animState){
-  const el = $("player");
+  const el = $("player") || $("roadPlayer");
   if(!el) return;
   const stateName = animState || "idle";
   game.player.anim = stateName;
   el.className = "anim-" + stateName;
   const vis = el.querySelector(".player-visual");
   if(!vis) return;
-  // 방향 반전 (캐릭터만 반전, UI는 반전 금지)
-  vis.classList.toggle("flip", game.player.dir < 0);
+  // 방향 반전 (캐릭터만 반전, UI는 반전 금지) — 길 구간 뒷모습은 반전하지 않음
+  vis.classList.toggle("flip", game.mode === "strata" && game.player.dir < 0);
   const inner = vis.querySelector(".player-anim");
+  /* climb 상태는 전용 이미지가 없으면 walk 이미지 사용 */
+  const imgState = (stateName === "climb") ? "walk" : stateName;
   let src = null;
-  if(assetStatus.player[stateName] === "ok") src = gameAssets.player[stateName];
+  if(assetStatus.player[imgState] === "ok") src = gameAssets.player[imgState];
   else if(assetStatus.player.idle === "ok") src = gameAssets.player.idle;
+  const fallbackSVG = (game.mode === "road") ? playerBackSVG : playerFallbackSVG;
   const cur = inner.getAttribute("data-src") || "";
-  const want = src || "fallback";
+  const want = (src || "fallback") + "@" + game.mode;
   if(cur === want) return; // 불필요한 재렌더 방지
   inner.setAttribute("data-src", want);
   if(src){
     inner.innerHTML = '<img class="player-img" alt="탐사대원">';
     const im = inner.querySelector("img");
-    im.onerror = () => { inner.setAttribute("data-src","fallback"); inner.innerHTML = playerFallbackSVG(); };
+    im.onerror = () => { inner.setAttribute("data-src","fallback@" + game.mode); inner.innerHTML = fallbackSVG(); };
     im.src = src;
   }else{
-    inner.innerHTML = playerFallbackSVG();
+    inner.innerHTML = fallbackSVG();
   }
 }
 
@@ -1862,119 +2152,168 @@ function makeDust(layerEl, count, areaW){
   }
 }
 
-/* --- 길 구간 씬 --- */
+/* --- 길 구간 씬 (진짜 3D 전진 시점) ---
+   바닥 평면을 rotateX로 눕히고, 오브젝트는 counter-rotate로 세워서
+   W키로 앞으로 걸어가면 길 옆 풍경과 지층 절벽이 다가오는 구조 --- */
 function renderRoadScene(){
   game.mode = "road";
-  game.worldLen = Math.max(1200, Number(safe(roadSceneData.length, 3000)) || 3000);
-  clearLayers();
-  const far = $("farLayer"), mid = $("midLayer"), play = $("playLayer"), fore = $("foreLayer");
-  const W = game.worldLen;
+  game.worldLen = Math.max(1200, Number(safe(roadSceneData.length, 2600)) || 2600);
+  const vp = $("sceneViewport");
+  vp.classList.add("mode-road");
+  vp.classList.remove("mode-strata");
+  const world = $("sceneWorld");
+  const L = game.worldLen;
 
-  /* far: 하늘 + 태양 + 구름 + 먼 산 + 멀리 보이는 협곡 (CSS fallback 배경) */
-  far.style.width = (W + 1200) + "px";
-  far.innerHTML =
-    '<div class="road-sky"></div>' +
-    '<div class="bg-photo"></div>' +
-    '<div class="sun"></div>';
+  /* 하늘(화면 고정) + 3D 바닥 평면 + 안개 + 뒷모습 플레이어 */
+  world.innerHTML =
+    '<div class="road3d-sky">' +
+      '<div class="bg-photo"></div>' +
+      '<div class="sun" style="top:9%; right:16%;"></div>' +
+    '</div>' +
+    '<div class="road3d-persp"><div class="road3d-ground-plane"><div class="plane-scroll" id="planeScroll"></div></div></div>' +
+    '<div class="road3d-fog"></div>' +
+    '<div id="roadPlayer"><div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div></div>';
+
+  const sky = world.querySelector(".road3d-sky");
   for(let i=0;i<5;i++){
     const cl = document.createElement("div");
     cl.className = "cloud";
     cl.style.width = (90 + i*34) + "px";
     cl.style.height = (26 + (i%3)*10) + "px";
-    cl.style.top = (6 + (i*9)%26) + "%";
-    cl.style.left = ((i*613)% (W+600)) + "px";
+    cl.style.top = (5 + (i*7)%22) + "%";
+    cl.style.left = (8 + i*19) + "%";
     cl.style.animationDuration = (30 + i*9) + "s";
-    far.appendChild(cl);
+    sky.appendChild(cl);
   }
-  for(let i=0;i<3;i++){
-    const m = document.createElement("div");
-    m.className = "far-mountain";
-    m.style.left = (i*900 + 120) + "px";
-    m.style.opacity = String(.5 + i*.12);
-    far.appendChild(m);
-  }
-  /* 길 끝에 보이는 협곡: 진행할수록 커짐 */
-  const canyon = document.createElement("div");
-  canyon.className = "far-canyon";
-  canyon.id = "roadCanyon";
-  canyon.style.left = (W - 240) + "px";
-  canyon.style.transform = "scale(.55)";
-  far.appendChild(canyon);
+  makeDust(sky, 8, window.innerWidth);
 
-  /* mid: 땅 + 길 + 표지판 + 바위 + 풀 + 반짝 포인트 */
-  mid.style.width = (W + 800) + "px";
-  const ground = document.createElement("div");
-  ground.className = "road-ground";
-  mid.appendChild(ground);
-  const path = document.createElement("div");
-  path.className = "road-path";
-  mid.appendChild(path);
-  (roadSceneData.signs || []).forEach(s => {
-    const sg = document.createElement("div");
-    sg.className = "deco-sign";
-    sg.style.left = (Number(safe(s.x,0))||0) + "px";
-    sg.innerHTML = '<div class="plate">' + escapeHTML(safe(s.text,"→")) + '</div><div class="pole"></div>';
-    mid.appendChild(sg);
-  });
-  for(let i=0;i<10;i++){
-    const r = document.createElement("div");
-    r.className = "deco-rock";
-    r.style.left = ((i*331+180)%W) + "px";
-    r.style.transform = "scale(" + (0.5 + (i%4)*0.22) + ")";
-    mid.appendChild(r);
-    const g = document.createElement("div");
-    g.className = "deco-grass";
-    g.style.left = ((i*277+80)%W) + "px";
-    g.innerHTML = '<span style="left:0;"></span><span style="left:12px; height:75%; animation-delay:.4s;"></span><span style="left:24px; height:88%; animation-delay:.9s;"></span>';
-    mid.appendChild(g);
-  }
-  for(let i=0;i<6;i++){
-    const sp = document.createElement("div");
-    sp.className = "sparkle-point";
-    sp.style.left = ((i*457+300)%W) + "px";
-    sp.style.bottom = (10 + (i*7)%14) + "%";
-    mid.appendChild(sp);
-  }
-  makeDust(mid, 10, W);
+  const scroll = $("planeScroll");
+  const plane = world.querySelector(".road3d-ground-plane");
+  game.roadObjs = [];
 
-  /* play: 플레이어 */
-  play.style.width = W + "px";
-  const player = document.createElement("div");
-  player.id = "player";
-  player.innerHTML = '<div class="player-shadow"></div><div class="player-visual"><div class="player-anim"></div></div>';
-  player.style.bottom = "9%";
-  play.appendChild(player);
+  /* 바닥 질감 + 가운데 길: 성능을 위해 바닥에 '고정'(스크롤하지 않음).
+     전진감은 길 위 점선/옆 풍경 오브젝트의 이동으로 표현한다. */
+  const tex = document.createElement("div");
+  tex.className = "plane-texture";
+  tex.style.left = "0px";
+  tex.style.top = "-3400px";
+  tex.style.height = "4200px";
+  plane.insertBefore(tex, scroll);
+  const roadStrip = document.createElement("div");
+  roadStrip.className = "plane-road";
+  roadStrip.style.left = "1350px";
+  roadStrip.style.top = "-3400px";
+  roadStrip.style.height = "4200px";
+  plane.insertBefore(roadStrip, scroll);
 
-  /* fore: 전경 장식 */
-  fore.style.width = (W + 800) + "px";
+  /* 길 위 점선 대시: 지나가면 앞으로 순환 배치 */
+  const WRAP = 2400;
+  for(let i=0;i<12;i++){
+    const dz = i * 200;
+    const dash = document.createElement("div");
+    dash.className = "plane-dash";
+    dash.style.width = "64px";
+    dash.style.height = "120px";
+    dash.style.left = "-32px";
+    dash.style.top = (-dz - 120) + "px";
+    scroll.appendChild(dash);
+    game.roadObjs.push({ z: dz, el: dash, wrap: WRAP, h: 120 });
+  }
+
+  /* 3D 오브젝트 배치: z(전진 거리), lat(중앙 기준 좌우 px), w/h(기본 크기) */
+  function addObj(z, lat, w, h, inner, cls){
+    const o = document.createElement("div");
+    o.className = "plane-obj" + (cls ? " " + cls : "");
+    o.style.width = w + "px";
+    o.style.height = h + "px";
+    o.style.left = (lat - w/2) + "px";
+    o.style.top = (-z - h) + "px";
+    o.innerHTML = '<div class="stand">' + inner + '</div>';
+    scroll.appendChild(o);
+    game.roadObjs.push({ z: z, el: o });
+    return o;
+  }
+  /* 길 양옆 바위/나무/풀/반짝 포인트 */
+  for(let i=0;i<12;i++){
+    const z = 320 + i*190 + (i*67)%110;
+    const side = (i%2 === 0) ? -1 : 1;
+    const lat = side * (330 + (i*53)%260);
+    const kind = i % 3;
+    if(kind === 0) addObj(z, lat, 110, 78, '<div class="obj-rock3d"></div>');
+    else if(kind === 1) addObj(z, lat, 120, 170, '<div class="obj-tree3d"><div class="trunk"></div><div class="crown"></div></div>');
+    else addObj(z, lat, 90, 66, '<div class="obj-grass3d"><span></span><span></span><span></span></div>');
+  }
   for(let i=0;i<5;i++){
-    const fr = document.createElement("div");
-    fr.className = "fore-rock";
-    fr.style.left = ((i*683+240)%W) + "px";
-    fr.style.transform = "scale(" + (0.7 + (i%3)*0.3) + ")";
-    fore.appendChild(fr);
-    const fg = document.createElement("div");
-    fg.className = "fore-grass";
-    fg.style.left = ((i*541+420)%W) + "px";
-    fg.innerHTML = '<span style="left:0;"></span><span style="left:15px; height:70%; animation-delay:.5s;"></span><span style="left:30px; height:85%; animation-delay:1s;"></span>';
-    fore.appendChild(fg);
+    addObj(430 + i*420, ((i%2)? -1:1) * (140 + (i*37)%90), 70, 70, '<div class="obj-spark3d"></div>');
   }
+  /* 표지판 (교사 데이터) */
+  (roadSceneData.signs || []).forEach(s => {
+    const side = (Number(safe(s.side, 1)) < 0) ? -1 : 1;
+    addObj(Number(safe(s.z, 400)) || 400, side * 300, 260, 150,
+      '<div class="obj-sign3d"><div class="plate">' + escapeHTML(safe(s.text,"→")) + '</div><div class="pole"></div></div>');
+  });
+  /* 길 옆 지층 절벽: 다가갈수록 화면을 가득 채우며 커짐 */
+  const dp = Number(safe(roadSceneData.discoveryPoint, L - 400)) || (L - 400);
+  let bands = "";
+  const n = Math.max(1, layerData.length);
+  layerData.forEach((ly, i) => {
+    bands += '<div class="strata-line" style="top:' + (i*100/n) + '%; height:' + (100/n + 2) + '%;' +
+      'background:repeating-linear-gradient(' + (177 - i) + 'deg, ' + safe(ly.color1,"#b98a5e") + ' 0 18px, ' + safe(ly.color2,"#8a5a3c") + ' 18px 26px);"></div>';
+  });
+  addObj(dp + 260, 760, 1500, 780,
+    '<div class="obj-cliff3d">' + bands + '<div class="cliff-glow"></div><div class="cliff-q">?</div></div>');
+  /* 절벽 반대편 먼 산 느낌 바위들 */
+  addObj(dp + 420, -900, 480, 300, '<div class="obj-rock3d"></div>');
+  addObj(dp + 100, -560, 220, 150, '<div class="obj-rock3d"></div>');
 
   game.sites = [];
   game.nearSite = null;
-  game.player.x = state.roadDone ? game.worldLen - 300 : 160;
+  $("actionHint").classList.remove("on");
+  game.player.z = state.roadDone ? Math.max(0, dp - 260) : 0;
+  game.player.lat = 0;
   game.player.dir = 1;
-  game.cameraX = clamp(game.player.x - viewportW()/2, 0, Math.max(0, W - viewportW()));
+  $("controlGuide").textContent = "🎮 W(▲) 앞으로 · A/D(◀▶) 좌우 · 길 끝 절벽을 찾아가요!";
   applyBgPhoto();
   renderPlayerCharacter("idle");
   updateHud();
+}
+
+/* 3D 길 화면 갱신: 스크롤 이동 + 지나간 오브젝트 숨김 */
+function updateRoad3D(){
+  const scroll = $("planeScroll");
+  if(!scroll) return;
+  const z = game.player.z;
+  scroll.style.transform = "translateX(" + (-game.player.lat) + "px) translateY(" + (z + ROAD3D.camOffset) + "px)";
+  for(let i=0;i<game.roadObjs.length;i++){
+    const o = game.roadObjs[i];
+    let d = o.z - z;
+    /* 순환 오브젝트(길 점선): 지나가면 앞으로 다시 배치 */
+    if(o.wrap && d < 20){
+      o.z += o.wrap;
+      o.el.style.top = (-o.z - (o.h || 0)) + "px";
+      d = o.z - z;
+    }
+    const vis = (d > 30 && d < 3400);
+    if(o.visible !== vis){
+      o.visible = vis;
+      o.el.style.visibility = vis ? "visible" : "hidden";
+    }
+  }
 }
 
 /* --- 지층(층상 단면) 씬 --- */
 function renderGame(){
   game.mode = "strata";
   game.worldLen = 2600;
-  clearLayers();
+  const vp = $("sceneViewport");
+  vp.classList.add("mode-strata");
+  vp.classList.remove("mode-road");
+  /* 길 구간이 씬을 통째로 바꾸므로 패럴랙스 레이어 골격을 다시 만든다 */
+  $("sceneWorld").innerHTML =
+    '<div class="parallax-layer" id="farLayer"></div>' +
+    '<div class="parallax-layer" id="midLayer"></div>' +
+    '<div class="parallax-layer" id="playLayer"></div>' +
+    '<div class="parallax-layer" id="foreLayer" style="pointer-events:none;"></div>';
   const far = $("farLayer"), mid = $("midLayer"), play = $("playLayer"), fore = $("foreLayer");
   const W = game.worldLen;
 
@@ -2020,7 +2359,9 @@ function renderGame(){
 
   game.player.x = 220;
   game.player.dir = 1;
+  game.player.elev = 0;
   game.cameraX = 0;
+  $("controlGuide").textContent = "🎮 A/D(◀▶) 좌우 · W/S(▲▼) 절벽 오르내리기 · E/클릭 조사";
   applyBgPhoto();
   renderPlayerCharacter("idle");
   updateHud();
@@ -2113,27 +2454,49 @@ function renderDigSites(playEl, W){
     site.addEventListener("click", () => {
       const s = game.sites.find(s2 => s2.id === item.id);
       if(!s) return;
-      if(Math.abs(game.player.x - s.x) < 150) tryAction();
-      else toast("조금 더 가까이 가 보세요! 🚶");
+      if(isNearSite(s)) tryAction();
+      else toast("🧗 W/S로 절벽을 올라 조사 지점 가까이 가서 눌러 보세요!");
     });
+    /* 조사 지점 아래로 등반 홈(발판) 표시: 절벽을 오를 수 있다는 시각적 안내 */
+    for(let g = y + 8; g < 72; g += 7){
+      const groove = document.createElement("div");
+      groove.className = "climb-groove";
+      groove.style.left = (x - 17 + ((g*13)%3 - 1) * 8) + "px";
+      groove.style.top = g + "%";
+      playEl.appendChild(groove);
+    }
     playEl.appendChild(site);
-    game.sites.push({ id: item.id, x: x, el: site, status: status });
+    game.sites.push({ id: item.id, x: x, yPct: y, el: site, status: status });
   });
+}
+/* 캐릭터-조사지점 2D 근접 판정 (가로 px + 세로 화면비율) */
+function isNearSite(s){
+  const H = $("sceneViewport").clientHeight || window.innerHeight;
+  const playerCenterY = H * (1 - (5 + game.player.elev)/100) - 62;
+  const siteY = H * s.yPct / 100;
+  return Math.abs(s.x - game.player.x) < 135 && Math.abs(siteY - playerCenterY) < H * 0.15;
 }
 
 /* ---------- 2.5D 패럴랙스 / 카메라 ---------- */
 function viewportW(){ return $("sceneViewport").clientWidth || window.innerWidth; }
 function updateCamera(){
+  if(game.mode === "road") return; /* 3D 길 구간은 카메라 고정(1인칭 추적) */
   const target = clamp(game.player.x - viewportW()/2, 0, Math.max(0, game.worldLen - viewportW()));
   const ease = game.reducedMotion ? 1 : 0.09;
   game.cameraX += (target - game.cameraX) * ease;
   if(Math.abs(target - game.cameraX) < 0.4) game.cameraX = target;
 }
 function renderParallaxScene(){
+  if(game.mode === "road"){ updateRoad3D(); return; }
+  updateStrataParallax();
+}
+function updateStrataParallax(){
   const cam = game.cameraX;
   const lite = game.reducedMotion;
+  const farL = $("farLayer");
+  if(!farL) return;
   /* 각 레이어를 서로 다른 속도로 이동 + 깊이(translateZ) 부여 */
-  $("farLayer").style.transform  = lite
+  farL.style.transform = lite
     ? "translate3d(" + (-cam*0.25) + "px,0,0)"
     : "translate3d(" + (-cam*0.25) + "px,0,-140px) scale(1.16)";
   $("midLayer").style.transform  = "translate3d(" + (-cam*0.6) + "px,0,0)";
@@ -2142,17 +2505,13 @@ function renderParallaxScene(){
     ? "translate3d(" + (-cam*1.25) + "px,0,0)"
     : "translate3d(" + (-cam*1.25) + "px,0,60px) scale(0.94)";
 
-  /* 플레이어 위치 */
+  /* 플레이어 위치 (가로 + 등반 높이) */
   const p = $("player");
-  if(p) p.style.left = game.player.x + "px";
-
-  /* 길 구간: 진행할수록 협곡이 커지며 다가오는 연출 */
-  if(game.mode === "road"){
-    const cy = $("roadCanyon");
-    if(cy){
-      const prog = clamp(game.player.x / Math.max(1, safe(roadSceneData.discoveryPoint, game.worldLen-400)), 0, 1);
-      cy.style.transform = "scale(" + (0.55 + prog*0.75) + ")";
-    }
+  if(p){
+    p.style.left = game.player.x + "px";
+    p.style.bottom = (5 + game.player.elev) + "%";
+    const sh = p.querySelector(".player-shadow");
+    if(sh) sh.style.opacity = game.player.elev > 3 ? "0.25" : "1";
   }
 
   /* 조사 안내 말풍선 위치 */
@@ -2178,11 +2537,26 @@ function gameLoop(t){
 
   const speed = 340;
   let moving = false;
+  let climbing = false;
   if(!game.digging && !anyModalOpen()){
-    if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
-    if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
+    if(game.mode === "road"){
+      /* 3D 길: W(▲) 앞으로, S(▼) 뒤로, A/D(◀▶) 좌우로 비켜 걷기 */
+      if(game.input.up){ game.player.z += speed*1.15*dt; moving = true; }
+      if(game.input.down){ game.player.z -= speed*0.7*dt; moving = true; }
+      if(game.input.left){ game.player.lat -= 300*dt; moving = true; }
+      if(game.input.right){ game.player.lat += 300*dt; moving = true; }
+      game.player.z = clamp(game.player.z, 0, game.worldLen);
+      game.player.lat = clamp(game.player.lat, -ROAD3D.maxLat, ROAD3D.maxLat);
+    }else{
+      /* 지층: A/D 좌우 이동, W/S 절벽 등반 */
+      if(game.input.left){ game.player.x -= speed*dt; game.player.dir = -1; moving = true; }
+      if(game.input.right){ game.player.x += speed*dt; game.player.dir = 1; moving = true; }
+      if(game.input.up){ game.player.elev += 36*dt; moving = true; climbing = true; }
+      if(game.input.down){ game.player.elev -= 40*dt; moving = true; climbing = true; }
+      game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
+      game.player.elev = clamp(game.player.elev, 0, 68);
+    }
   }
-  game.player.x = clamp(game.player.x, 60, game.worldLen - 60);
 
   /* 걷기 효과음 (가볍게) */
   if(moving){
@@ -2190,24 +2564,27 @@ function gameLoop(t){
     if(game.stepSoundTimer <= 0){ playSound("step"); game.stepSoundTimer = 0.28; }
   }
 
-  /* 캐릭터 상태 */
-  if(game.digging){
-    if(game.player.anim !== "dig") renderPlayerCharacter("dig");
-  }else if(moving){
-    if(game.player.anim !== "walk") renderPlayerCharacter("walk");
-    else { const vis = document.querySelector("#player .player-visual"); if(vis) vis.classList.toggle("flip", game.player.dir < 0); }
-  }else if(game.player.anim === "walk" || game.player.anim === "dig"){
-    renderPlayerCharacter("idle");
+  /* 캐릭터 상태: 벽에 매달려 있으면 climb, 이동 중이면 walk */
+  const onWall = game.mode === "strata" && game.player.elev > 3;
+  let wantAnim;
+  if(game.digging) wantAnim = "dig";
+  else if(onWall || climbing) wantAnim = "climb";
+  else if(moving) wantAnim = "walk";
+  else wantAnim = (game.player.anim === "walk" || game.player.anim === "dig" || game.player.anim === "climb") ? "idle" : game.player.anim;
+  if(game.player.anim !== wantAnim) renderPlayerCharacter(wantAnim);
+  else if(game.mode === "strata"){
+    const vis = document.querySelector("#player .player-visual");
+    if(vis) vis.classList.toggle("flip", game.player.dir < 0);
   }
 
   /* 그림자 크기 변화 */
-  const sh = document.querySelector("#player .player-shadow");
-  if(sh){ sh.style.width = moving ? "52px" : "64px"; sh.style.opacity = moving ? ".8" : "1"; }
+  const sh = document.querySelector(game.mode === "road" ? "#roadPlayer .player-shadow" : "#player .player-shadow");
+  if(sh){ sh.style.width = moving ? "70%" : "80%"; }
 
   /* 길 구간: 발견 지점 도달 체크 */
   if(game.mode === "road" && !game.discoveryShown){
     const dp = Number(safe(roadSceneData.discoveryPoint, game.worldLen - 400)) || (game.worldLen - 400);
-    if(game.player.x >= dp) showDiscoveryCinematic();
+    if(game.player.z >= dp) showDiscoveryCinematic();
   }
 
   /* 지층 구간: 조사 지점 근접 체크 */
@@ -2223,9 +2600,10 @@ function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
 }
 function updateNearSite(){
-  let best = null, bestDist = 150;
+  let best = null, bestDist = 1e9;
   game.sites.forEach(s => {
     if(s.status === "collected") return;
+    if(!isNearSite(s)) return;
     const d = Math.abs(s.x - game.player.x);
     if(d < bestDist){ best = s; bestDist = d; }
   });
@@ -2261,7 +2639,7 @@ function enterExplorationArea(){
   state.enteredSite = true;
   saveState();
   renderGame();
-  toast("🧭 층상 단면 탐사 시작! 반짝이는 곳을 조사해 보세요.");
+  toast("🧗 층상 단면 탐사 시작! W/S로 절벽을 올라 반짝이는 곳을 조사해요.");
 }
 function cameraShake(){
   if(game.reducedMotion) return;
@@ -2683,22 +3061,34 @@ function renderCollection(){
     chips += '<span class="chip">🏷 ' + escapeHTML(g) + " " + c + "/" + items.length + "</span>";
   });
   stats.innerHTML = chips;
-  /* 카드 */
+  /* 카드 (포켓몬 도감 느낌의 깜찍한 컬렉션 카드) */
+  const PASTELS = [
+    ["#ffd6e0","#ffe9c9"], ["#c9f2e6","#dff4ff"], ["#e6dcff","#ffe0f0"],
+    ["#fff0c2","#ffe0c9"], ["#d4f0d0","#f0ffd8"], ["#cfe6ff","#e6dcff"]
+  ];
+  const groupList = [...new Set(itemData.map(i => safe(i.group,"기타")))];
   itemData.forEach((item, idx) => {
     const completed = state.completed.includes(item.id);
     const discovered = state.discovered.includes(item.id) || completed;
     const cls = completed ? "completed" : (discovered ? "discovered" : "locked");
     const card = document.createElement("div");
     card.className = "collect-card " + cls;
-    const stateIcon = completed ? "✅" : (discovered ? "🔍" : "🔒");
+    const pastel = PASTELS[Math.max(0, groupList.indexOf(safe(item.group,"기타"))) % PASTELS.length];
+    card.style.setProperty("--c1", pastel[0]);
+    card.style.setProperty("--c2", pastel[1]);
+    const stateIcon = completed ? "⭐" : (discovered ? "🔍" : "");
     const layer = layerData.find(l => l.id === item.layer);
+    const stars = completed ? "⭐⭐⭐" : (discovered ? "⭐" : "");
     card.innerHTML =
+      '<div class="card-top"></div>' +
       '<div class="card-no">No.' + String(idx+1).padStart(2,"0") + '</div>' +
       '<div class="card-state">' + stateIcon + '</div>' +
-      '<div class="card-visual item-visual-slot"></div>' +
+      (completed ? '<div class="card-get">GET!</div>' : '') +
+      '<div class="card-ring"><div class="card-visual item-visual-slot"></div></div>' +
       '<div class="card-name">' + (discovered ? escapeHTML(safe(item.name,"단서")) : "???") + '</div>' +
-      '<div class="card-sub">' + (discovered ? escapeHTML(safe(layer && layer.label, "?")) : "미발견") +
-        (completed ? " · " + escapeHTML(safe(item.group,"")) : "") + '</div>';
+      '<div class="card-sub">' + (discovered ? "🏞 " + escapeHTML(safe(layer && layer.label, "?")) : "🔒 미발견") +
+        (completed ? " · " + escapeHTML(safe(item.group,"")) : "") + '</div>' +
+      '<div class="card-star">' + stars + '</div>';
     renderAssetImage(card.querySelector(".card-visual"), item, discovered ? "normal" : "silhouette");
     card.addEventListener("click", () => {
       playSound("click");
@@ -2868,6 +3258,8 @@ function bindInputs(){
     if(!game.running || anyModalOpen()) return;
     if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = true;
     if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = true;
+    if(e.key === "ArrowUp" || e.key === "w" || e.key === "W") game.input.up = true;
+    if(e.key === "ArrowDown" || e.key === "s" || e.key === "S") game.input.down = true;
     if(e.key === "e" || e.key === "E" || e.key === " "){
       e.preventDefault();
       tryAction();
@@ -2876,10 +3268,14 @@ function bindInputs(){
   window.addEventListener("keyup", e => {
     if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = false;
     if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = false;
+    if(e.key === "ArrowUp" || e.key === "w" || e.key === "W") game.input.up = false;
+    if(e.key === "ArrowDown" || e.key === "s" || e.key === "S") game.input.down = false;
   });
   /* 모바일 버튼 (터치/마우스 겸용) */
   bindHold($("btnLeft"), v => game.input.left = v);
   bindHold($("btnRight"), v => game.input.right = v);
+  bindHold($("btnUp"), v => game.input.up = v);
+  bindHold($("btnDown"), v => game.input.down = v);
   $("btnAction").addEventListener("click", () => { ensureAudioOnce(); tryAction(); });
   /* 첫 입력에서 오디오 활성화 (모바일 자동재생 제한 대응) */
   ["pointerdown","touchstart"].forEach(ev => {
@@ -2915,7 +3311,7 @@ function bindUI(){
       toast("🧭 탐사를 이어서 진행합니다!");
     }else{
       renderRoadScene();
-      toast("🚶 길을 따라 → 방향으로 걸어가 보세요!");
+      toast("🚶 W키(또는 ▲ 버튼)를 눌러 길을 따라 앞으로 걸어가 보세요!");
     }
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });

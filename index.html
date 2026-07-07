@@ -302,7 +302,10 @@ h1,h2,h3{margin:.3em 0;}
 }
 .road3d-sky{
   position:absolute; inset:0;
-  background:linear-gradient(180deg,#8fd8f0 0%, #bfeee6 30%, #ffe9c9 46%, #ffd9ac 56%, #e8c390 100%);
+  /* 픽셀 게임식 띠 하늘: 부드러운 그라데이션 대신 플랫 컬러 밴드 */
+  background:linear-gradient(180deg,
+    #7ecdea 0 14%, #9adcee 14% 28%, #bfeee6 28% 40%,
+    #ffefc9 40% 50%, #ffdfae 50% 60%, #f2cc96 60% 100%);
 }
 .road3d-ground-plane{
   position:absolute;
@@ -317,20 +320,22 @@ h1,h2,h3{margin:.3em 0;}
   width:3200px; height:1px;
   transform-style:preserve-3d;
 }
-/* 길 위 점선(바닥에 평평하게 붙어 순환하며 전진감을 표현) */
+/* 길 위 점선(바닥에 평평하게 붙어 순환하며 전진감을 표현) — 각진 도트 발자국 */
 .plane-dash{
   position:absolute;
-  background:rgba(125,85,45,.32);
-  border-radius:14px;
+  background:rgba(125,85,45,.35);
+  border-radius:0;
+  box-shadow:inset 0 0 0 6px rgba(90,60,30,.15);
   pointer-events:none;
 }
 .plane-texture{
   position:absolute; left:-1600px;
   width:3200px;
+  /* 도트 잔디/모래 타일: 체커 + 점 패턴 */
   background:
-    radial-gradient(circle at 22% 30%, rgba(255,255,255,.16) 0 5px, transparent 6px),
-    radial-gradient(circle at 74% 68%, rgba(120,80,45,.2) 0 7px, transparent 8px),
-    repeating-linear-gradient(0deg, #d9b57e 0 110px, #cfa970 110px 220px);
+    repeating-linear-gradient(0deg, transparent 0 96px, rgba(120,150,80,.14) 96px 108px, transparent 108px 220px),
+    repeating-linear-gradient(90deg, transparent 0 84px, rgba(255,255,255,.1) 84px 96px, transparent 96px 200px),
+    linear-gradient(#bcd489, #bcd489);
 }
 .plane-road{
   position:absolute; left:-250px;
@@ -347,12 +352,14 @@ h1,h2,h3{margin:.3em 0;}
   pointer-events:none;
 }
 .plane-obj.interactive{pointer-events:auto; cursor:pointer;}
-/* 구불구불한 좁은 길: 짧은 조각들을 곡선을 따라 이어 붙임 */
+/* 구불구불한 좁은 길: 짧은 조각들을 곡선을 따라 이어 붙임 (도트 흙길) */
 .road-seg{
   position:absolute;
-  background:linear-gradient(90deg,#c9a165 0 16px, #f0d9a4 16px calc(100% - 16px), #c9a165 calc(100% - 16px) 100%);
-  box-shadow:0 0 26px rgba(120,80,40,.25);
-  border-radius:10px;
+  background:linear-gradient(90deg,
+    #a8845c 0 10px, #d9b57e 10px 22px,
+    #f0d9a4 22px calc(100% - 22px),
+    #d9b57e calc(100% - 22px) calc(100% - 10px), #a8845c calc(100% - 10px) 100%);
+  border-radius:0;
 }
 /* 3D 오브젝트로 세워진 노두: 산책길용 .outcrop 스타일 재사용 + 위치 오버라이드 */
 .plane-obj .outcrop{
@@ -366,43 +373,53 @@ h1,h2,h3{margin:.3em 0;}
   transform:rotateX(-85.5deg);
   transform-origin:50% 100%;
 }
+/* 도트 바위: 계단형 실루엣 + 플랫 2톤 */
 .obj-rock3d{
   width:100%; height:100%;
-  background:radial-gradient(circle at 35% 28%, #cbb493 0%, #97805f 55%, #6f5c44 100%);
-  border-radius:46% 54% 50% 50% / 72% 66% 34% 38%;
-  box-shadow:inset -10px -10px 16px rgba(60,40,20,.4), 0 8px 10px rgba(60,40,20,.3);
+  background:linear-gradient(180deg,#b09a76 0 45%, #8a7458 45% 100%);
+  clip-path:polygon(25% 0, 75% 0, 75% 16%, 90% 16%, 90% 38%, 100% 38%, 100% 100%, 0 100%, 0 38%, 10% 38%, 10% 16%, 25% 16%);
 }
+/* 도트 나무: 각진 잎뭉치 + 플랫 톤 */
 .obj-tree3d{width:100%; height:100%;}
-.obj-tree3d .trunk{position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:16%; height:42%; background:linear-gradient(90deg,#7a5236,#a97b50); border-radius:8px;}
-.obj-tree3d .crown{position:absolute; top:0; left:50%; transform:translateX(-50%); width:92%; height:70%; background:radial-gradient(circle at 40% 30%, #9fd98a 0%, #5faf5c 55%, #3f7f45 100%); border-radius:50% 50% 46% 54% / 58% 62% 38% 42%; box-shadow:inset -12px -10px 18px rgba(30,70,35,.4);}
+.obj-tree3d .trunk{position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:18%; height:38%; background:#8a5f3e; border-left:6px solid #6f4a2e;}
+.obj-tree3d .crown{
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:96%; height:72%;
+  background:linear-gradient(180deg,#8fd47a 0 40%, #5faf5c 40% 74%, #468a4a 74% 100%);
+  clip-path:polygon(30% 0, 70% 0, 70% 14%, 86% 14%, 86% 34%, 100% 34%, 100% 78%, 86% 78%, 86% 100%, 14% 100%, 14% 78%, 0 78%, 0 34%, 14% 34%, 14% 14%, 30% 14%);
+}
 .obj-grass3d{width:100%; height:100%;}
-.obj-grass3d span{position:absolute; bottom:0; width:22%; height:100%; background:linear-gradient(180deg,#8fd47a 0%, #4e9f52 100%); border-radius:50% 50% 0 0; transform-origin:bottom center;}
-.obj-grass3d span:nth-child(1){left:4%; transform:rotate(-10deg);}
-.obj-grass3d span:nth-child(2){left:38%; height:82%;}
-.obj-grass3d span:nth-child(3){left:70%; height:90%; transform:rotate(10deg);}
+.obj-grass3d span{position:absolute; bottom:0; width:24%; height:100%; background:linear-gradient(180deg,#8fd47a 0 55%, #4e9f52 55% 100%); border-radius:0;}
+.obj-grass3d span:nth-child(1){left:2%; height:72%;}
+.obj-grass3d span:nth-child(2){left:38%;}
+.obj-grass3d span:nth-child(3){left:74%; height:84%;}
 .obj-sign3d{width:100%; height:100%; text-align:center;}
 .obj-sign3d .plate{
   background:#a06e46; color:#fff3d8;
-  border:5px solid #6f4a2e; border-radius:16px;
+  border:6px solid #6f4a2e; border-radius:0;
   padding:10px 12px; font-weight:900; font-size:30px;
-  box-shadow:0 5px 8px rgba(0,0,0,.3);
+  box-shadow:6px 6px 0 rgba(70,45,25,.35);
   white-space:nowrap;
 }
-.obj-sign3d .pole{width:14px; height:60px; margin:0 auto; background:linear-gradient(90deg,#6f4a2e,#a06e46); border-radius:0 0 6px 6px;}
+.obj-sign3d .pole{width:14px; height:60px; margin:0 auto; background:#6f4a2e;}
 .obj-spark3d{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
-.obj-spark3d::before{content:"✦"; font-size:46px; color:#ffe27a; text-shadow:0 0 18px #ffce4a; animation:sparkleTwinkle 1.4s ease-in-out infinite;}
-/* 길 옆 지층 절벽 (다가갈수록 커짐) */
-.obj-cliff3d{width:100%; height:100%; border-radius:26px 60px 0 0; overflow:hidden;
-  box-shadow:inset 0 -60px 90px rgba(60,35,20,.5), inset 30px 0 60px rgba(255,230,180,.22), 0 20px 30px rgba(60,35,20,.35);}
+.obj-spark3d::before{content:"✦"; font-size:46px; color:#ffce4a; animation:sparkleTwinkle 1.2s steps(2,end) infinite;}
+/* 길 끝 지층 절벽 (장식) — 플랫 밴드 도트 절벽 */
+.obj-cliff3d{width:100%; height:100%; border-radius:0; overflow:hidden;
+  clip-path:polygon(8% 0, 92% 0, 92% 6%, 100% 6%, 100% 100%, 0 100%, 0 6%, 8% 6%);
+  box-shadow:inset -20px 0 0 rgba(60,35,20,.25), inset 20px 0 0 rgba(255,235,190,.2);}
 .obj-cliff3d .strata-line{position:absolute; left:0; right:0;
-  box-shadow:inset 0 12px 16px rgba(255,235,190,.2), inset 0 -14px 22px rgba(40,20,8,.45);}
-.obj-cliff3d .cliff-glow{position:absolute; inset:0; background:radial-gradient(circle at 32% 22%, rgba(255,244,200,.4), transparent 55%);}
-.obj-cliff3d .cliff-q{position:absolute; top:26%; left:50%; transform:translateX(-50%);
-  font-size:80px; font-weight:900; color:rgba(255,240,200,.95); text-shadow:0 0 26px #ffce4a;
-  animation:hintBounce 1.4s ease-in-out infinite;}
+  box-shadow:inset 0 -8px 0 rgba(40,20,8,.25);}
+.obj-cliff3d .cliff-glow{display:none;}
+.obj-cliff3d .cliff-q{display:none;}
+/* 지평선 안개 → 얇고 은은한 도트 디더 밴드 */
 .road3d-fog{
-  position:absolute; left:0; right:0; top:26%; height:22%;
-  background:linear-gradient(180deg, transparent 0%, rgba(255,236,205,.85) 46%, rgba(255,236,205,.85) 56%, transparent 100%);
+  position:absolute; left:0; right:0; top:31%; height:6%;
+  background:
+    repeating-conic-gradient(rgba(255,242,215,.5) 0 25%, transparent 0 50%) 0 0/8px 8px,
+    linear-gradient(180deg, rgba(255,242,215,.55), rgba(255,242,215,.2));
+  -webkit-mask-image:linear-gradient(180deg, transparent, #000 35%, #000 65%, transparent);
+  mask-image:linear-gradient(180deg, transparent, #000 35%, #000 65%, transparent);
   pointer-events:none;
 }
 /* 뒤에서 본 주인공 (길 구간 고정 위치) */
@@ -413,9 +430,9 @@ h1,h2,h3{margin:.3em 0;}
   z-index:6; pointer-events:none;
 }
 #roadPlayer .player-shadow{
-  position:absolute; bottom:-10px; left:50%; transform:translateX(-50%);
-  width:86px; height:18px; border-radius:50%;
-  background:radial-gradient(ellipse, rgba(0,0,0,.35) 0%, transparent 70%);
+  position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+  width:72px; height:12px; border-radius:0;
+  background:rgba(60,40,20,.3);
 }
 /* 조작 안내 칩 (게임 중 하단 중앙) */
 #controlGuide{
@@ -442,20 +459,33 @@ h1,h2,h3{margin:.3em 0;}
 }
 .sun{
   position:absolute; top:7%; right:14%;
-  width:90px; height:90px; border-radius:50%;
-  background:radial-gradient(circle,#fff6d8 20%, #ffd97a 60%, rgba(255,217,122,0) 75%);
-  filter:blur(1px);
-  animation:sunPulse 5s ease-in-out infinite;
+  width:72px; height:72px;
+  background:#ffd97a;
+  /* 픽셀 태양: 계단형 팔각 실루엣 + 플랫 하이라이트 */
+  clip-path:polygon(25% 0, 75% 0, 75% 12.5%, 87.5% 12.5%, 87.5% 25%, 100% 25%, 100% 75%, 87.5% 75%, 87.5% 87.5%, 75% 87.5%, 75% 100%, 25% 100%, 25% 87.5%, 12.5% 87.5%, 12.5% 75%, 0 75%, 0 25%, 12.5% 25%, 12.5% 12.5%, 25% 12.5%);
+  animation:sunPulse 3s steps(2,end) infinite;
 }
-@keyframes sunPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.sun::after{
+  content:"";
+  position:absolute; top:18%; left:18%;
+  width:28%; height:28%;
+  background:#fff2c2;
+}
+@keyframes sunPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
 .cloud{
   position:absolute;
-  background:rgba(255,255,255,.85);
-  border-radius:999px;
-  filter:blur(2px);
-  animation:cloudDrift 40s linear infinite;
+  width:10px; height:10px;
+  background:transparent;
+  /* box-shadow 픽셀 드로잉으로 그린 도트 구름 (10px = 1도트) */
+  box-shadow:
+    20px 0 0 #fff, 30px 0 0 #fff, 40px 0 0 #fff,
+    10px 10px 0 #fff, 20px 10px 0 #fff, 30px 10px 0 #fff, 40px 10px 0 #fff, 50px 10px 0 #fff, 60px 10px 0 #fff,
+    0 20px 0 #fff, 10px 20px 0 #fff, 20px 20px 0 #fff, 30px 20px 0 #fff, 40px 20px 0 #fff, 50px 20px 0 #fff, 60px 20px 0 #fff, 70px 20px 0 #fff,
+    0 30px 0 #eef7fb, 10px 30px 0 #eef7fb, 20px 30px 0 #eef7fb, 30px 30px 0 #eef7fb, 40px 30px 0 #eef7fb, 50px 30px 0 #eef7fb, 60px 30px 0 #eef7fb, 70px 30px 0 #eef7fb;
+  transform:scale(var(--cs,1));
+  animation:cloudDrift 40s steps(24) infinite;
 }
-@keyframes cloudDrift{from{transform:translateX(0);} to{transform:translateX(-160px);}}
+@keyframes cloudDrift{from{transform:scale(var(--cs,1)) translateX(0);} to{transform:scale(var(--cs,1)) translateX(-160px);}}
 .far-mountain{
   position:absolute; bottom:32%;
   width:420px; height:200px;
@@ -557,9 +587,9 @@ h1,h2,h3{margin:.3em 0;}
 /* --- 먼지/공기 입자 --- */
 .dust-mote{
   position:absolute;
-  border-radius:50%;
-  background:rgba(255,240,200,.5);
-  animation:moteFloat linear infinite;
+  border-radius:0;
+  background:rgba(255,240,200,.55);
+  animation:moteFloat steps(14) infinite;
   pointer-events:none;
 }
 @keyframes moteFloat{
@@ -700,11 +730,11 @@ h1,h2,h3{margin:.3em 0;}
   background:radial-gradient(circle at 35% 30%, #efe0c0 0%, #d3ba8e 70%);
   box-shadow:inset -3px -3px 5px rgba(140,100,55,.35), 0 2px 3px rgba(120,90,50,.2);
 }
-/* 미조사 노두: 은은한 금빛 링이 숨쉬듯 반짝임 → "저기 가보고 싶다" */
-.outcrop:not(.done) .mound{animation:moundGlow 2.6s ease-in-out infinite;}
+/* 미조사 노두: 도트 게임식 깜빡이는 외곽선 → "저기 가보고 싶다" */
+.outcrop:not(.done) .mound{animation:moundGlow 1.4s steps(2,end) infinite;}
 @keyframes moundGlow{
-  0%,100%{box-shadow:inset -14px -8px 20px rgba(90,55,30,.35), inset 10px 8px 16px rgba(255,244,210,.4), 0 10px 18px rgba(120,90,50,.3), 0 0 0 0 rgba(255,210,110,0);}
-  50%{box-shadow:inset -14px -8px 20px rgba(90,55,30,.35), inset 10px 8px 16px rgba(255,244,210,.4), 0 10px 18px rgba(120,90,50,.3), 0 0 26px 6px rgba(255,210,110,.5);}
+  0%,100%{box-shadow:inset -12px 0 0 rgba(90,55,30,.28), inset 12px 0 0 rgba(255,244,210,.3);}
+  50%{box-shadow:inset -12px 0 0 rgba(90,55,30,.28), inset 12px 0 0 rgba(255,244,210,.3), inset 0 0 0 8px rgba(255,210,110,.75);}
 }
 /* --- 길 옆 작은 노두 (클릭해서 확대 조사) --- */
 .outcrop{
@@ -720,13 +750,11 @@ h1,h2,h3{margin:.3em 0;}
 @keyframes outcropBounce{0%,100%{transform:scale(1) translateY(0);}50%{transform:scale(1.05) translateY(-7px);}}
 .outcrop .mound{
   position:absolute; left:0; right:0; bottom:22px; top:14px;
-  border-radius:46% 52% 14px 14px / 60% 66% 10px 10px;
+  /* 도트 노두: 계단형 언덕 실루엣 */
+  border-radius:0;
   overflow:hidden;
-  box-shadow:
-    inset -14px -8px 20px rgba(90,55,30,.35),
-    inset 10px 8px 16px rgba(255,244,210,.4),
-    0 10px 18px rgba(120,90,50,.3);
-  border:4px solid rgba(120,85,50,.55);
+  clip-path:polygon(30% 0, 70% 0, 70% 10%, 84% 10%, 84% 24%, 94% 24%, 94% 42%, 100% 42%, 100% 100%, 0 100%, 0 42%, 6% 42%, 6% 24%, 16% 24%, 16% 10%, 30% 10%);
+  box-shadow:inset -12px 0 0 rgba(90,55,30,.28), inset 12px 0 0 rgba(255,244,210,.3);
 }
 .outcrop .mound .band{
   position:absolute; left:-6%; width:112%;
@@ -734,9 +762,8 @@ h1,h2,h3{margin:.3em 0;}
 }
 .outcrop .mound .pebble{
   position:absolute;
-  border-radius:50% 45% 55% 50%;
+  border-radius:0;
   background:rgba(70,40,20,.3);
-  box-shadow:inset 1px 1px 2px rgba(255,240,200,.35);
 }
 .outcrop .grass-tuft{
   position:absolute; top:2px;
@@ -744,14 +771,13 @@ h1,h2,h3{margin:.3em 0;}
 }
 .outcrop .grass-tuft span{
   position:absolute; bottom:0; width:9px; height:100%;
-  background:linear-gradient(180deg,#8fd47a,#5faf5c);
-  border-radius:8px 8px 0 0;
+  background:linear-gradient(180deg,#8fd47a 0 55%, #5faf5c 55% 100%);
+  border-radius:0;
 }
 .outcrop .glint{
   position:absolute; top:-4px; right:16px;
-  font-size:26px; color:#ffdf6e;
-  text-shadow:0 0 12px #ffce4a;
-  animation:sparkleTwinkle 1.5s ease-in-out infinite;
+  font-size:26px; color:#ffce4a;
+  animation:sparkleTwinkle 1.2s steps(2,end) infinite;
   pointer-events:none;
 }
 .outcrop.done .glint{display:none;}
@@ -759,31 +785,31 @@ h1,h2,h3{margin:.3em 0;}
   position:absolute; left:50%; bottom:-6px;
   transform:translateX(-50%);
   background:#fffdf6;
-  border:3px solid #d8b880;
-  color:#7a5a36;
-  border-radius:999px;
+  border:4px solid #6f5236;
+  color:#6f5236;
+  border-radius:0;
   padding:5px 14px;
   font-weight:900;
   font-size:.92rem;
   white-space:nowrap;
-  box-shadow:0 4px 8px rgba(120,90,50,.25);
+  box-shadow:4px 4px 0 rgba(70,50,30,.3);
 }
-.outcrop.unlocked .outcrop-label{border-color:var(--teal); color:var(--teal-dark);}
+.outcrop.unlocked .outcrop-label{border-color:var(--teal-dark); color:var(--teal-dark);}
 .outcrop .complete-sticker{
   position:absolute; top:-12px; left:-10px;
   width:56px; height:56px;
-  border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #8ee6c8, var(--teal));
-  border:3px solid #fff;
+  border-radius:0;
+  background:var(--teal);
+  border:4px solid #fff;
   color:#fff;
   font-weight:900;
   font-size:.78rem;
   display:none;
   align-items:center; justify-content:center;
   text-align:center;
-  transform:rotate(-14deg);
-  box-shadow:0 4px 10px rgba(30,120,105,.4);
-  animation:stickerStamp .45s cubic-bezier(.2,1.8,.4,1) both;
+  transform:rotate(-8deg);
+  box-shadow:4px 4px 0 rgba(30,110,95,.4);
+  animation:stickerStamp .45s steps(3,end) both;
 }
 @keyframes stickerStamp{from{transform:rotate(-14deg) scale(2.2); opacity:0;} to{transform:rotate(-14deg) scale(1); opacity:1;}}
 .outcrop.done .complete-sticker{display:flex;}
@@ -863,23 +889,19 @@ h1,h2,h3{margin:.3em 0;}
 }
 .dig-site .socket{
   position:absolute; inset:6px;
-  border-radius:50% 46% 54% 50%;
-  background:
-    radial-gradient(circle at 40% 32%, rgba(255,235,190,.25), transparent 55%),
-    radial-gradient(circle at 55% 60%, rgba(30,14,5,.85) 0%, rgba(70,42,22,.9) 60%, rgba(110,70,40,.6) 100%);
-  box-shadow:
-    inset 0 8px 14px rgba(0,0,0,.65),
-    inset 0 -4px 8px rgba(255,220,170,.15),
-    0 3px 8px rgba(0,0,0,.4);
-  transition:transform .2s ease;
+  /* 도트 발굴 구멍: 계단형 사각 구덩이 */
+  border-radius:0;
+  clip-path:polygon(22% 0, 78% 0, 78% 12%, 92% 12%, 92% 30%, 100% 30%, 100% 100%, 0 100%, 0 30%, 8% 30%, 8% 12%, 22% 12%);
+  background:linear-gradient(180deg, #4a2c16 0 40%, #34200f 40% 100%);
+  box-shadow:inset 0 -10px 0 rgba(255,220,170,.12), inset 0 10px 0 rgba(0,0,0,.5);
+  transition:transform .2s steps(2,end);
 }
 .dig-site .glint{
   position:absolute; top:2px; left:50%;
   transform:translateX(-50%);
   font-size:20px;
-  color:#ffe27a;
-  text-shadow:0 0 8px #ffce4a;
-  animation:sparkleTwinkle 1.8s ease-in-out infinite;
+  color:#ffce4a;
+  animation:sparkleTwinkle 1.2s steps(2,end) infinite;
   pointer-events:none;
 }
 .dig-site .site-item{
@@ -954,10 +976,10 @@ h1,h2,h3{margin:.3em 0;}
 .player-shadow{
   position:absolute; bottom:-8px; left:50%;
   transform:translateX(-50%);
-  width:64px; height:14px;
-  background:radial-gradient(ellipse, rgba(0,0,0,.4) 0%, transparent 70%);
-  border-radius:50%;
-  transition:width .2s ease, opacity .2s ease;
+  width:64px; height:10px;
+  background:rgba(60,40,20,.3);
+  border-radius:0;
+  transition:width .2s steps(2,end), opacity .2s ease;
 }
 .player-visual{
   position:absolute; inset:0;
@@ -1516,6 +1538,147 @@ h1,h2,h3{margin:.3em 0;}
 .item-visual-slot{width:100%; height:100%; position:relative;}
 .item-img{width:100%; height:100%; object-fit:contain; display:block;}
 .item-fallback-svg{width:100%; height:100%; display:block;}
+
+/* ==========================================================================
+   ██ 픽셀아트 스킨 ██
+   전체 UI를 도트 게임 느낌으로: 각진 모서리 + 두꺼운 외곽선 + 하드 섀도(블러 0)
+   ========================================================================== */
+:root{
+  --ink:#4a3b2e;          /* 픽셀 외곽선 색 */
+  --hard:4px 4px 0 rgba(74,59,46,.35); /* 하드 섀도 */
+}
+img, .item-img, .player-img{image-rendering:pixelated;}
+.btn{
+  border-radius:0;
+  border:4px solid var(--ink);
+  background-image:none;
+  background-color:var(--orange);
+  text-shadow:none;
+  box-shadow:inset -4px -4px 0 rgba(0,0,0,.14), inset 4px 4px 0 rgba(255,255,255,.35), var(--hard);
+  transition:transform .1s steps(2,end);
+}
+.btn:hover{filter:none; transform:translate(-1px,-1px);}
+.btn:active{transform:translate(3px,3px); box-shadow:inset -4px -4px 0 rgba(0,0,0,.14), inset 4px 4px 0 rgba(255,255,255,.35), 1px 1px 0 rgba(74,59,46,.35);}
+.btn.teal{background-color:var(--teal); box-shadow:inset -4px -4px 0 rgba(0,0,0,.14), inset 4px 4px 0 rgba(255,255,255,.35), var(--hard);}
+.btn.navy{background-color:var(--lav); box-shadow:inset -4px -4px 0 rgba(0,0,0,.14), inset 4px 4px 0 rgba(255,255,255,.35), var(--hard);}
+.btn.pink{background-color:var(--pink); box-shadow:inset -4px -4px 0 rgba(0,0,0,.14), inset 4px 4px 0 rgba(255,255,255,.35), var(--hard);}
+.btn.ghost{background-color:#fffdf6; color:var(--ink); border-color:var(--ink); box-shadow:var(--hard);}
+.chip, .hud-chip{
+  border-radius:0;
+  border:3px solid var(--ink);
+  box-shadow:3px 3px 0 rgba(74,59,46,.3);
+  background:#fffdf6;
+  color:var(--ink);
+}
+.hud-btn, .ctrl-btn{
+  border-radius:0;
+  border:4px solid var(--ink);
+  background:#fffdf6;
+  color:var(--ink);
+  box-shadow:var(--hard);
+  transition:transform .1s steps(2,end);
+}
+.hud-btn:hover{transform:none;}
+.hud-btn:active, .ctrl-btn:active{transform:translate(3px,3px); box-shadow:1px 1px 0 rgba(74,59,46,.35);}
+.ctrl-btn.act{background:var(--pink); color:#fff; border-color:var(--ink);}
+.modal-card, .panel-card, .start-card, .badge-token{
+  border-radius:0;
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 rgba(74,59,46,.3);
+}
+.modal-close{border-radius:0; border:3px solid var(--ink); background:#ffe9c9; color:var(--ink);}
+.collect-card{
+  border-radius:0;
+  border:4px solid var(--ink);
+  box-shadow:5px 5px 0 rgba(74,59,46,.28);
+}
+.collect-card:hover{transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(74,59,46,.3);}
+.collect-card .card-top{border-radius:0;}
+.collect-card .card-ring{
+  border-radius:0;
+  border-width:4px;
+  border-color:var(--ink);
+  box-shadow:none;
+}
+.collect-card.completed .card-ring{border-color:var(--sun); box-shadow:0 0 0 3px var(--ink);}
+.collect-card.locked .card-ring{border-style:dashed;}
+.collect-card .card-no, .collect-card .card-sub, .collect-card .card-new{border-radius:0;}
+.badge-token .icon{filter:none;}
+.toast{
+  border-radius:0;
+  border:3px solid var(--ink);
+  background:#fffdf6;
+  color:var(--ink);
+  box-shadow:4px 4px 0 rgba(74,59,46,.3);
+}
+.toast.gold{background:var(--sun); color:#6a4e10;}
+.rate-bar{
+  border-radius:0;
+  border:4px solid var(--ink);
+  background:repeating-linear-gradient(90deg,#fff 0 18px, #f0e8d8 18px 20px);
+}
+.rate-bar .fill{
+  border-radius:0;
+  background:repeating-linear-gradient(90deg, var(--teal) 0 18px, #6fd9c4 18px 20px);
+  transition:width .5s steps(8,end);
+}
+.modal-item-visual{border-radius:0; border:4px solid var(--ink); box-shadow:none;}
+.modal-item-visual .shine{display:none;}
+.quiz-question{border-radius:0; border:4px solid var(--ink); background:#fdf4de;}
+.quiz-choice{
+  border-radius:0;
+  border:4px solid var(--ink);
+  box-shadow:3px 3px 0 rgba(74,59,46,.25);
+  transition:transform .1s steps(2,end);
+}
+.quiz-choice:hover{transform:translate(-1px,-1px); border-color:var(--teal-dark);}
+.quiz-feedback{border-radius:0;}
+.quiz-feedback.hint{border:4px solid #d8a63a;}
+.quiz-feedback.explain{border:4px solid var(--teal-dark);}
+.teacher-textarea, .teacher-tab, .teacher-note{border-radius:0;}
+.teacher-tab{border:3px solid var(--ink);}
+.teacher-tab.on{background:var(--ink); border-color:var(--ink);}
+#actionHint .bubble{
+  border-radius:0;
+  border:4px solid var(--ink);
+  animation-timing-function:steps(2,end);
+}
+#actionHint .bubble::after{border-top-color:var(--ink);}
+#controlGuide{border-radius:0; border:3px solid var(--ink); color:var(--ink);}
+.xsec-wrap{border-radius:0; border:5px solid var(--ink); box-shadow:none;}
+.xsec-wrap .crack, .xsec-wrap .pebble{border-radius:0;}
+.xsec-note{color:#8a755c;}
+.dig-progress{border-radius:0; border:2px solid var(--ink);}
+.dig-progress .fill{border-radius:0; background:repeating-linear-gradient(90deg,var(--sun) 0 8px, var(--orange) 8px 10px); transition:width .1s steps(2,end);}
+.dig-particle{border-radius:0; animation-timing-function:steps(5,end);}
+.confetti-burst{border-radius:0; animation-timing-function:steps(8,end);}
+.start-card{background:#fffdf6;}
+.start-scene .curve-path{
+  border-radius:0;
+  background:linear-gradient(180deg,#f0d9a4 0 30%, #e2c489 30% 100%);
+  box-shadow:inset 0 8px 0 rgba(150,110,60,.25);
+}
+.start-scene .mini-outcrop{border-radius:0; border:3px solid var(--ink); animation-timing-function:steps(2,end);}
+.start-scene .start-sign .plate{border-radius:0; border:3px solid var(--ink);}
+.start-hero, .start-deco{animation-timing-function:steps(2,end);}
+.help-num{border-radius:0; box-shadow:3px 3px 0 var(--teal-dark);}
+.mini-cliff-far{filter:none; border-radius:0;}
+.fore-rock{filter:none; border-radius:0; clip-path:polygon(25% 0, 75% 0, 75% 20%, 92% 20%, 92% 45%, 100% 45%, 100% 100%, 0 100%, 0 45%, 8% 45%, 8% 20%, 25% 20%);}
+/* 캐릭터/스프라이트 애니메이션을 도트 프레임 느낌으로 */
+.anim-idle .player-anim{animation-timing-function:steps(2,end);}
+.anim-walk .player-anim{animation-timing-function:steps(2,end); animation-duration:.32s;}
+.anim-dig .player-anim{animation-timing-function:steps(2,end);}
+.anim-discover .player-anim{animation-timing-function:steps(2,end);}
+.anim-inspect .player-anim{animation-timing-function:steps(2,end);}
+@keyframes heroBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+/* 시작 화면 배경도 띠 하늘로 */
+#startScreen{
+  background:linear-gradient(180deg,
+    #8fd4ee 0 16%, #aee0f0 16% 32%, #cfeee2 32% 46%,
+    #ffefc9 46% 60%, #e8c894 60% 78%, #b98a5e 78% 100%);
+}
+#gameScreen{background:#20304e;}
+.screen-title{text-shadow:2px 2px 0 rgba(255,255,255,.7);}
 
 /* ---------- 반응형 ---------- */
 @media (max-width:760px){
@@ -2233,89 +2396,153 @@ function applyBgPhoto(){
   }
 }
 
+/* ---------- 픽셀아트 스프라이트 헬퍼 ----------
+   rows: 문자열 배열(픽셀 맵), palette: {문자: 색상}, '.'은 투명
+   가로로 이어진 같은 색 픽셀은 하나의 rect로 합쳐 그린다 */
+function pixelSVG(rows, palette, cls){
+  const h = rows.length, w = rows[0].length;
+  let out = '<svg class="' + (cls || "item-fallback-svg") + '" viewBox="0 0 ' + w + ' ' + h +
+    '" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+  for(let y = 0; y < h; y++){
+    let x = 0;
+    while(x < w){
+      const ch = rows[y][x];
+      const color = palette[ch];
+      if(!color){ x++; continue; }
+      let run = 1;
+      while(x + run < w && rows[y][x + run] === ch) run++;
+      out += '<rect x="' + x + '" y="' + y + '" width="' + run + '" height="1" fill="' + color + '"/>';
+      x += run;
+    }
+  }
+  return out + '</svg>';
+}
+
 /* ---------- 아이템 fallback 그림 (SVG) ---------- */
 const FALLBACK_COLORS = ["#2ea79c","#ff8c42","#8a6fbf","#e05a7a","#4a90d9","#7fae3f"];
 function itemColor(item){
   const idx = Math.max(0, itemData.findIndex(i => i.id === item.id));
   return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
 }
+/* 아이템 도트 스프라이트 맵 (12x12) — A:본색, B:외곽선/진한색, L:밝은색,
+   W:흰 반짝, D:눈/입, R:볼터치 */
+const ITEM_PIXEL_MAPS = {
+  spiral: [
+    "...BBBBBB...",
+    "..BAAAAAAB..",
+    ".BAABBBBAAB.",
+    ".BABAAAABAB.",
+    "BABALLLLABAB",
+    "BABALWWLABAB",
+    "BABALLLLABAB",
+    ".BABAAAABAB.",
+    ".BAABBBBAAB.",
+    "..BAAAAAAB..",
+    "..BADAADAB..",
+    "...BBBBBB..."
+  ],
+  segmented: [
+    "..D......D..",
+    "...B....B...",
+    "..BBBBBBBB..",
+    ".BAABAABAAB.",
+    "BADABAABAAAB",
+    "BAAABAABAAAB",
+    "BARABAABAAAB",
+    ".BAABAABAAB.",
+    "..BBBBBBBB..",
+    "..BB.BB.BB..",
+    "............",
+    "............"
+  ],
+  bone: [
+    "............",
+    ".BB......BB.",
+    "BAAB....BAAB",
+    "BAAAAAAAAAAB",
+    "BAADALLADAAB",
+    "BAAAAAAAAAAB",
+    "BAAB....BAAB",
+    ".BB......BB.",
+    "............",
+    "............",
+    "............",
+    "............"
+  ],
+  disk: [
+    "...BBBBBB...",
+    "..BAAAAAAB..",
+    ".BAWAAAAWAB.",
+    ".BAAAAAAAAB.",
+    "BADAAAAAADAB",
+    "BRAAAAAAAARB",
+    "BAAADDDDAAAB",
+    ".BAAAAAAAAB.",
+    ".BAWAAAAWAB.",
+    "..BAAAAAAB..",
+    "...BBBBBB...",
+    "............"
+  ],
+  branch: [
+    ".BB.....BB..",
+    "BAAB...BAAB.",
+    ".BAAB.BAAB..",
+    "..BAABAAB...",
+    "...BAAAB....",
+    "....BAB.....",
+    "....BAB.....",
+    "....BAB.....",
+    "...BADAB....",
+    "...BAAAB....",
+    "...BBBBB....",
+    "............"
+  ],
+  leaf: [
+    ".....BB.....",
+    "....BAAB....",
+    "...BALAAB...",
+    "..BAALAAAB..",
+    ".BAAALAAAAB.",
+    ".BADALADAAB.",
+    ".BAAALAAAAB.",
+    ".BARALARAAB.",
+    "..BAALAAAB..",
+    "...BALAAB...",
+    "....BAB.....",
+    ".....B......"
+  ],
+  unknown: [
+    "...BBBBBB...",
+    "..BAAAAAAB..",
+    ".BAAAAAAAAB.",
+    ".BAAAAAAAAB.",
+    "BADDAAAADDAB",
+    "BAAAAAAAAAAB",
+    "BAARADDARAAB",
+    "BAAAAAAAAAAB",
+    ".BAAAAAAAAB.",
+    ".BAAAAAAAAB.",
+    "..BBBBBBBB..",
+    "............"
+  ]
+};
 function fallbackShapeSVG(shape, color, silhouette){
-  /* 귀여운 스티커 일러스트 느낌: 두꺼운 외곽선 + 하이라이트 + 반짝이 + 작은 표정 */
-  const c  = silhouette ? "#9aa0ab" : color;
-  const c2 = silhouette ? "#71777f" : "#4a3b5e";
-  const q  = silhouette ? '<text x="60" y="74" text-anchor="middle" font-size="36" font-weight="900" fill="#565c66">?</text>' : "";
-  /* 작은 카와이 얼굴 (실루엣일 때는 표시하지 않음) */
-  function kf(x, y){
-    if(silhouette) return "";
-    return '<circle cx="' + (x-8) + '" cy="' + y + '" r="3" fill="#3a3350"/>' +
-      '<circle cx="' + (x+8) + '" cy="' + y + '" r="3" fill="#3a3350"/>' +
-      '<circle cx="' + (x-6.8) + '" cy="' + (y-1.2) + '" r="1.1" fill="#fff"/>' +
-      '<circle cx="' + (x+9.2) + '" cy="' + (y-1.2) + '" r="1.1" fill="#fff"/>' +
-      '<path d="M' + (x-4) + ' ' + (y+6) + ' Q' + x + ' ' + (y+10) + ' ' + (x+4) + ' ' + (y+6) + '" stroke="#3a3350" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
-      '<ellipse cx="' + (x-14) + '" cy="' + (y+5) + '" rx="3.4" ry="2.2" fill="#ffb3a0" opacity=".85"/>' +
-      '<ellipse cx="' + (x+14) + '" cy="' + (y+5) + '" rx="3.4" ry="2.2" fill="#ffb3a0" opacity=".85"/>';
-  }
-  const sparkle = silhouette ? "" :
-    '<path d="M97 18 l2.6 6.4 6.4 2.6 -6.4 2.6 -2.6 6.4 -2.6 -6.4 -6.4 -2.6 6.4 -2.6 Z" fill="#fff" opacity=".95"/>' +
-    '<circle cx="24" cy="30" r="2.6" fill="#fff" opacity=".8"/>';
-  let body = "";
-  switch(shape){
-    case "spiral": /* 동글동글 소라 나선 */
-      body = '<circle cx="60" cy="62" r="37" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<path d="M60 62 a7 7 0 0 1 7 7 a13 13 0 0 1 -13 6 a19 19 0 0 1 -12 -19 a25 25 0 0 1 25 -18 a30 30 0 0 1 23 24" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5.5" stroke-linecap="round"/>' +
-        '<ellipse cx="44" cy="40" rx="9" ry="5" fill="rgba(255,255,255,.55)" transform="rotate(-24 44 40)"/>' +
-        kf(60, 66);
-      break;
-    case "segmented": /* 마디가 있는 통통 벌레 느낌 */
-      body = '<circle cx="34" cy="66" r="21" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="86" cy="66" r="21" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="60" cy="58" r="26" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<path d="M46 30 q-4 -10 -11 -13 M74 30 q4 -10 11 -13" stroke="' + c2 + '" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-        '<circle cx="35" cy="16" r="4" fill="' + c + '" stroke="' + c2 + '" stroke-width="3"/>' +
-        '<circle cx="85" cy="16" r="4" fill="' + c + '" stroke="' + c2 + '" stroke-width="3"/>' +
-        '<ellipse cx="48" cy="42" rx="8" ry="4.5" fill="rgba(255,255,255,.55)" transform="rotate(-20 48 42)"/>' +
-        kf(60, 58);
-      break;
-    case "bone": /* 말랑한 뼈다귀 */
-      body = '<circle cx="30" cy="48" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="42" cy="38" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="78" cy="84" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="90" cy="74" r="12" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<rect x="30" y="46" width="60" height="22" rx="11" transform="rotate(38 60 60)" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<rect x="38" y="52" width="44" height="10" rx="5" transform="rotate(38 60 60)" fill="rgba(255,255,255,.4)"/>' +
-        kf(60, 58);
-      break;
-    case "disk": /* 동글동글 쿠키/원반 */
-      body = '<circle cx="60" cy="60" r="38" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<circle cx="60" cy="60" r="27" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>' +
-        '<ellipse cx="44" cy="40" rx="10" ry="5.5" fill="rgba(255,255,255,.55)" transform="rotate(-26 44 40)"/>' +
-        '<circle cx="82" cy="72" r="3" fill="rgba(255,255,255,.7)"/>' +
-        '<circle cx="38" cy="78" r="2.6" fill="rgba(255,255,255,.7)"/>' +
-        kf(60, 58);
-      break;
-    case "branch": /* 몽글몽글 산호 가지 */
-      body = '<path d="M60 104 L60 62 M60 62 Q52 44 38 36 M60 74 Q72 60 82 54 M38 36 Q34 26 26 22 M38 36 Q48 30 50 20 M82 54 Q90 44 96 40 M82 54 Q74 44 72 34" stroke="' + c + '" stroke-width="13" fill="none" stroke-linecap="round"/>' +
-        '<circle cx="26" cy="20" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-        '<circle cx="51" cy="18" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-        '<circle cx="97" cy="38" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-        '<circle cx="72" cy="32" r="7" fill="' + c + '" stroke="' + c2 + '" stroke-width="4"/>' +
-        '<path d="M60 104 L60 62 M60 62 Q52 44 38 36 M60 74 Q72 60 82 54" stroke="rgba(255,255,255,.35)" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-        kf(60, 88);
-      break;
-    case "leaf": /* 방긋 잎사귀 */
-      body = '<path d="M60 16 C 94 38 94 82 60 104 C 26 82 26 38 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<path d="M60 26 L60 96 M60 46 Q50 50 44 58 M60 46 Q70 50 76 58 M60 68 Q52 72 47 78 M60 68 Q68 72 73 78" stroke="rgba(255,255,255,.6)" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
-        '<ellipse cx="47" cy="36" rx="7" ry="4" fill="rgba(255,255,255,.5)" transform="rotate(-32 47 36)"/>' +
-        kf(60, 56);
-      break;
-    default: /* unknown: 몽글 젤리 */
-      body = '<path d="M60 16 C 90 16 104 42 100 64 C 96 88 80 104 60 104 C 40 104 24 88 20 64 C 16 42 30 16 60 16 Z" fill="' + c + '" stroke="' + c2 + '" stroke-width="5"/>' +
-        '<ellipse cx="44" cy="34" rx="9" ry="5" fill="rgba(255,255,255,.5)" transform="rotate(-22 44 34)"/>' +
-        (silhouette ? "" : kf(60, 58));
-      break;
-  }
-  return '<svg class="item-fallback-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-         '<ellipse cx="60" cy="108" rx="34" ry="6.5" fill="rgba(0,0,0,.13)"/>' + body + sparkle + q + '</svg>';
+  /* 도트 게임 느낌: 픽셀 맵 기반 스프라이트 (실루엣은 회색 + ?) */
+  const map = ITEM_PIXEL_MAPS[shape] || ITEM_PIXEL_MAPS.unknown;
+  const palette = silhouette
+    ? { A:"#9aa0ab", B:"#71777f", L:"#aab0ba", W:"#aab0ba", D:"#71777f", R:"#9aa0ab" }
+    : {
+        A: color,
+        B: mixColor(color, "#2f2430"),
+        L: mixColor(color, "#ffffff"),
+        W: "#ffffff",
+        D: "#3a3350",
+        R: "#ffb3a0"
+      };
+  const q = silhouette
+    ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:clamp(18px,42%,34px); color:#565c66; text-shadow:1px 1px 0 #fff;">?</div>'
+    : "";
+  return pixelSVG(map, palette) + q;
 }
 /* fallback 플레이스홀더 표시 (item id/group/shape에 따라 다른 그림) */
 function renderFallbackItem(container, item, silhouette){
@@ -2344,84 +2571,64 @@ function renderAssetImage(container, item, type){
 }
 
 /* ---------- 플레이어 캐릭터 ---------- */
+/* 캐릭터 공용 팔레트 (도트 스프라이트) */
+const PLAYER_PAL = {
+  H:"#ffd166", h:"#e0a32e",   /* 안전모 / 안전모 그림자 */
+  f:"#ffdcb8", D:"#3a3350",   /* 피부 / 눈 */
+  W:"#ffffff", R:"#ffb3a0",   /* 눈 반짝 / 볼터치 */
+  M:"#c96a2a",                /* 입 */
+  V:"#ff9d5c", C:"#fff2d8",   /* 조끼 / 셔츠 */
+  P:"#4a5d78", o:"#7a5236",   /* 바지 / 부츠 */
+  K:"#8a5a3c", k:"#c9a468",   /* 배낭 / 배낭 주머니 */
+  a:"#7a5236",                /* 뒷머리 */
+  g:"#9fb2c4", L:"#55a8d6"    /* 망치 / 루페 */
+};
 function playerFallbackSVG(){
-  /* 꼬마 탐사대원 2.0: 머리가 크고 눈이 반짝이는 깜찍 버전
-     (노란 안전모 + 조끼 + 가방 + 루페 + 망치, CSS/SVG 기본 캐릭터) */
-  return '<svg class="player-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    // 가방 (등 뒤로 살짝)
-    '<rect x="16" y="80" width="24" height="30" rx="10" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
-    '<rect x="21" y="87" width="14" height="9" rx="4" fill="#c9a468"/>' +
-    // 짧은 다리 + 통통한 부츠
-    '<rect x="45" y="116" width="12" height="18" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<rect x="63" y="116" width="12" height="18" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<ellipse cx="50" cy="137" rx="11" ry="7.5" fill="#7a5236" stroke="#4a3020" stroke-width="4"/>' +
-    '<ellipse cx="70" cy="137" rx="11" ry="7.5" fill="#7a5236" stroke="#4a3020" stroke-width="4"/>' +
-    // 작은 몸통(조끼)
-    '<rect x="40" y="86" width="40" height="34" rx="14" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4"/>' +
-    '<rect x="54" y="86" width="12" height="34" fill="#fff2d8" stroke="#c96a2a" stroke-width="3"/>' +
-    '<circle cx="60" cy="97" r="2.6" fill="#c96a2a"/><circle cx="60" cy="108" r="2.6" fill="#c96a2a"/>' +
-    '<rect x="43" y="92" width="8" height="10" rx="3" fill="#ffd166" stroke="#c96a2a" stroke-width="2.5"/>' +
-    // 왼팔 + 콩콩 망치
-    '<rect x="28" y="90" width="12" height="24" rx="6" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4" transform="rotate(20 34 102)"/>' +
-    '<circle cx="26" cy="114" r="6.5" fill="#ffd9b0" stroke="#c96a2a" stroke-width="3.5"/>' +
-    '<rect x="9" y="110" width="22" height="7" rx="3.5" fill="#b98a5e" stroke="#6f4a2e" stroke-width="3" transform="rotate(-28 20 113)"/>' +
-    '<rect x="3" y="96" width="13" height="12" rx="4" fill="#9fb2c4" stroke="#4c5866" stroke-width="3" transform="rotate(-28 9 102)"/>' +
-    // 오른팔 + 반짝 루페
-    '<rect x="80" y="90" width="12" height="24" rx="6" fill="#ff9d5c" stroke="#c96a2a" stroke-width="4" transform="rotate(-20 86 102)"/>' +
-    '<circle cx="94" cy="114" r="6.5" fill="#ffd9b0" stroke="#c96a2a" stroke-width="3.5"/>' +
-    '<circle cx="104" cy="100" r="10" fill="rgba(185,235,255,.6)" stroke="#3a4a75" stroke-width="4.5"/>' +
-    '<path d="M100 96 a5 5 0 0 1 5 -2" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
-    '<line x1="98" y1="108" x2="95" y2="113" stroke="#3a4a75" stroke-width="5" stroke-linecap="round"/>' +
-    // 크고 둥근 얼굴
-    '<circle cx="60" cy="54" r="33" fill="#ffdcb8" stroke="#c98d5a" stroke-width="4"/>' +
-    // 반짝이는 큰 눈
-    '<circle cx="47" cy="56" r="6" fill="#3a3350"/>' +
-    '<circle cx="73" cy="56" r="6" fill="#3a3350"/>' +
-    '<circle cx="49" cy="53.6" r="2.4" fill="#fff"/>' +
-    '<circle cx="75" cy="53.6" r="2.4" fill="#fff"/>' +
-    '<circle cx="45.4" cy="58.4" r="1.1" fill="#fff" opacity=".9"/>' +
-    '<circle cx="71.4" cy="58.4" r="1.1" fill="#fff" opacity=".9"/>' +
-    // 볼터치 + 방긋 미소
-    '<ellipse cx="38" cy="66" rx="5.5" ry="4" fill="#ffb3a0" opacity=".85"/>' +
-    '<ellipse cx="82" cy="66" rx="5.5" ry="4" fill="#ffb3a0" opacity=".85"/>' +
-    '<path d="M52 68 Q60 75 68 68" stroke="#b3763d" stroke-width="3.6" fill="none" stroke-linecap="round"/>' +
-    // 노란 안전모 (동그란 챙 + 꼭지)
-    '<path d="M28 46 a32 32 0 0 1 64 0 l0 5 l-64 0 Z" fill="#ffd166" stroke="#e0a32e" stroke-width="4"/>' +
-    '<rect x="22" y="46" width="76" height="10" rx="5" fill="#ffd166" stroke="#e0a32e" stroke-width="4"/>' +
-    '<rect x="53" y="17" width="14" height="14" rx="6" fill="#ffe08c" stroke="#e0a32e" stroke-width="3"/>' +
-    '<path d="M36 34 a26 26 0 0 1 12 -9" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>' +
-    '</svg>';
+  /* 꼬마 탐사대원 (앞모습, 14x18 도트 스프라이트):
+     노란 안전모 + 반짝 눈 + 볼터치 + 조끼 + 망치/루페 */
+  return pixelSVG([
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHHHHHHH...",
+    "..HHHHHHHHHH..",
+    ".hhhhhhhhhhhh.",
+    "..ffffffffff..",
+    "..fDDffffDDf..",
+    "..fWDffffDWf..",
+    ".RffffffffffR.",
+    "...fffMMfff...",
+    "...VVVVVVVV...",
+    "ggfVVCCCCVVfLL",
+    ".gfVVCCCCVVfL.",
+    "...VVVVVVVV...",
+    "....PP..PP....",
+    "....PP..PP....",
+    "...oo....oo...",
+    ".............."
+  ], PLAYER_PAL, "player-svg");
 }
-/* 뒷모습 꼬마 탐사대원 (3D 길 구간용): 큰 배낭 + 안전모 + 조끼 */
+/* 뒷모습 꼬마 탐사대원 (3D 길 구간용, 14x18 도트 스프라이트): 큰 배낭 + 안전모 */
 function playerBackSVG(){
-  return '<svg class="player-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    // 다리 + 신발
-    '<rect x="42" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<rect x="63" y="112" width="13" height="26" rx="6" fill="#4a5d78" stroke="#2b3a52" stroke-width="4"/>' +
-    '<ellipse cx="48" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
-    '<ellipse cx="70" cy="140" rx="11" ry="7" fill="#5c3f2a" stroke="#3a2718" stroke-width="4"/>' +
-    // 팔 (양옆)
-    '<rect x="24" y="76" width="14" height="32" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
-    '<rect x="80" y="76" width="14" height="32" rx="7" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
-    '<circle cx="31" cy="110" r="6.5" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
-    '<circle cx="87" cy="110" r="6.5" fill="#ffd9b0" stroke="#b35a1f" stroke-width="3.5"/>' +
-    // 몸통(조끼 뒷면)
-    '<rect x="36" y="70" width="46" height="48" rx="16" fill="#ff9d5c" stroke="#b35a1f" stroke-width="4"/>' +
-    // 큰 배낭
-    '<rect x="38" y="66" width="42" height="50" rx="14" fill="#8a5a3c" stroke="#4a3020" stroke-width="4"/>' +
-    '<rect x="45" y="74" width="28" height="14" rx="6" fill="#c9a468" stroke="#4a3020" stroke-width="3"/>' +
-    '<rect x="45" y="94" width="28" height="16" rx="6" fill="#a97b50" stroke="#4a3020" stroke-width="3"/>' +
-    '<rect x="47" y="58" width="24" height="10" rx="5" fill="#3ec6b5" stroke="#1d9184" stroke-width="3"/>' +
-    // 뒤통수 + 머리카락
-    '<circle cx="59" cy="46" r="26" fill="#ffd9b0" stroke="#b3763d" stroke-width="4"/>' +
-    '<path d="M33 46 a26 26 0 0 1 52 0 l0 8 q-13 8 -26 8 q-13 0 -26 -8 Z" fill="#7a5236" stroke="#5c3f2a" stroke-width="3"/>' +
-    '<circle cx="38" cy="52" r="4" fill="#ffb3a0" opacity=".6"/>' +
-    '<circle cx="80" cy="52" r="4" fill="#ffb3a0" opacity=".6"/>' +
-    // 안전모 (뒤에서 본 모습)
-    '<path d="M32 40 a27 27 0 0 1 54 0 l0 4 l-54 0 Z" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
-    '<rect x="28" y="40" width="62" height="9" rx="4.5" fill="#ffd166" stroke="#c98d1a" stroke-width="4"/>' +
-    '<rect x="52" y="20" width="14" height="12" rx="5" fill="#ffe08c" stroke="#c98d1a" stroke-width="3"/>' +
-    '</svg>';
+  return pixelSVG([
+    "....HHHHHH....",
+    "...HHHHHHHH...",
+    "...HHHHHHHH...",
+    "..HHHHHHHHHH..",
+    ".hhhhhhhhhhhh.",
+    "..aaaaaaaaaa..",
+    "..aaaaaaaaaa..",
+    "..faaaaaaaaf..",
+    "...aaaaaaaa...",
+    "..VVVVVVVVVV..",
+    ".fVKKKKKKKKVf.",
+    ".fVKKKkkKKKVf.",
+    ".fVKKKkkKKKVf.",
+    "..VKKKKKKKKV..",
+    "....PP..PP....",
+    "....PP..PP....",
+    "...oo....oo...",
+    ".............."
+  ], PLAYER_PAL, "player-svg");
 }
 /* 캐릭터 렌더: 이미지 우선, 실패 시 idle 이미지, 그것도 없으면 SVG fallback
    길 구간(#roadPlayer)은 뒷모습, 지층 구간(#player)은 옆/앞모습 */
@@ -2538,10 +2745,9 @@ function renderRoadScene(){
   for(let i=0;i<5;i++){
     const cl = document.createElement("div");
     cl.className = "cloud";
-    cl.style.width = (90 + i*34) + "px";
-    cl.style.height = (26 + (i%3)*10) + "px";
     cl.style.top = (5 + (i*7)%22) + "%";
-    cl.style.left = (8 + i*19) + "%";
+    cl.style.left = (6 + i*19) + "%";
+    cl.style.setProperty("--cs", String(0.7 + (i%3)*0.35));
     cl.style.animationDuration = (30 + i*9) + "s";
     sky.appendChild(cl);
   }
@@ -2648,7 +2854,7 @@ function renderRoadScene(){
   let bands = "";
   layerData.forEach((ly, i) => {
     bands += '<div class="strata-line" style="top:' + (i*100/nL) + '%; height:' + (100/nL + 2) + '%;' +
-      'background:repeating-linear-gradient(' + (177 - i) + 'deg, ' + safe(ly.color1,"#b98a5e") + ' 0 18px, ' + safe(ly.color2,"#8a5a3c") + ' 18px 26px);"></div>';
+      'background:' + safe(i % 2 ? ly.color2 : ly.color1, "#b98a5e") + ';"></div>';
   });
   addObj(L + 420, 420, 1100, 560, '<div class="obj-cliff3d">' + bands + '<div class="cliff-glow"></div></div>');
   addObj(L + 560, -760, 480, 300, '<div class="obj-rock3d"></div>');
@@ -2680,8 +2886,9 @@ function buildOutcrop3D(ly){
   html += '<div class="mound">';
   const bandColors = [c1, mixColor(c1, c2), c2];
   bandColors.forEach((c, k) => {
+    /* 도트 층리: 플랫 컬러 + 가로 층리 라인 */
     html += '<div class="band" style="top:' + (k*34) + '%; height:36%; background:' +
-      'repeating-linear-gradient(' + (176 + k) + 'deg, transparent 0 14px, rgba(70,40,20,.14) 14px 18px, transparent 18px 30px), ' +
+      'repeating-linear-gradient(0deg, rgba(70,40,20,.16) 0 4px, transparent 4px 16px), ' +
       'linear-gradient(' + c + ', ' + c + ');"></div>';
   });
   for(let k=0;k<4;k++){
@@ -2996,8 +3203,10 @@ function openOutcropModal(layerId){
     b.className = "band";
     b.style.top = (k * 26) + "%";
     b.style.height = "28%";
+    /* 도트 층리: 플랫 컬러 + 가로 층리 라인 + 점 무늬 */
     b.style.background =
-      "repeating-linear-gradient(" + (177 + k) + "deg, transparent 0 22px, rgba(70,40,20,.16) 22px 28px, transparent 28px 46px), " +
+      "repeating-linear-gradient(0deg, rgba(70,40,20,.18) 0 5px, transparent 5px 22px), " +
+      "repeating-linear-gradient(90deg, transparent 0 46px, rgba(70,40,20,.1) 46px 54px, transparent 54px 120px), " +
       "linear-gradient(" + c + ", " + c + ")";
     xsec.appendChild(b);
   });

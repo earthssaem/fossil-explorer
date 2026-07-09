@@ -221,6 +221,25 @@ h1,h2,h3{margin:.3em 0;}
   line-height:1.5;
   font-weight:700;
 }
+.start-nick{
+  margin:12px auto 4px;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.start-nick label{font-weight:900; color:var(--earth-dark); font-size:var(--font-base);}
+.start-nick input{
+  width:min(300px, 82%);
+  padding:12px 16px;
+  font-size:var(--font-mid);
+  font-weight:800;
+  text-align:center;
+  color:var(--ink);
+  background:#fff;
+  border:4px solid var(--ink);
+  border-radius:0;
+  box-shadow:inset 3px 3px 0 rgba(74,59,46,.12);
+  outline:none;
+}
+.start-nick input:focus{border-color:var(--teal-dark);}
 .start-buttons{display:flex; flex-direction:column; gap:10px; margin-top:16px; align-items:center;}
 .start-hero{
   width:118px; height:136px; margin:2px auto 0;
@@ -1854,6 +1873,10 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <div class="start-hero" id="startHero"></div>
       <h1 class="start-title">탐사대<br><span class="accent">숨겨진 층의 비밀을 찾아라</span></h1>
       <p class="start-sub">길을 따라 숨겨진 단서를 찾아보세요!<br>반짝이는 곳을 눌러 조사하고, 도감을 하나씩 채워 볼까요? 🌟</p>
+      <div class="start-nick">
+        <label for="nickInput">🧑‍🔬 탐사대원 이름</label>
+        <input id="nickInput" type="text" maxlength="12" placeholder="이름을 입력하세요" autocomplete="off">
+      </div>
       <div class="start-badge-row" id="startProgressRow"></div>
       <div class="start-buttons">
         <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
@@ -2083,6 +2106,17 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     <div class="panel-card">
       <h3 style="color:var(--earth-dark);">🏅 획득한 배지</h3>
       <div class="badge-grid" id="resultBadges"></div>
+    </div>
+    <div class="panel-card" style="text-align:center;">
+      <h3 style="color:var(--earth-dark);">📄 제출용 탐사 보고서</h3>
+      <p style="font-weight:700; color:#7a6a4d; line-height:1.5;">아래 보고서를 이미지로 저장해 선생님께 제출하세요!</p>
+      <div id="reportPreview" style="overflow-x:auto; margin:12px 0;">
+        <canvas id="reportCanvas" width="900" height="600" style="width:100%; max-width:520px; border:4px solid var(--ink); box-shadow:4px 4px 0 rgba(74,59,46,.3); image-rendering:auto;"></canvas>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn" id="btnSaveReport">💾 보고서 이미지 저장</button>
+      </div>
+      <p id="reportSavedMsg" style="font-weight:800; color:var(--teal-dark); min-height:1.4em; margin-top:8px;"></p>
     </div>
     <div class="panel-card" style="text-align:center; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       <button class="btn teal" id="btnResultCollection">📚 도감 보기</button>
@@ -2355,6 +2389,8 @@ function defaultState(){
     foundOutcrops: [],   // 근접해서 '발견'한 노두(층 id) — 미니맵에 표시
     visitedCells: [],    // 지나간 맵 칸 (미니맵 안개 걷힘)
     parkDone: false,     // 노두 6개 모두 조사 완료 연출을 봤는지
+    nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
+    startedAt: "",       // 탐사 시작 시각 (보고서용)
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -2838,6 +2874,8 @@ function renderStartProgress(){
   row.innerHTML = html;
   const hero = $("startHero");
   if(hero && !hero.hasChildNodes()) hero.innerHTML = playerFallbackSVG();
+  const nick = $("nickInput");
+  if(nick && document.activeElement !== nick) nick.value = safe(state.nickname, "");
 }
 function renderHelpMissions(){
   const card = $("helpMissionCard");
@@ -4380,7 +4418,101 @@ function openResultScreen(){
     '<div class="result-stat"><span>🔓 해금한 층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
     '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>';
   renderBadgeGrid($("resultBadges"));
+  $("reportSavedMsg").textContent = "";
+  drawReport();
   renderScreen("resultScreen");
+}
+
+/* ---------- 제출용 탐사 보고서 이미지 (Canvas → PNG 다운로드) ---------- */
+function drawReport(){
+  const cv = $("reportCanvas");
+  if(!cv) return;
+  const g = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const total = Math.max(1, itemData.length);
+  const acc = state.quizAnswered > 0 ? Math.round(state.quizFirstCorrect / state.quizAnswered * 100) : 0;
+  /* 배경 */
+  g.fillStyle = "#fdf6e6"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "#4a3b2e"; g.fillRect(0, 0, W, 18); g.fillRect(0, H-18, W, 18);
+  g.fillRect(0, 0, 18, H); g.fillRect(W-18, 0, 18, H);
+  /* 헤더 */
+  g.fillStyle = "#3ec6b5"; g.fillRect(40, 44, W-80, 96);
+  g.fillStyle = "#1d9184"; g.fillRect(40, 128, W-80, 12);
+  g.fillStyle = "#fffdf6";
+  g.font = "900 46px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.textBaseline = "middle";
+  g.fillText("🧭 탐사 보고서", 70, 92);
+  g.font = "800 22px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.fillText("탐사대: 숨겨진 층의 비밀을 찾아라", 74, 122);
+  /* 탐사대원 정보 */
+  g.fillStyle = "#4a3b2e";
+  g.font = "900 30px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.fillText("🧑‍🔬 탐사대원: " + safe(state.nickname, "익명"), 60, 190);
+  g.font = "700 20px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.fillStyle = "#7a6a4d";
+  g.fillText("🕐 " + safe(state.startedAt, "-") + "  ~  " + new Date().toLocaleString(), 60, 226);
+  /* 성적 카드 6개 */
+  const stats = [
+    ["⭐ 총 점수", safe(state.score,0) + "점"],
+    ["📦 수집한 단서", state.completed.length + " / " + total],
+    ["⛏ 조사한 노두", exploredOutcropCount() + " / " + layerData.length],
+    ["🧠 퀴즈 정답률", acc + "%"],
+    ["🔥 최고 콤보", String(safe(state.maxCombo,0))],
+    ["🏅 획득 배지", state.badges.length + " / " + badgeData.length]
+  ];
+  const cardW = (W - 120 - 40) / 3, cardH = 92;
+  stats.forEach((s, i) => {
+    const cx = 60 + (i % 3) * (cardW + 20);
+    const cy = 260 + Math.floor(i / 3) * (cardH + 20);
+    g.fillStyle = "#fff"; g.fillRect(cx, cy, cardW, cardH);
+    g.strokeStyle = "#4a3b2e"; g.lineWidth = 4; g.strokeRect(cx, cy, cardW, cardH);
+    g.fillStyle = "#7a6a4d"; g.font = "800 19px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(s[0], cx + 16, cy + 28);
+    g.fillStyle = "#1d9184"; g.font = "900 34px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(s[1], cx + 16, cy + 62);
+  });
+  /* 수집 도감 요약 (아이템별 상태 도트) */
+  g.fillStyle = "#4a3b2e"; g.font = "900 24px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.fillText("📚 도감 수집 현황", 60, 496);
+  itemData.forEach((it, i) => {
+    const bx = 60 + i * 132, by = 516;
+    const completed = state.completed.includes(it.id);
+    const discovered = state.discovered.includes(it.id) || completed;
+    g.fillStyle = completed ? "#3ec6b5" : (discovered ? "#ffd166" : "#d8cbb0");
+    g.fillRect(bx, by, 120, 54);
+    g.strokeStyle = "#4a3b2e"; g.lineWidth = 3; g.strokeRect(bx, by, 120, 54);
+    g.fillStyle = "#4a3b2e"; g.font = "900 16px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText("No." + String(i+1).padStart(2,"0"), bx + 10, by + 20);
+    g.font = "700 15px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(completed ? "⭐ 완료" : (discovered ? "🔍 발견" : "🔒 미발견"), bx + 10, by + 40);
+  });
+}
+function saveReport(){
+  drawReport();
+  const cv = $("reportCanvas");
+  const nm = (safe(state.nickname, "탐사대원") || "탐사대원").replace(/[^\wㄱ-힣]/g, "");
+  const fname = "탐사보고서_" + nm + ".png";
+  try{
+    cv.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = fname;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      $("reportSavedMsg").textContent = "✅ 저장 완료! 「" + fname + "」 파일을 선생님께 제출하세요.";
+    }, "image/png");
+  }catch(e){
+    /* toBlob 미지원 폴백 */
+    try{
+      const a = document.createElement("a");
+      a.href = cv.toDataURL("image/png"); a.download = fname; a.click();
+      $("reportSavedMsg").textContent = "✅ 저장 완료! 「" + fname + "」 파일을 선생님께 제출하세요.";
+    }catch(e2){
+      $("reportSavedMsg").textContent = "⚠ 이 브라우저에서 저장이 막혀 있어요. 화면을 캡처해 제출해 주세요.";
+    }
+  }
+  playSound("register");
 }
 
 /* ---------- 교사용 설정 모드 ---------- */
@@ -4557,12 +4689,30 @@ function bindHold(el, setter){
 
 /* ---------- UI 이벤트 바인딩 ---------- */
 function bindUI(){
+  const nickEl = $("nickInput");
+  if(nickEl){
+    nickEl.addEventListener("input", () => {
+      state.nickname = nickEl.value.replace(/\s+/g, " ").slice(0, 12);
+      saveState();
+    });
+    nickEl.addEventListener("keydown", e => { if(e.key === "Enter") $("btnStart").click(); });
+  }
   $("btnStart").addEventListener("click", () => {
+    /* 닉네임이 없으면 입력을 유도 */
+    const nm = (nickEl ? nickEl.value : state.nickname || "").trim();
+    if(!nm){
+      toast("🧑‍🔬 먼저 탐사대원 이름을 입력해 주세요!");
+      if(nickEl){ nickEl.focus(); nickEl.style.borderColor = "#e0654a"; setTimeout(() => nickEl.style.borderColor = "", 1200); }
+      return;
+    }
+    state.nickname = nm.slice(0, 12);
+    if(!state.startedAt) state.startedAt = new Date().toLocaleString();
+    saveState();
     playSound("click");
     renderScreen("gameScreen");
     /* 탑다운 공원 맵에서 자유 탐험 */
     renderRoadScene();
-    toast("🗺 공원을 자유롭게 탐험! 숨어 있는 노두 " + layerData.length + "개를 찾아 조사해요!");
+    toast("🗺 " + escapeHTML(state.nickname) + " 탐사대원, 공원을 탐험하며 노두 " + layerData.length + "개를 찾아 조사해요!");
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
   $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });
@@ -4646,6 +4796,7 @@ function bindUI(){
   /* 결과 화면 */
   $("btnResultFromCollection").addEventListener("click", () => { playSound("click"); openResultScreen(); });
   $("btnResultBack").addEventListener("click", () => { playSound("click"); renderScreen("startScreen"); });
+  $("btnSaveReport").addEventListener("click", () => { playSound("click"); saveReport(); });
   $("btnResultCollection").addEventListener("click", () => {
     playSound("click");
     collectionReturnTo = "resultScreen";

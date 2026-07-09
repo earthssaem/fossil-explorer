@@ -4,7 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>탐사대: 숨겨진 층의 비밀을 찾아라</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
+/* DungGeunMo (둥근모) — 구글폰트에 없어 jsDelivr CDN에서 직접 로드 */
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 /* ==========================================================================
    탐사대: 숨겨진 층의 비밀을 찾아라 — 범용 2.5D 탐험 게임 엔진
    - 외부 라이브러리 없음 / 단일 파일 / 정적 배포 가능
@@ -37,13 +48,36 @@
   --font-big:clamp(1.6rem, 3.5vw, 2.6rem);
   --font-mid:clamp(1.05rem, 2.2vw, 1.4rem);
   --font-base:clamp(.95rem, 1.8vw, 1.15rem);
+  /* 픽셀 폰트: 제목·숫자·버튼 등 강조 텍스트용 (영/숫자는 Press Start 2P, 한글은 둥근모) */
+  --font-pixel:'Press Start 2P', 'DungGeunMo', cursive;
 }
 
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
+
+/* ===== 픽셀 폰트 강조: 로고·제목·통계 숫자·버튼 텍스트 (레트로 8비트 무드) ===== */
+h1, h2, h3,
+.screen-title, .start-title, .modal-title,
+.cinematic-title, .discover-banner,
+.btn, .hud-chip, .chip,
+.result-stat .val, .val,
+.card-no, .card-get, .card-new,
+.badge-token .name,
+#dexPanel .dex-head b, .dex-panel-count{
+  font-family:var(--font-pixel);
+}
+/* Press Start 2P는 글자폭이 넓어 한글 본문 가독성을 위해 강조부에만 사용,
+   자간·행간을 여유 있게 조정 */
+.btn{letter-spacing:0;}
+.start-title{line-height:1.5;}
+.screen-title, .modal-title, h1, h2, h3{line-height:1.5;}
+.hud-chip, .chip{letter-spacing:0;}
+/* 입력창·일반 폼 요소는 본문 폰트(둥근모) 상속 */
+input, select, textarea{font-family:inherit;}
+.start-nick input{font-family:'DungGeunMo','Noto Sans KR',sans-serif;}
 body{
   margin:0;
-  font-family:'Segoe UI','Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  font-family:'DungGeunMo','Noto Sans KR',sans-serif;
   background:var(--navy-deep);
   color:var(--navy);
   overflow:hidden;

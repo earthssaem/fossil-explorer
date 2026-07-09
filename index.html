@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>탐사대: 숨겨진 층의 비밀을 찾아라</title>
+<title>화석 탐정: 지층의 시간을 찾아라</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -1900,13 +1900,13 @@ img, .item-img, .player-img{image-rendering:pixelated;}
         <i style="top:38%; height:34%; background:#b08a5e;"></i>
         <i style="top:70%; height:32%; background:#8a6a46;"></i>
       </div>
-      <div class="start-sign" style="left:24%;"><div class="plate">🧭 탐사길</div><div class="pole"></div></div>
-      <div class="start-sign" style="right:22%; animation-delay:.6s;"><div class="plate">✨ 단서 발견!</div><div class="pole"></div></div>
+      <div class="start-sign" style="left:24%;"><div class="plate">🧭 지질공원</div><div class="pole"></div></div>
+      <div class="start-sign" style="right:22%; animation-delay:.6s;"><div class="plate">✨ 화석 발견!</div><div class="pole"></div></div>
     </div>
     <div class="start-card">
       <div class="start-hero" id="startHero"></div>
-      <h1 class="start-title">탐사대<br><span class="accent">숨겨진 층의 비밀을 찾아라</span></h1>
-      <p class="start-sub">길을 따라 숨겨진 단서를 찾아보세요!<br>반짝이는 곳을 눌러 조사하고, 도감을 하나씩 채워 볼까요? 🌟</p>
+      <h1 class="start-title">화석 탐정<br><span class="accent">지층의 시간을 찾아라</span></h1>
+      <p class="start-sub">지질공원을 탐험하며 화석을 찾고,<br>과거 환경을 추리하라! 🦖</p>
       <div class="start-nick">
         <label for="nickInput">🧑‍🔬 탐사대원 이름</label>
         <input id="nickInput" type="text" maxlength="12" placeholder="이름을 입력하세요" autocomplete="off">
@@ -1915,7 +1915,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <div class="start-buttons">
         <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
         <button class="btn teal wide" id="btnHelp">📖 게임 방법</button>
-        <button class="btn navy wide" id="btnCollectionFromStart">📚 탐사 도감</button>
+        <button class="btn navy wide" id="btnCollectionFromStart">📚 화석도감</button>
         <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
           <button class="btn ghost small" id="btnRestart">🔄 처음부터 다시 시작</button>
           <button class="btn ghost small" id="btnTeacher">🛠 교사용 설정</button>
@@ -1931,14 +1931,15 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h2 class="screen-title">📖 게임 방법</h2>
     </div>
     <div class="panel-card">
-      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작 방법은 W·A·S·D!</b><br><b>W·A·S·D(또는 방향키)</b>로 공원 맵을 자유롭게 돌아다녀요. 대각선 이동도 OK! 연못은 건널 수 없어요. 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>🗺 공원 곳곳의 노두를 발견!</b><br>넓은 탐험 공원 곳곳에 <b>노두</b>(지층이 드러난 곳) 6개가 숨어 있어요 — 일부는 나무숲 뒤에! 가까이 가면 <b>"새 노두 발견!"</b>과 함께 <b>미니맵</b>에 점이 찍히고, 걸어 다닐수록 지도가 채워져요.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 단면 조사!</b><br>노두 가까이에서 <b>클릭/탭 또는 E키</b>를 누르면 지층 단면이 위→아래 스택으로 열려요. <b>📍 여기!</b> 표시된 층에서 ✦ <b>반짝이는 조사 지점</b>을 눌러 발굴! 상단의 <b>노두 조사 카운터(0/6)</b>를 모두 채우면 완료 연출이 나와요.</div></div>
-      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 추론!</b><br>흙이 걷히면 새로운 단서가 나타나요. 루페로 관찰하고, 퀴즈를 풀어 단서의 숨겨진 정보를 해금해요.</div></div>
-      <div class="help-step"><div class="help-num">5</div><div><b>도감을 완성하라!</b><br>해금한 단서는 탐사 도감에 컬러 카드로 등록돼요. 미발견 단서는 회색 실루엣 + ???로 표시! 모두 모으면 층의 비밀이 전부 밝혀져요.</div></div>
-      <div class="help-step"><div class="help-num">6</div><div><b>배지 수집!</b><br>탐사 활약에 따라 배지를 받을 수 있어요. 완벽한 탐사대원에 도전해 보세요!</div></div>
+      <div class="help-step"><div class="help-num">1</div><div><b>🎮 조작은 W·A·S·D!</b><br><b>W·A·S·D(또는 방향키)</b>로 지질공원 탐사길을 자유롭게 걸어요. 길 위로만 이동하고 연못은 건널 수 없어요. 모바일은 화면 아래 방향 버튼을 눌러요.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>🗺 지층 노두를 발견!</b><br>지질공원 곳곳에 <b>지층 노두</b>(지층이 드러난 곳) 6곳이 숨어 있어요 — 일부는 나무숲 뒤에! 가까이 가면 <b>"새 지층 노두 발견!"</b>과 함께 <b>미니맵</b>에 점이 찍혀요.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>🔎 노두를 눌러 지층 조사!</b><br>노두 가까이에서 <b>클릭/탭 또는 E키</b>를 누르면 지층 단면이 위→아래로 열려요. <b>📍 여기!</b> 표시된 지층에서 ✦ <b>반짝이는 지점</b>을 눌러 화석을 발굴해요!</div></div>
+      <div class="help-step"><div class="help-num">4</div><div><b>화석 발견 → 관찰 → 해석!</b><br>화석을 발견하면 <b>화석도감</b>에 등록돼요. 관찰 포인트를 확인하고 퀴즈를 풀면 화석의 <b>시대·환경·분류</b>가 해금돼요.</div></div>
+      <div class="help-step"><div class="help-num">5</div><div><b>🕰 표준 화석 vs 🌊 시상 화석</b><br><b>표준 화석</b>은 지층이 만들어진 <b>시대</b>를 알려줘요(삼엽충·공룡 등). <b>시상 화석</b>은 <b>과거 환경</b>을 알려줘요(산호·고사리 등).</div></div>
+      <div class="help-step"><div class="help-num">6</div><div><b>🌍 환경 변화 추리!</b><br>지층 A~D를 모두 조사하면 <b>최종 미션</b>이 열려요. 바다 화석과 육지 화석을 근거로 이 지역의 <b>과거 환경 변화</b>를 추리해 보세요!</div></div>
     </div>
     <div class="panel-card" id="helpMissionCard"></div>
+    <div class="panel-card" id="helpNoteCard"></div>
   </section>
 
   <!-- ============ 3~4. 탐사 화면 (길 구간 + 지층 구간 공용) ============ -->
@@ -1985,7 +1986,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     <!-- 도감 사이드 패널: 인벤토리처럼 항상 보이는 수집 현황 -->
     <div id="dexPanel">
       <div class="dex-head">
-        <span>📚 탐사 도감</span>
+        <span>📚 화석도감</span>
         <b id="dexPanelCount">0/0</b>
         <button id="btnDexCollapse" title="접기/펼치기">▾</button>
       </div>
@@ -2062,6 +2063,17 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     </div>
   </div>
 
+  <!-- ============ 최종 미션 모달 ============ -->
+  <div class="modal-backdrop" id="finalMissionModal">
+    <div class="modal-card">
+      <h3 class="modal-title">🧩 최종 미션 · 이 지역의 과거 환경은 어떻게 변했을까?</h3>
+      <div class="quiz-question" id="finalQuestion"></div>
+      <div class="quiz-choices" id="finalChoices"></div>
+      <div class="quiz-feedback" id="finalFeedback"></div>
+      <div class="modal-actions" id="finalActions"></div>
+    </div>
+  </div>
+
   <!-- ============ 배지 획득 팝업 ============ -->
   <div class="modal-backdrop" id="badgeModal">
     <div class="modal-card" style="text-align:center;">
@@ -2077,11 +2089,12 @@ img, .item-img, .player-img{image-rendering:pixelated;}
   <section id="collectionScreen" class="screen panel-screen">
     <div class="back-bar" style="width:min(900px,96%);">
       <button class="btn ghost small" id="btnCollectionBack">← 돌아가기</button>
-      <h2 class="screen-title">📚 탐사 도감</h2>
+      <h2 class="screen-title">📚 화석도감</h2>
     </div>
     <div class="collect-stats" id="collectStats"></div>
     <div class="rate-bar"><div class="fill" id="collectRateFill"></div></div>
     <div class="collection-grid" id="collectionGrid"></div>
+    <div class="panel-card" id="dexNoteCard"></div>
     <div class="panel-card">
       <h3 style="color:var(--earth-dark);">🏅 탐사 배지</h3>
       <div class="badge-grid" id="badgeGrid"></div>
@@ -2100,10 +2113,11 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     <div class="panel-card">
       <div class="teacher-note">
         💡 <b>교사 안내</b><br>
-        · 상세 퀴즈 내용은 <b>itemData</b>의 <b>quiz 배열</b>에서 수정할 수 있습니다.<br>
-        · 이미지를 교체하려면 <b>images 폴더</b>에 같은 파일명으로 이미지를 넣으면 됩니다.<br>
-        · 이미지가 없으면 자동으로 기본 그림이 표시됩니다.<br>
-        · 아래에서 데이터를 JSON으로 복사/수정/적용할 수 있습니다. JSON에 오류가 있어도 기존 데이터는 안전하게 유지됩니다.
+        · 화석 데이터는 <b>itemData</b>에서 수정할 수 있습니다 (이름·시대·환경·분류·설명·관찰 포인트).<br>
+        · 각 화석의 <b>quiz 배열</b>을 수정하면 문항을 바꿀 수 있습니다.<br>
+        · 이미지 파일은 <b>images 폴더</b>에 넣으면 자동으로 교체됩니다 (예: coral.png, trilobite.png). 없으면 기본 픽셀 그림이 표시됩니다.<br>
+        · 지층·환경 변화 해석은 <b>layerData</b>와 <b>missionData.finalMission</b>에서 수정할 수 있습니다.<br>
+        · 아래 <b>진행 상황 완전 초기화</b> 버튼으로 학생용 테스트를 다시 시작할 수 있습니다. JSON에 오류가 있어도 기존 데이터는 안전하게 유지됩니다.
       </div>
     </div>
     <div class="panel-card">
@@ -2121,11 +2135,9 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h3 style="color:var(--navy);">🖼 이미지 교체 안내</h3>
       <p style="line-height:1.7; font-weight:600; color:#44546e;">
         index.html 옆에 <b>images</b> 폴더를 만들고 아래 파일명으로 PNG를 넣으면 자동으로 교체됩니다.<br>
-        · 길 배경: <code>images/road-scene.png</code><br>
-        · 층상 단면 배경: <code>images/strata-background.png</code><br>
         · 캐릭터: <code>images/player-idle.png</code>, <code>player-walk.png</code>, <code>player-dig.png</code>, <code>player-inspect.png</code>, <code>player-discover.png</code><br>
-        · 아이템: itemData 각 항목의 <code>img</code> 경로 (기본: <code>images/item-01.png</code> ~ <code>item-06.png</code>)<br>
-        이미지가 없거나 로드에 실패하면 언제나 기본 CSS/SVG 그림이 대신 표시되어 게임이 깨지지 않습니다.
+        · 화석: itemData 각 항목의 <code>img</code> 경로 (예: <code>images/coral.png</code>, <code>trilobite.png</code>, <code>fern.png</code>, <code>dinosaur.png</code>, <code>fusulina.png</code>, <code>ammonite.png</code>, <code>nummulites.png</code>, <code>mammoth.png</code>, <code>stromatolite.png</code>, <code>ediacara.png</code>)<br>
+        이미지가 없거나 로드에 실패하면 언제나 기본 픽셀아트 그림이 대신 표시되어 게임이 깨지지 않습니다.
       </p>
     </div>
   </section>
@@ -2187,200 +2199,333 @@ const gameAssets = {
    · quiz 배열에 문항을 추가/수정하세요. type: "choice"(4지선다) 또는 "ox"
    · shape: 이미지가 없을 때 표시할 기본 그림 종류
      (spiral / segmented / bone / disk / branch / leaf / unknown)          */
+/* hiddenInfo1 = 시대, hiddenInfo2 = 환경 (퀴즈 완료 후 화석도감에서 해금)
+   group = 분류(표준 화석 / 시상 화석 / 대표 화석)
+   shape = 이미지가 없을 때 표시할 픽셀아트 화석 모양 */
 const DEFAULT_ITEM_DATA = [
   {
-    id: "sample_item_01",
-    name: "샘플 단서 01",
-    img: "images/item-01.png",
-    shape: "spiral",
+    id: "coral",
+    name: "산호",
+    img: "images/coral.png",
+    shape: "coral",
     layer: "A",
-    group: "샘플 분류 가",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "빙글빙글 나선 모양의 단서처럼 보입니다.",
+    group: "시상 화석",
+    hiddenInfo1: "여러 시대 (환경을 알려주는 화석)",
+    hiddenInfo2: "따뜻하고 수심이 얕은 바다",
+    description: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석이다.",
+    funNote: "환경 변화에 민감해 '과거 환경'을 알려줘요.",
+    visualHint: "가지 모양 또는 여러 개체가 모인 군체 구조",
     discovered: false,
     quiz: [
       {
         type: "choice",
-        question: "이 단서를 바탕으로 무엇을 추론할 수 있을까요? (임시 문항)",
-        choices: ["숨겨진 정보 A", "숨겨진 정보 B", "숨겨진 정보 C", "숨겨진 정보 D"],
-        answer: "숨겨진 정보 A",
-        hint: "관찰 포인트를 다시 확인해 보세요.",
-        explanation: "이 설명은 임시 해설입니다. 나중에 교사가 수정할 수 있습니다."
-      }
-    ]
-  },
-  {
-    id: "sample_item_02",
-    name: "샘플 단서 02",
-    img: "images/item-02.png",
-    shape: "segmented",
-    layer: "B",
-    group: "샘플 분류 가",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "둥글고 마디가 있는 단서처럼 보입니다.",
-    discovered: false,
-    quiz: [
-      {
-        type: "choice",
-        question: "마디가 있는 이 단서는 어떤 특징과 관련이 있을까요? (임시 문항)",
-        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
-        answer: "임시 선택지 1",
-        hint: "단서의 생김새를 다시 살펴보세요.",
-        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+        question: "산호 화석이 알려주는 과거 환경으로 가장 적절한 것은?",
+        choices: ["따뜻하고 수심이 얕은 바다", "건조한 사막", "깊고 차가운 심해", "빙하로 덮인 산 정상"],
+        answer: "따뜻하고 수심이 얕은 바다",
+        hint: "산호는 특정 환경에서만 잘 자라요.",
+        explanation: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석입니다."
       },
       {
         type: "ox",
-        question: "이 단서는 관찰 기록으로 남길 가치가 있다. (임시 OX 문항)",
-        answer: "O",
-        hint: "탐사대원은 모든 단서를 소중히 기록해요.",
-        explanation: "임시 해설입니다. OX 문항도 이렇게 만들 수 있습니다."
+        question: "산호는 지층의 '시대'를 알려주는 표준 화석이다.",
+        answer: "X",
+        hint: "산호가 알려주는 것은 시대가 아니라…?",
+        explanation: "산호는 시대가 아니라 '환경'을 알려주는 시상 화석입니다. 시대를 알려주는 것은 표준 화석이에요."
       }
     ]
   },
   {
-    id: "sample_item_03",
-    name: "샘플 단서 03",
-    img: "images/item-03.png",
-    shape: "leaf",
+    id: "stromatolite",
+    name: "스트로마톨라이트",
+    img: "images/stromatolite.png",
+    shape: "stromatolite",
+    layer: "A",
+    group: "대표 화석 / 퇴적 구조",
+    hiddenInfo1: "선캄브리아 시대",
+    hiddenInfo2: "얕은 바다",
+    description: "남세균의 활동으로 만들어진 층상 구조로, 선캄브리아 시대 생명 활동의 중요한 증거이다.",
+    funNote: "얇은 층이 겹겹이 쌓여 만들어져요.",
+    visualHint: "얇은 층이 겹겹이 쌓인 모양",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "스트로마톨라이트는 주로 어느 지질 시대의 생명 활동을 알려줄까요?",
+        choices: ["선캄브리아 시대", "고생대", "중생대", "신생대"],
+        answer: "선캄브리아 시대",
+        hint: "가장 오래된 생명 활동의 증거예요.",
+        explanation: "남세균 활동으로 만들어진 층상 구조로, 선캄브리아 시대 생명 활동의 대표적인 증거입니다."
+      }
+    ]
+  },
+  {
+    id: "trilobite",
+    name: "삼엽충",
+    img: "images/trilobite.png",
+    shape: "trilobite",
+    layer: "B",
+    group: "표준 화석",
+    hiddenInfo1: "고생대",
+    hiddenInfo2: "바다",
+    description: "삼엽충은 고생대를 대표하는 바다 생물 화석으로, 지층의 생성 시기를 추정하는 데 도움이 된다.",
+    funNote: "고생대 말에 멸종했어요.",
+    visualHint: "몸이 여러 마디로 나뉘고 세 부분으로 구분됨",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "삼엽충 화석은 주로 무엇을 알려주는 단서일까요?",
+        choices: ["지층이 만들어진 시기", "오늘의 날씨", "별의 밝기", "달의 모양"],
+        answer: "지층이 만들어진 시기",
+        hint: "표준 화석이 알려주는 것을 생각해 보세요.",
+        explanation: "삼엽충은 고생대를 대표하는 표준 화석으로, 지층의 생성 시기를 추정하는 데 도움이 됩니다."
+      },
+      {
+        type: "choice",
+        question: "삼엽충이 대표하는 지질 시대는?",
+        choices: ["고생대", "중생대", "신생대", "선캄브리아 시대"],
+        answer: "고생대",
+        hint: "삼엽충은 아주 오래된 바다 생물이에요.",
+        explanation: "삼엽충은 고생대를 대표하는 표준 화석입니다."
+      }
+    ]
+  },
+  {
+    id: "fusulina",
+    name: "방추충",
+    img: "images/fusulina.png",
+    shape: "fusulina",
+    layer: "B",
+    group: "표준 화석",
+    hiddenInfo1: "고생대",
+    hiddenInfo2: "바다",
+    description: "방추충은 고생대를 대표하는 작은 바다 생물 화석으로, 지층의 시대 판단에 이용된다.",
+    funNote: "삼엽충과 함께 고생대 말에 멸종했어요.",
+    visualHint: "쌀알 또는 방추 모양",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "방추충이 대표하는 지질 시대는?",
+        choices: ["고생대", "중생대", "신생대", "현재"],
+        answer: "고생대",
+        hint: "삼엽충과 같은 시대의 바다 생물이에요.",
+        explanation: "방추충은 고생대를 대표하는 표준 화석으로, 지층의 시대 판단에 이용됩니다."
+      }
+    ]
+  },
+  {
+    id: "fern",
+    name: "고사리",
+    img: "images/fern.png",
+    shape: "fern",
     layer: "C",
-    group: "샘플 분류 나",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "잎맥 같은 무늬가 보이는 단서입니다.",
+    group: "시상 화석",
+    hiddenInfo1: "여러 시대 (환경을 알려주는 화석)",
+    hiddenInfo2: "따뜻하고 습한 육지",
+    description: "고사리 화석은 따뜻하고 습한 육지 환경을 추리하는 단서가 된다.",
+    funNote: "산호처럼 '환경'을 알려주는 시상 화석이에요.",
+    visualHint: "잎맥이 갈라진 잎 모양",
     discovered: false,
     quiz: [
       {
         type: "choice",
-        question: "이 단서에서 관찰할 수 있는 것은 무엇일까요? (임시 문항)",
-        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
-        answer: "임시 선택지 2",
-        hint: "무늬의 모양에 주목하세요.",
-        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+        question: "고사리 화석이 알려주는 환경으로 가장 적절한 것은?",
+        choices: ["따뜻하고 습한 육지", "깊고 차가운 바다", "매우 건조한 사막", "화산이 분출하는 시각"],
+        answer: "따뜻하고 습한 육지",
+        hint: "고사리가 잘 자라는 곳을 떠올려 보세요.",
+        explanation: "고사리는 따뜻하고 습한 육지 환경을 알려주는 시상 화석입니다."
       }
     ]
   },
   {
-    id: "sample_item_04",
-    name: "샘플 단서 04",
-    img: "images/item-04.png",
-    shape: "disk",
+    id: "dinosaur",
+    name: "공룡",
+    img: "images/dinosaur.png",
+    shape: "dino",
     layer: "D",
-    group: "샘플 분류 나",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "동글납작한 원반형 단서처럼 보입니다.",
+    group: "표준 화석",
+    hiddenInfo1: "중생대",
+    hiddenInfo2: "육지",
+    description: "공룡은 중생대를 대표하는 육상 동물로, 중생대 지층을 판단하는 단서가 된다.",
+    funNote: "중생대 말에 멸종했어요.",
+    visualHint: "큰 뼈, 이빨, 발자국 등의 흔적",
     discovered: false,
     quiz: [
       {
         type: "choice",
-        question: "원반형 단서를 발견한 층에서 알 수 있는 것은? (임시 문항)",
-        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
-        answer: "임시 선택지 3",
-        hint: "발견 위치(층)를 떠올려 보세요.",
-        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+        question: "공룡 화석은 어느 지질 시대를 대표하는 표준 화석일까요?",
+        choices: ["선캄브리아 시대", "고생대", "중생대", "현재"],
+        answer: "중생대",
+        hint: "공룡이 번성했던 시대예요.",
+        explanation: "공룡은 중생대를 대표하는 육상 동물입니다."
       }
     ]
   },
   {
-    id: "sample_item_05",
-    name: "샘플 단서 05",
-    img: "images/item-05.png",
-    shape: "branch",
+    id: "ammonite",
+    name: "암모나이트",
+    img: "images/ammonite.png",
+    shape: "ammonite",
     layer: "E",
-    group: "샘플 분류 다",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "가지처럼 갈라진 모양의 단서입니다.",
-    discovered: false,
-    quiz: [
-      {
-        type: "ox",
-        question: "가지 모양 단서는 다른 단서와 비교하며 관찰하면 좋다. (임시 OX 문항)",
-        answer: "O",
-        hint: "비교 관찰은 탐사의 기본!",
-        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
-      }
-    ]
-  },
-  {
-    id: "sample_item_06",
-    name: "샘플 단서 06",
-    img: "images/item-06.png",
-    shape: "bone",
-    layer: "F",
-    group: "샘플 분류 다",
-    hiddenInfo1: "숨겨진 정보 1 (교사가 수정)",
-    hiddenInfo2: "숨겨진 정보 2 (교사가 수정)",
-    description: "임시 설명입니다. 나중에 교사가 수정합니다.",
-    funNote: "임시 한 줄 메모입니다.",
-    visualHint: "단단해 보이는 뼈 모양 단서입니다.",
+    group: "표준 화석",
+    hiddenInfo1: "중생대",
+    hiddenInfo2: "바다",
+    description: "암모나이트는 중생대를 대표하는 바다 생물 화석으로, 나선형 껍데기가 특징이다.",
+    funNote: "공룡과 함께 중생대 말에 멸종했어요.",
+    visualHint: "돌돌 말린 나선형 껍데기",
     discovered: false,
     quiz: [
       {
         type: "choice",
-        question: "가장 아래층에서 발견된 이 단서로 추론할 수 있는 것은? (임시 문항)",
-        choices: ["임시 선택지 1", "임시 선택지 2", "임시 선택지 3", "임시 선택지 4"],
-        answer: "임시 선택지 4",
-        hint: "층이 쌓이는 순서를 생각해 보세요.",
-        explanation: "임시 해설입니다. 교사가 수정할 수 있습니다."
+        question: "암모나이트가 대표하는 지질 시대는?",
+        choices: ["고생대", "중생대", "신생대", "선캄브리아 시대"],
+        answer: "중생대",
+        hint: "공룡과 같은 시대의 바다 생물이에요.",
+        explanation: "암모나이트는 나선형 껍데기가 특징인 중생대 바다 표준 화석입니다."
+      }
+    ]
+  },
+  {
+    id: "nummulites",
+    name: "화폐석",
+    img: "images/nummulites.png",
+    shape: "coin",
+    layer: "E",
+    group: "표준 화석",
+    hiddenInfo1: "신생대",
+    hiddenInfo2: "바다",
+    description: "화폐석은 신생대를 대표하는 바다 생물 화석으로, 동전처럼 둥근 모양이 특징이다.",
+    funNote: "이름처럼 동전(화폐)을 닮았어요.",
+    visualHint: "납작하고 둥근 원반 모양",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "화폐석이 대표하는 지질 시대는?",
+        choices: ["고생대", "중생대", "신생대", "현재"],
+        answer: "신생대",
+        hint: "가장 최근에 가까운 시대예요.",
+        explanation: "화폐석은 동전처럼 둥근 신생대 바다 표준 화석입니다."
+      }
+    ]
+  },
+  {
+    id: "ediacara",
+    name: "에디아카라 동물군",
+    img: "images/ediacara.png",
+    shape: "ediacara",
+    layer: "E",
+    group: "대표 화석군",
+    hiddenInfo1: "선캄브리아 시대 말",
+    hiddenInfo2: "바다",
+    description: "선캄브리아 시대 말에 나타난 다세포 생물 화석군이다.",
+    funNote: "단단한 껍데기 없이 부드러운 몸을 가졌어요.",
+    visualHint: "납작하고 부드러운 몸의 흔적",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "에디아카라 동물군이 살았던 시대는?",
+        choices: ["선캄브리아 시대 말", "고생대", "중생대", "신생대"],
+        answer: "선캄브리아 시대 말",
+        hint: "삼엽충보다도 더 오래된 생물이에요.",
+        explanation: "에디아카라 동물군은 선캄브리아 시대 말에 나타난 다세포 생물 화석군입니다."
+      }
+    ]
+  },
+  {
+    id: "mammoth",
+    name: "매머드",
+    img: "images/mammoth.png",
+    shape: "mammoth",
+    layer: "F",
+    group: "표준 화석",
+    hiddenInfo1: "신생대",
+    hiddenInfo2: "육지",
+    description: "매머드는 신생대에 살았던 큰 포유류로, 추운 기후와 관련된 대표 화석이다.",
+    funNote: "긴 상아와 두꺼운 털이 특징이에요.",
+    visualHint: "긴 상아와 털이 많은 모습",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "매머드와 관련된 기후로 가장 적절한 것은?",
+        choices: ["추운 기후", "무더운 사막", "깊은 바다", "우주 공간"],
+        answer: "추운 기후",
+        hint: "두꺼운 털이 무엇을 말해줄까요?",
+        explanation: "매머드는 신생대에 살았던 큰 포유류로, 추운 기후와 관련된 대표 화석입니다."
       }
     ]
   }
 ];
 
-/* --- 층 데이터 (교사가 수정할 데이터 영역)
-   hiddenName / hiddenInfo는 그 층의 아이템 퀴즈를 완료해야 해금됩니다. --- */
+/* --- 지층 데이터 (교사가 수정할 데이터 영역) — 노두마다 서로 다른 지층
+   env: "바다" 또는 "육지" (최종 미션의 환경 변화 추론에 사용)
+   hiddenName(짧은 정체) / hiddenInfo(해금 문구)는 그 지층 화석의 퀴즈를 완료해야 해금됨 --- */
 const DEFAULT_LAYER_DATA = [
-  { id: "A", label: "층 A", color1: "#e0c084", color2: "#c8a060",
-    hiddenName: "미확인 층 A의 정체 (교사가 수정)",
-    hiddenInfo: "층 A의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "B", label: "층 B", color1: "#c89a6a", color2: "#ae7e4e",
-    hiddenName: "미확인 층 B의 정체 (교사가 수정)",
-    hiddenInfo: "층 B의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "C", label: "층 C", color1: "#b0805a", color2: "#946746",
-    hiddenName: "미확인 층 C의 정체 (교사가 수정)",
-    hiddenInfo: "층 C의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "D", label: "층 D", color1: "#96704e", color2: "#7c583c",
-    hiddenName: "미확인 층 D의 정체 (교사가 수정)",
-    hiddenInfo: "층 D의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "E", label: "층 E", color1: "#7c5c40", color2: "#644830",
-    hiddenName: "미확인 층 E의 정체 (교사가 수정)",
-    hiddenInfo: "층 E의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." },
-  { id: "F", label: "층 F", color1: "#644832", color2: "#4e3624",
-    hiddenName: "미확인 층 F의 정체 (교사가 수정)",
-    hiddenInfo: "층 F의 숨겨진 정보입니다. 교사가 수정할 수 있습니다." }
+  { id: "A", label: "지층 A", env: "바다", color1: "#e0c084", color2: "#c8a060",
+    hiddenName: "따뜻하고 얕은 바다",
+    hiddenInfo: "산호 화석은 따뜻하고 수심이 얕은 바다 환경을 알려주는 단서입니다." },
+  { id: "B", label: "지층 B", env: "바다", color1: "#c89a6a", color2: "#ae7e4e",
+    hiddenName: "고생대 바다",
+    hiddenInfo: "삼엽충은 고생대를 대표하는 표준 화석입니다. 이 지층은 고생대 바다 환경과 관련이 있습니다." },
+  { id: "C", label: "지층 C", env: "육지", color1: "#b0805a", color2: "#946746",
+    hiddenName: "따뜻하고 습한 육지",
+    hiddenInfo: "고사리 화석은 따뜻하고 습한 육지 환경을 추리하는 단서입니다." },
+  { id: "D", label: "지층 D", env: "육지", color1: "#96704e", color2: "#7c583c",
+    hiddenName: "중생대 육지",
+    hiddenInfo: "공룡은 중생대를 대표하는 표준 화석입니다. 이 지층은 중생대 육지 환경과 관련이 있습니다." },
+  { id: "E", label: "지층 E", env: "바다", color1: "#7c5c40", color2: "#644830",
+    hiddenName: "여러 시대의 바다",
+    hiddenInfo: "암모나이트·화폐석 등 서로 다른 시대의 바다 화석이 함께 관찰되는 지층입니다." },
+  { id: "F", label: "지층 F", env: "육지", color1: "#644832", color2: "#4e3624",
+    hiddenName: "신생대 육지",
+    hiddenInfo: "매머드는 신생대를 대표하는 육상 포유류로, 이 지층은 신생대 육지 환경과 관련이 있습니다." }
 ];
 
 /* --- 배지 데이터 (교사가 수정할 데이터 영역) --- */
 const DEFAULT_BADGE_DATA = [
-  { id: "first_find",  icon: "🥇", name: "첫 발견자",       desc: "첫 아이템을 발견했어요!",            type: "discoverCount", value: 1 },
-  { id: "rookie",      icon: "⛏", name: "초보 탐사대원",   desc: "아이템 3개를 발견했어요!",           type: "discoverCount", value: 3 },
-  { id: "collector",   icon: "📚", name: "도감 수집가",     desc: "전체 아이템 50% 이상 수집!",         type: "completeRate",  value: 0.5 },
-  { id: "layer_reader",icon: "🧩", name: "층 해석자",       desc: "층 정보를 1개 이상 해금했어요!",     type: "layerUnlock",   value: 1 },
-  { id: "perfect",     icon: "👑", name: "완벽한 탐사대원", desc: "모든 샘플 아이템을 수집했어요!",     type: "completeAll",   value: 1 }
+  { id: "first_find",  icon: "🥇", name: "첫 발견자",       desc: "첫 화석을 발견했어요!",              type: "discoverCount", value: 1 },
+  { id: "rookie",      icon: "⛏", name: "초보 탐사대원",   desc: "화석 3개를 발견했어요!",             type: "discoverCount", value: 3 },
+  { id: "collector",   icon: "📚", name: "화석 수집가",     desc: "전체 화석 50% 이상 수집!",           type: "completeRate",  value: 0.5 },
+  { id: "layer_reader",icon: "🧩", name: "지층 해석자",     desc: "지층 정보를 1개 이상 해금했어요!",   type: "layerUnlock",   value: 1 },
+  { id: "perfect",     icon: "👑", name: "완벽한 탐사대원", desc: "모든 화석을 수집했어요!",            type: "completeAll",   value: 1 }
 ];
 
 /* --- 미션 데이터 (교사가 수정할 데이터 영역) --- */
 const DEFAULT_MISSION_DATA = {
-  main: "층상 단면에 숨겨진 모든 단서를 발굴하고, 도감을 완성해 층의 비밀을 밝혀라!",
+  main: "지질공원 탐사길의 지층 노두를 조사해 화석을 발굴하고, 화석도감을 완성해 이 지역의 과거 환경과 지질 시대를 추리하라!",
   bonus: [
-    "모든 층의 정보를 해금해 보세요.",
-    "퀴즈를 첫 시도에 맞혀 콤보를 쌓아 보세요.",
-    "배지 5개를 모두 획득해 보세요."
-  ]
+    "모든 지층의 정보를 해금해 보세요.",
+    "표준 화석과 시상 화석의 차이를 구분해 보세요.",
+    "최종 미션에서 이 지역의 환경 변화를 추리해 보세요."
+  ],
+  /* 최종 미션 (모든 지층 조사 후 열림) */
+  finalMission: {
+    title: "이 지역의 과거 환경은 어떻게 변했을까?",
+    question: "지층 A와 B에서는 바다 환경의 단서가, 지층 C와 D에서는 육지 환경의 단서가 발견되었습니다. 이 지역에서 추론할 수 있는 변화로 가장 적절한 것은?",
+    choices: [
+      "과거 바다 환경이었던 지역이 이후 육지 환경으로 변했을 가능성이 있다.",
+      "지층이 모두 같은 날 만들어졌다.",
+      "공룡은 현재에도 같은 지역에서 번성하고 있다.",
+      "화석으로는 과거 환경을 전혀 알 수 없다."
+    ],
+    answer: "과거 바다 환경이었던 지역이 이후 육지 환경으로 변했을 가능성이 있다.",
+    hint: "바다 화석과 육지 화석이 함께 발견된다는 점에 주목하세요.",
+    explanation: "바다 환경을 알려주는 단서와 육지 환경을 알려주는 단서가 함께 발견되므로, 이 지역의 환경이 시간에 따라 변했음을 추리할 수 있습니다. 과거 바다에서 만들어진 지층이 현재 육지에서 관찰된다면 지층의 융기를 생각할 수 있습니다.",
+    closing: "화석은 단순한 돌이 아니라, 지층의 나이와 과거 환경을 알려주는 시간의 단서입니다."
+  }
 };
+
+/* --- 탐사 노트 (도움말·화석도감에 카드형으로 표시) --- */
+const DEFAULT_NOTE_DATA = [
+  { icon: "🪨", title: "화석이란?", body: "과거에 살았던 생물의 몸체나 흔적이 지층 속에 남은 것이다." },
+  { icon: "🕰", title: "표준 화석", body: "지층의 시대를 알려주는 화석. 생존 기간이 짧고, 넓은 지역에 많이 분포할수록 좋다. (삼엽충·방추충·암모나이트·공룡·화폐석·매머드)" },
+  { icon: "🌊", title: "시상 화석", body: "과거 환경을 알려주는 화석. 특정 환경에서 잘 살고 환경 변화에 민감할수록 좋다. (산호·고사리)" },
+  { icon: "🦕", title: "지질 시대 대표 화석", body: "선캄브리아: 스트로마톨라이트·에디아카라 / 고생대: 삼엽충·방추충 / 중생대: 암모나이트·공룡 / 신생대: 화폐석·매머드" },
+  { icon: "💥", title: "대멸종", body: "많은 생물이 짧은 기간에 넓은 지역에서 사라진 사건. 고생대 말에는 삼엽충·방추충이, 중생대 말에는 공룡·암모나이트가 멸종했다." }
+];
 
 /* --- 탐험 공원 맵 설정 (교사가 수정할 데이터 영역)
    width/height: 맵 크기(px, 화면보다 크게 — 카메라가 플레이어를 따라감)
@@ -2410,6 +2555,7 @@ let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
 let badgeData  = deepClone(DEFAULT_BADGE_DATA);
 let missionData = deepClone(DEFAULT_MISSION_DATA);
+let noteData = deepClone(DEFAULT_NOTE_DATA);
 let roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
 
 let state = defaultState();
@@ -2425,6 +2571,7 @@ function defaultState(){
     parkDone: false,     // 노두 6개 모두 조사 완료 연출을 봤는지
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
+    finalMissionDone: false, // 최종 미션(환경 변화 추리) 완료 여부
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -2642,13 +2789,167 @@ function pixelSVG(rows, palette, cls){
 
 /* ---------- 아이템 fallback 그림 (SVG) ---------- */
 const FALLBACK_COLORS = ["#2ea79c","#ff8c42","#8a6fbf","#e05a7a","#4a90d9","#7fae3f"];
+/* 화석별 대표 색 (없으면 순번 색) — 픽셀 fallback을 화석답게 */
+const FOSSIL_COLORS = {
+  coral: "#ff7a6e", stromatolite: "#7fae3f", trilobite: "#8a6fbf",
+  fusulina: "#e0b24a", fern: "#4e9f52", dino: "#5aa06a",
+  ammonite: "#4a90d9", coin: "#d9a842", ediacara: "#e07aa0", mammoth: "#a9764e",
+  dinosaur: "#5aa06a", nummulites: "#d9a842"
+};
 function itemColor(item){
-  const idx = Math.max(0, itemData.findIndex(i => i.id === item.id));
+  if(item){
+    if(item.color) return item.color;
+    if(item.shape && FOSSIL_COLORS[item.shape]) return FOSSIL_COLORS[item.shape];
+    if(item.id && FOSSIL_COLORS[item.id]) return FOSSIL_COLORS[item.id];
+  }
+  const idx = Math.max(0, itemData.findIndex(i => i.id === (item && item.id)));
   return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
 }
 /* 아이템 도트 스프라이트 맵 (12x12) — A:본색, B:외곽선/진한색, L:밝은색,
-   W:흰 반짝, D:눈/입, R:볼터치 */
+   W:흰 반짝, D:진한 무늬, R:포인트
+   화석별 전용 맵(coral/trilobite/fern/dino/fusulina/ammonite/coin/mammoth/
+   stromatolite/ediacara)과 기본 도형(spiral/segmented/…)을 함께 둔다. */
 const ITEM_PIXEL_MAPS = {
+  coral: [
+    "....A..A....",
+    "...AA.AA....",
+    "A..A.AA..A..",
+    "AA.A.A.AAA..",
+    ".AAA.A.A.A..",
+    "..A.AAA.A...",
+    "...AAAAAA...",
+    "....AAAA....",
+    "....AAAA....",
+    "...AAAAAA...",
+    "..AAAAAAAA..",
+    ".BBBBBBBBBB."
+  ],
+  trilobite: [
+    "...BBBBBB...",
+    "..BAAAAAAB..",
+    ".BADAAAADAB.",
+    ".BAAAAAAAAB.",
+    ".BABAAAABAB.",
+    ".BAABAABAAB.",
+    ".BAABAABAAB.",
+    ".BAABAABAAB.",
+    ".BAABAABAAB.",
+    "..BABAABAB..",
+    "...BAAAAB...",
+    "....BBBB...."
+  ],
+  fern: [
+    ".....AB.....",
+    "....AAB.....",
+    "...AABB.....",
+    "..AAB.B.....",
+    ".AAB..B.....",
+    "AABAB.B.....",
+    ".AABAB.B....",
+    "..AABAB.B...",
+    "...AABAB.B..",
+    "....AABAB...",
+    ".....AAB....",
+    "......B....."
+  ],
+  dino: [
+    ".........AA.",
+    "........AAA.",
+    "A.....AAAAA.",
+    "AA...AAAAAA.",
+    "AAAAAAAAAA..",
+    ".AAAAAAAAA..",
+    "..AAAAAAA...",
+    "..AAAAAA....",
+    "..AA.AA.....",
+    "..AA.AA.....",
+    ".BA..BA.....",
+    ".BB..BB....."
+  ],
+  fusulina: [
+    "............",
+    "....BBBB....",
+    "..BBLLLLBB..",
+    ".BLLAAAALLB.",
+    "BLAAAAAAAALB",
+    "BLAAAAAAAALB",
+    "BLAAAAAAAALB",
+    ".BLLAAAALLB.",
+    "..BBLLLLBB..",
+    "....BBBB....",
+    "............",
+    "............"
+  ],
+  ammonite: [
+    "...BBBBBB...",
+    ".BBLLLLLLBB.",
+    ".BLLBBBBLLB.",
+    "BLLBLLLLBLLB",
+    "BLBLLWWLLBLB",
+    "BLBLLLLLLBLB",
+    "BLLBLLLLBLLB",
+    ".BLLBBBBLLB.",
+    ".BBLLLLLLBB.",
+    "...BBBBBB...",
+    "............",
+    "............"
+  ],
+  coin: [
+    "...BBBBBB...",
+    ".BBLLLLLLBB.",
+    "BLALALALALLB",
+    "BLLALALALALB",
+    "BALALALALALB",
+    "BLALALALALLB",
+    "BLLALALALALB",
+    "BALALALALALB",
+    ".BBLLLLLLBB.",
+    "...BBBBBB...",
+    "............",
+    "............"
+  ],
+  mammoth: [
+    "...AAAAAA...",
+    "..AAAAAAAA..",
+    ".AAAAAAAAAA.",
+    ".AAADAADAAA.",
+    ".AAAAAAAAAA.",
+    "AAAAAAAAAAAA",
+    "AAAAAAAAAAAA",
+    "WAAAAAAAAAAW",
+    ".WAA.AA.AAW.",
+    "..AA.AA.AA..",
+    ".WA..AA..AW.",
+    ".W.......W.."
+  ],
+  stromatolite: [
+    "............",
+    "...BBBBBB...",
+    "..BLLLLLLB..",
+    ".BBBBBBBBBB.",
+    ".BLLLLLLLLB.",
+    ".BBBBBBBBBB.",
+    ".BLLLLLLLLB.",
+    ".BBBBBBBBBB.",
+    ".BLLLLLLLLB.",
+    ".BBBBBBBBBB.",
+    "BBBBBBBBBBBB",
+    "............"
+  ],
+  ediacara: [
+    "............",
+    "...BBBBB....",
+    "..BAAAAAB...",
+    ".BAALAALAB..",
+    "BAAALAALAAB.",
+    "BAALAAALAAB.",
+    "BAAALAALAAB.",
+    ".BAALAALAB..",
+    "..BAAAAAB...",
+    "...BBBBB....",
+    "............",
+    "............"
+  ],
   spiral: [
     "...BBBBBB...",
     "..BAAAAAAB..",
@@ -2921,6 +3222,18 @@ function renderHelpMissions(){
     '<p style="font-weight:800; color:var(--earth-dark); line-height:1.6;">' + escapeHTML(safe(missionData.main,"")) + '</p>' +
     '<h3 style="color:var(--teal-dark);">🌟 보너스 미션</h3>' +
     '<ul style="font-weight:700; color:#7a6a4d; line-height:1.5; padding-left:22px;">' + bonus + '</ul>';
+  renderNoteCards($("helpNoteCard"));
+}
+/* 탐사 노트 카드 렌더 (도움말·화석도감 공용) */
+function renderNoteCards(container){
+  if(!container) return;
+  let cards = "";
+  (noteData || []).forEach(n => {
+    cards += '<div style="border:3px solid var(--ink); background:#fff; padding:10px 12px; margin:8px 0; box-shadow:3px 3px 0 rgba(74,59,46,.25);">' +
+      '<b style="color:var(--earth-dark);">' + escapeHTML(safe(n.icon,"📝")) + ' ' + escapeHTML(safe(n.title,"")) + '</b>' +
+      '<div style="font-weight:700; color:#5a4a3e; line-height:1.5; margin-top:4px; font-size:.95rem;">' + escapeHTML(safe(n.body,"")) + '</div></div>';
+  });
+  container.innerHTML = '<h3 style="color:var(--earth-dark);">📔 탐사 노트</h3>' + cards;
 }
 
 /* ---------- 장면(씬) 구성 ---------- */
@@ -2985,7 +3298,7 @@ function renderRoadScene(){
   game.camX = clamp(game.player.x - viewportW()/2, 0, Math.max(0, PARK.W - viewportW()));
   game.camY = clamp(game.player.y - viewportH()/2, 0, Math.max(0, PARK.H - viewportH()));
   $("actionHint").classList.remove("on");
-  $("controlGuide").textContent = "🎮 W·A·S·D(방향키)로 자유롭게 탐험 · 숨은 노두를 찾아 클릭/E로 조사!";
+  $("controlGuide").textContent = "🎮 W·A·S·D(방향키)로 지질공원 탐사길 탐험 · 숨은 지층 노두를 찾아 클릭/E로 조사!";
   /* 캔버스 클릭: 노두를 누르면 가까우면 조사, 멀면 걸어가서 조사 */
   park.canvas.onclick = (e) => {
     ensureAudioOnce();
@@ -3011,7 +3324,7 @@ function renderRoadScene(){
         return;
       }
       game.autoTarget = { waypoints: wp, layerId: best.layerId };
-      toast("🚶 길을 따라 노두 " + safe(best.layerId, "?") + "(으)로 걸어가는 중…");
+      toast("🚶 길을 따라 " + safe((layerData.find(l=>l.id===best.layerId)||{}).label, "지층 " + best.layerId) + " 노두로 걸어가는 중…");
     }
   };
   if(!park.resizeBound){
@@ -3337,7 +3650,8 @@ function drawPark(){
       const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
       const unlocked = state.unlockedLayers.includes(o.layerId);
       /* 이름표 */
-      const label = (dug ? "✔ " : "") + "노두 " + o.layerId + (unlocked ? "·" + safe(layerData.find(l=>l.id===o.layerId).hiddenName,"") : " · ???");
+      const lyObj = layerData.find(l => l.id === o.layerId);
+      const label = (dug ? "✔ " : "") + safe(lyObj && lyObj.label, "지층 " + o.layerId) + (unlocked ? " · " + safe(lyObj && lyObj.hiddenName, "") : " · ???");
       ctx.font = "900 13px sans-serif";
       const tw = ctx.measureText(label).width + 14;
       ctx.fillStyle = "#fffdf6";
@@ -3426,8 +3740,16 @@ function maybeParkComplete(){
   saveState();
   const show = () => {
     if(anyModalOpen()){ setTimeout(show, 800); return; }
-    $("cinematicTitle").textContent = "🎉 모든 노두 조사 완료!";
-    $("cinematicSub").textContent = "공원의 노두 " + layerData.length + "곳을 전부 조사했어요! 이제 퀴즈를 풀어 도감을 완성해요.";
+    $("cinematicTitle").textContent = "🎉 모든 지층 노두 조사 완료!";
+    $("cinematicSub").textContent = "지질공원의 지층 노두 " + layerData.length + "곳을 전부 조사했어요! 이제 이 지역의 과거 환경 변화를 추리해 볼까요?";
+    const btn = $("btnCinematicGo");
+    btn.textContent = "🧩 최종 미션 도전!";
+    btn.onclick = () => {
+      $("cinematicOverlay").classList.remove("on");
+      btn.onclick = defaultCinematicGo;
+      btn.textContent = "⛏ 본격 탐사 시작!";
+      openFinalMission();
+    };
     openCinematic();
     playSound("badge");
     spawnConfetti();
@@ -3678,7 +4000,7 @@ function openOutcropModal(layerId){
   if(!ly) return;
   game.currentOutcrop = layerId;
   const unlocked = state.unlockedLayers.includes(layerId);
-  $("outcropModalTitle").textContent = "🔎 노두 " + safe(ly.id, "?") + " 단면 조사" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
+  $("outcropModalTitle").textContent = "🔎 " + safe(ly.label, "지층 " + ly.id) + " 노두 단면 조사" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
   const xsec = $("outcropXsec");
   xsec.innerHTML = "";
   layerData.forEach(lr => {
@@ -3726,8 +4048,8 @@ function openOutcropModal(layerId){
   const itemsHere = itemsOfLayer(layerId);
   const left = itemsHere.filter(i => !state.completed.includes(i.id)).length;
   $("outcropNote").textContent = left > 0
-    ? "✨ 반짝이는 곳을 눌러 조사해요! (남은 단서 " + left + "개)"
-    : "🎉 이 노두의 단서를 모두 찾았어요!";
+    ? "✨ 반짝이는 곳을 눌러 화석을 발굴해요! (남은 화석 " + left + "개)"
+    : "🎉 이 지층의 화석을 모두 찾았어요!";
   openModal("outcropModal");
   playSound("place");
 }
@@ -3882,7 +4204,7 @@ function updateNearSite(){
     if(d < 210 && !state.foundOutcrops.includes(o.layerId)){
       state.foundOutcrops.push(o.layerId);
       saveState();
-      toast("🗺 새 노두 발견! 미니맵에 표시됐어요 — 노두 " + safe(o.layerId, "?"));
+      toast("🗺 새 지층 노두 발견! 미니맵에 표시됐어요 — " + safe((layerData.find(l=>l.id===o.layerId)||{}).label, "지층 " + o.layerId));
       playSound("place");
     }
     if(d < bestDist){ best = o; bestDist = d; }
@@ -4042,15 +4364,15 @@ function openItemModal(itemId, fromCollection){
   currentItemId = itemId;
   const done = state.completed.includes(itemId);
   const found = state.discovered.includes(itemId) || done;
-  $("itemModalTitle").textContent = found ? ("🔍 " + safe(item.name,"단서") + " 관찰") : "미발견 단서";
+  $("itemModalTitle").textContent = found ? ("🔍 " + safe(item.name,"화석") + " 관찰") : "미발견 화석";
   renderAssetImage($("itemModalVisual"), item, found ? "normal" : "silhouette");
   const layer = layerData.find(l => l.id === item.layer);
   const rows = [];
-  rows.push(row("발견 위치", found ? (safe(layer && layer.label, "?") ) : "???", !found));
+  rows.push(row("발견 지층", found ? (safe(layer && layer.label, "?") ) : "???", !found));
   rows.push(row("관찰 포인트", found ? safe(item.visualHint,"-") : "발굴하면 관찰할 수 있어요.", !found));
   rows.push(row("분류", done ? safe(item.group,"-") : "🔒 퀴즈를 풀면 해금!", !done));
-  rows.push(row("숨겨진 정보 1", done ? safe(item.hiddenInfo1,"-") : "🔒 ???", !done));
-  rows.push(row("숨겨진 정보 2", done ? safe(item.hiddenInfo2,"-") : "🔒 ???", !done));
+  rows.push(row("시대", done ? safe(item.hiddenInfo1,"-") : "🔒 ???", !done));
+  rows.push(row("환경", done ? safe(item.hiddenInfo2,"-") : "🔒 ???", !done));
   rows.push(row("설명", done ? safe(item.description,"-") : "🔒 퀴즈를 풀어 정보를 해금하세요.", !done));
   if(done) rows.push(row("한 줄 메모", safe(item.funNote,"-"), false));
   $("itemModalInfo").innerHTML = rows.join("");
@@ -4060,7 +4382,7 @@ function openItemModal(itemId, fromCollection){
     const hasQuiz = Array.isArray(item.quiz) && item.quiz.length > 0;
     const b = document.createElement("button");
     b.className = "btn";
-    b.textContent = hasQuiz ? "🧠 추론 퀴즈 도전!" : "📚 도감에 등록하기";
+    b.textContent = hasQuiz ? "🧠 화석 해석 퀴즈!" : "📚 화석도감에 등록하기";
     b.addEventListener("click", () => {
       playSound("click");
       closeModal("itemModal");
@@ -4211,7 +4533,7 @@ function completeItem(itemId){
   }
   saveState();
   playSound("register");
-  toast("📚 도감에 새 기록이 추가되었어요! 「" + safe(item.name,"단서") + "」");
+  toast("📚 화석도감에 등록! 「" + safe(item.name,"화석") + "」");
   spawnConfetti();
   /* 확대 조사창 안의 조사 지점 상태 갱신 */
   const s = game.sites.find(x => x.id === itemId);
@@ -4256,6 +4578,60 @@ function showAllCollected(){
   spawnConfetti();
 }
 function defaultCinematicGo(){ playSound("click"); $("cinematicOverlay").classList.remove("on"); }
+
+/* ---------- 최종 미션: 이 지역의 과거 환경 변화 추리 ---------- */
+let finalAttempts = 0;
+function openFinalMission(){
+  const fm = (missionData && missionData.finalMission) ? missionData.finalMission : (DEFAULT_MISSION_DATA.finalMission);
+  finalAttempts = 0;
+  $("finalQuestion").textContent = safe(fm.question, "");
+  const fb = $("finalFeedback");
+  fb.className = "quiz-feedback"; fb.textContent = "";
+  $("finalActions").innerHTML = "";
+  const box = $("finalChoices");
+  box.innerHTML = "";
+  const marks = ["①","②","③","④","⑤"];
+  (Array.isArray(fm.choices) ? fm.choices : []).forEach((c, i) => {
+    const b = document.createElement("button");
+    b.className = "quiz-choice";
+    b.innerHTML = "<span>" + safe(marks[i], "·") + "</span><span>" + escapeHTML(c) + "</span>";
+    b.addEventListener("click", () => checkFinalAnswer(c, b, fm));
+    box.appendChild(b);
+  });
+  openModal("finalMissionModal");
+  playSound("place");
+}
+function checkFinalAnswer(answer, btnEl, fm){
+  const correct = String(answer) === String(safe(fm.answer, ""));
+  const fb = $("finalFeedback");
+  if(correct){
+    playSound("correct");
+    if(btnEl) btnEl.classList.add("correct");
+    document.querySelectorAll("#finalChoices .quiz-choice").forEach(b => b.disabled = true);
+    if(!state.finalMissionDone){
+      state.finalMissionDone = true;
+      state.score = safe(state.score,0) + 50;
+      saveState();
+      updateHud();
+    }
+    fb.className = "quiz-feedback explain";
+    fb.textContent = "🎉 정답! 📝 " + safe(fm.explanation, "");
+    const actions = $("finalActions");
+    actions.innerHTML = "";
+    const b = document.createElement("button");
+    b.className = "btn teal";
+    b.textContent = "📋 탐사 결과 보기";
+    b.addEventListener("click", () => { playSound("click"); closeModal("finalMissionModal"); openResultScreen(); });
+    actions.appendChild(b);
+    checkBadges();
+  }else{
+    playSound("wrong");
+    if(btnEl){ btnEl.classList.add("wrong"); btnEl.disabled = true; }
+    finalAttempts++;
+    fb.className = "quiz-feedback hint";
+    fb.textContent = "🌱 다시 생각해 봐요! 💡 " + safe(fm.hint, "");
+  }
+}
 
 /* ---------- 층 정보 모달 ---------- */
 function openLayerModal(layerId){
@@ -4426,6 +4802,8 @@ function renderCollection(){
   });
   /* 배지 */
   renderBadgeGrid($("badgeGrid"));
+  /* 탐사 노트 */
+  renderNoteCards($("dexNoteCard"));
 }
 function renderBadgeGrid(el){
   el.innerHTML = "";
@@ -4444,13 +4822,21 @@ function renderBadgeGrid(el){
 function openResultScreen(){
   const total = Math.max(1, itemData.length);
   const acc = state.quizAnswered > 0 ? Math.round(state.quizFirstCorrect / state.quizAnswered * 100) : 0;
+  const fm = (missionData && missionData.finalMission) ? missionData.finalMission : DEFAULT_MISSION_DATA.finalMission;
+  let interp = "";
+  if(state.finalMissionDone){
+    interp = '<div style="border:4px solid var(--teal-dark); background:#e0f5ef; padding:12px 14px; margin-top:12px; line-height:1.6; font-weight:800; color:var(--teal-dark);">' +
+      '🌍 <b>과거 환경 추리:</b> ' + escapeHTML(safe(fm.explanation, "")) + '<br><br>' +
+      '💬 “' + escapeHTML(safe(fm.closing, "")) + '”</div>';
+  }
   $("resultStats").innerHTML =
     '<div class="result-stat"><span>⭐ 총 점수</span><span class="val">' + safe(state.score,0) + '점</span></div>' +
-    '<div class="result-stat"><span>📦 수집한 단서</span><span class="val">' + state.completed.length + " / " + total + '</span></div>' +
+    '<div class="result-stat"><span>🦴 수집한 화석</span><span class="val">' + state.completed.length + " / " + total + '</span></div>' +
+    '<div class="result-stat"><span>⛏ 조사한 지층</span><span class="val">' + exploredOutcropCount() + " / " + layerData.length + '</span></div>' +
     '<div class="result-stat"><span>🧠 퀴즈 첫 시도 정답률</span><span class="val">' + acc + '%</span></div>' +
-    '<div class="result-stat"><span>🔥 최고 콤보</span><span class="val">' + safe(state.maxCombo,0) + '</span></div>' +
-    '<div class="result-stat"><span>🔓 해금한 층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
-    '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>';
+    '<div class="result-stat"><span>🔓 해금한 지층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
+    '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>' +
+    interp;
   renderBadgeGrid($("resultBadges"));
   $("reportSavedMsg").textContent = "";
   drawReport();
@@ -4477,7 +4863,7 @@ function drawReport(){
   g.textBaseline = "middle";
   g.fillText("🧭 탐사 보고서", 70, 92);
   g.font = "800 22px 'Segoe UI','Noto Sans KR',sans-serif";
-  g.fillText("탐사대: 숨겨진 층의 비밀을 찾아라", 74, 122);
+  g.fillText("화석 탐정: 지층의 시간을 찾아라", 74, 122);
   /* 탐사대원 정보 */
   g.fillStyle = "#4a3b2e";
   g.font = "900 30px 'Segoe UI','Noto Sans KR',sans-serif";
@@ -4488,8 +4874,8 @@ function drawReport(){
   /* 성적 카드 6개 */
   const stats = [
     ["⭐ 총 점수", safe(state.score,0) + "점"],
-    ["📦 수집한 단서", state.completed.length + " / " + total],
-    ["⛏ 조사한 노두", exploredOutcropCount() + " / " + layerData.length],
+    ["🦴 수집한 화석", state.completed.length + " / " + total],
+    ["⛏ 조사한 지층", exploredOutcropCount() + " / " + layerData.length],
     ["🧠 퀴즈 정답률", acc + "%"],
     ["🔥 최고 콤보", String(safe(state.maxCombo,0))],
     ["🏅 획득 배지", state.badges.length + " / " + badgeData.length]
@@ -4507,7 +4893,7 @@ function drawReport(){
   });
   /* 수집 도감 요약 (아이템별 상태 도트) */
   g.fillStyle = "#4a3b2e"; g.font = "900 24px 'Segoe UI','Noto Sans KR',sans-serif";
-  g.fillText("📚 도감 수집 현황", 60, 496);
+  g.fillText("📚 화석도감 수집 현황", 60, 496);
   itemData.forEach((it, i) => {
     const bx = 60 + i * 132, by = 516;
     const completed = state.completed.includes(it.id);
@@ -4746,7 +5132,7 @@ function bindUI(){
     renderScreen("gameScreen");
     /* 탑다운 공원 맵에서 자유 탐험 */
     renderRoadScene();
-    toast("🗺 " + escapeHTML(state.nickname) + " 탐사대원, 공원을 탐험하며 노두 " + layerData.length + "개를 찾아 조사해요!");
+    toast("🗺 " + escapeHTML(state.nickname) + " 탐사대원, 지질공원의 지층 노두 " + layerData.length + "곳을 찾아 화석을 조사해요!");
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
   $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });

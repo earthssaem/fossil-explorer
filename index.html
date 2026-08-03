@@ -3102,22 +3102,30 @@ const DEFAULT_NOTE_DATA = [
    width/height: 맵 크기(px, 화면보다 크게 — 카메라가 플레이어를 따라감)
    outcrops: 노두 위치 [{layer, x, y}] — 층 id와 맵 좌표
 
-   ★ 배치 원칙: A→B→C→D→E→F가 한 붓 그리기처럼 이어지도록 뱀 모양으로 둔다.
-     북쪽 줄을 왼쪽→오른쪽(A·B·C)으로 걷고, 그대로 남쪽으로 내려와
-     오른쪽→왼쪽(D·E·F)으로 돌아온다. 시대 순서가 곧 걷는 순서가 된다.
-       A(북·왼쪽) → B(북·가운데) → C(북·오른쪽)
-                                      ↓
-       F(남·왼쪽) ← E(남·가운데) ← D(남·오른쪽)                        --- */
+   ★ 배치 원칙: 노두는 중앙 광장을 중심으로 네 방향에 흩어져 있다.
+     걷는 순서는 학생이 정하며, 시대 순서와 일치하지 않아도 된다.
+     단 남쪽(경계) 구역만 조건부로 열린다.
+     아래 배열 순서는 공간 배치를 적어 둔 것일 뿐이므로,
+     시대 정보가 필요하면 반드시 layerData의 era 필드에서 가져올 것.
+
+                    [북쪽 능선]
+                   노두 A · 노두 B
+                        │
+       [서쪽 숲길] ── 중앙 광장 ── [동쪽 물가]
+        노두 F             │          노두 C
+                     (잠김) │
+                    [남쪽 협곡]
+                   노두 E · 노두 D                                    --- */
 const DEFAULT_ROAD_SCENE_DATA = {
-  width: 1500,
-  height: 1050,
+  width: 1700,
+  height: 1200,
   outcrops: [
-    { layer: "A", x: 250,  y: 210 },   /* 선캄브리아 시대 · 왼쪽 세로길 북단 */
-    { layer: "B", x: 760,  y: 150 },   /* 고생대 · 가운데 세로길 북단 */
-    { layer: "C", x: 1265, y: 260 },   /* 중생대 · 오른쪽 세로길 북단 (나무숲 뒤에 살짝 숨김) */
-    { layer: "D", x: 1265, y: 880 },   /* 경계 노두 · 오른쪽 세로길 남단 */
-    { layer: "E", x: 700,  y: 900 },   /* 신생대 바다 · 가운데 세로길 남단 (나무숲 뒤에 살짝 숨김) */
-    { layer: "F", x: 210,  y: 780 }    /* 신생대 육지 · 왼쪽 진입로 남단 */
+    { layer: "A", x: 420,  y: 210 },   /* 북쪽 구역 서단 — 선캄브리아 시대 */
+    { layer: "B", x: 1280, y: 210 },   /* 북쪽 구역 동단 — 고생대 */
+    { layer: "C", x: 1410, y: 600 },   /* 동쪽 구역 끝 — 중생대 */
+    { layer: "F", x: 290,  y: 600 },   /* 서쪽 구역 끝 — 신생대 육지 */
+    { layer: "E", x: 420,  y: 990 },   /* 남쪽 구역 서단 — 신생대 바다 */
+    { layer: "D", x: 1280, y: 990 }    /* 남쪽 구역 동단 — 경계 노두 */
   ]
 };
 
@@ -3137,7 +3145,7 @@ const CONCEPT_KEYS = CONCEPT_TAGS.map(t => t.key);
    ========================================================================== */
 
 /* ---------- 전역 상태 ---------- */
-const SAVE_KEY = "stratumExplorer_save_v2";
+const SAVE_KEY = "stratumExplorer_save_v3";
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
@@ -3157,6 +3165,8 @@ function defaultState(){
     foundOutcrops: [],   // 근접해서 '발견'한 노두(층 id) — 미니맵에 표시
     dugSlots: [],        // 발굴을 끝낸 조사 지점 slot id (경계 노두는 한 화석이 여러 지점에서 나옴)
     visitedCells: [],    // 지나간 맵 칸 (미니맵 안개 걷힘)
+    visitedZones: [],    // 처음 발을 들인 구역 key (미니맵에 이름 표시)
+    southOpenSeen: false, // 남쪽 구역 해금 알림을 이미 봤는지
     parkDone: false,     // 노두 6개 모두 조사 완료 연출을 봤는지
     evidenceCinematicShown: false, // 경계층 첫 증거 발견 연출을 봤는지
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
@@ -3357,7 +3367,7 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells","dugSlots"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","visitedZones"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);
@@ -4369,9 +4379,9 @@ function renderRoadScene(){
       y: clamp(Number(safe(s && s.y, gy)) || gy, 80, PARK.H - 60)
     });
   });
-  /* 시작 지점: 가로 큰길 서쪽 끝 (항상 길 위에서 시작) */
-  game.player.x = 130;
-  game.player.y = 485 * (PARK.H / 1050);
+  /* 시작 지점: 중앙 광장 한가운데 (사방 어느 쪽으로든 갈 수 있다) */
+  game.player.x = 850 * (PARK.W / 1700);
+  game.player.y = 600 * (PARK.H / 1200);
   game.player.dir = 1;
   game.player.face = "down";
   game.nearSite = null;
@@ -4395,6 +4405,13 @@ function renderRoadScene(){
     });
     if(!best) return;
     playSound("click");
+    /* 잠긴 구역의 노두는 길이 막혀 있으므로 걸어가지 않는다.
+       (findPath는 도달 가능한 가장 가까운 칸을 돌려주므로 그냥 두면
+        차단봉 앞까지 걸어간 뒤 조사창이 열려 잠금이 뚫린다) */
+    if(outcropLocked(best.layerId)){
+      toast("🚧 아직 조사 허가가 나지 않은 구역이다. (남은 노두 " + southRemainingCount() + "곳을 먼저 조사하자)");
+      return;
+    }
     if(Math.hypot(best.x - game.player.x, best.y - game.player.y) < 150){
       openOutcropModal(best.layerId);
     }else{
@@ -4417,7 +4434,8 @@ function renderRoadScene(){
 }
 
 /* 공원 월드 상수/런타임 */
-const PARK = { W: 1500, H: 1050 };
+/* 기준 좌표계 1700x1200 — 방사형 4구역 맵 */
+const PARK = { W: 1700, H: 1200 };
 const park = { canvas: null, ctx: null, terrain: null, trees: [], sprites: {}, walkT: 0 };
 function viewportH(){ return $("sceneViewport").clientHeight || window.innerHeight; }
 function resizeParkCanvas(){
@@ -4429,8 +4447,12 @@ function resizeParkCanvas(){
   park.ctx.imageSmoothingEnabled = false;
 }
 
-/* 연못 (이동 불가 지형) */
-function pondAt(){ return { cx: PARK.W * 0.7, cy: PARK.H * 0.62, rx: 170, ry: 105 }; }
+/* 연못 (이동 불가 지형) — 길과 겹치면 통행을 막으므로 광장 남동쪽 빈 잔디에 둔다.
+   길과 같은 1700x1200 기준으로 스케일한다. */
+function pondAt(){
+  const sx = PARK.W / 1700, sy = PARK.H / 1200;
+  return { cx: 1240 * sx, cy: 800 * sy, rx: 170 * sx, ry: 105 * sy };
+}
 function inPond(x, y){
   const p = pondAt();
   const dx = (x - p.cx) / (p.rx + 18), dy = (y - p.cy) / (p.ry + 18);
@@ -4438,24 +4460,113 @@ function inPond(x, y){
 }
 
 /* ★ 길 네트워크: 캐릭터는 이 길 위로만 걸을 수 있다 ★
-   (기준 좌표계 1500x1050 — 맵 크기가 바뀌면 비율에 맞게 스케일) */
+   중앙 광장에서 북·서·동·남 네 방향으로 길이 뻗는 방사형 구조.
+   (기준 좌표계 1700x1200 — 맵 크기가 바뀌면 비율에 맞게 스케일)
+   locked 값이 있으면 그 구역이 열리기 전까지 통행 불가. */
 const PARK_PATHS_BASE = [
-  { x: 0,    y: 440, w: 1500, h: 90 },   /* 가로 큰길 */
-  { x: 230,  y: 150, w: 80,   h: 900 },  /* 왼쪽 세로길 (노두 A·F 방면) */
-  { x: 700,  y: 110, w: 80,   h: 940 },  /* 가운데 세로길 (노두 B·E 방면) */
-  { x: 1240, y: 190, w: 80,   h: 860 },  /* 오른쪽 세로길 (노두 C·D 방면) */
-  { x: 150,  y: 740, w: 170,  h: 80 },   /* 노두 F 진입로 */
-  { x: 1240, y: 840, w: 170,  h: 80 },   /* 노두 D 진입로 */
-  { x: 1240, y: 190, w: 130,  h: 80 }    /* 노두 C 진입로 */
+  /* 중앙 광장 — 사방으로 길이 뻗는 기준점 */
+  { x: 700,  y: 470, w: 300, h: 260 },
+
+  /* 북쪽 길 (광장 → 북쪽 능선) */
+  { x: 810,  y: 170, w: 80,  h: 310 },
+  /* 북쪽 구역 가로길 — 양 끝에 노두 A(서), B(동) */
+  { x: 380,  y: 170, w: 940, h: 80  },
+
+  /* 서쪽 길 (광장 → 서쪽 숲길) */
+  { x: 250,  y: 560, w: 460, h: 80  },
+
+  /* 동쪽 길 (광장 → 동쪽 물가) */
+  { x: 990,  y: 560, w: 460, h: 80  },
+
+  /* 남쪽 길 (광장 → 남쪽 협곡) — 잠기는 구간 */
+  { x: 810,  y: 720, w: 80,  h: 300, locked: "south" },
+  /* 남쪽 구역 가로길 — 양 끝에 노두 E(서), D(동) */
+  { x: 380,  y: 950, w: 940, h: 80,  locked: "south" }
 ];
-function parkPaths(){
-  const sx = PARK.W / 1500, sy = PARK.H / 1050;
-  return PARK_PATHS_BASE.map(p => ({ x: p.x*sx, y: p.y*sy, w: p.w*sx, h: p.h*sy }));
+/* 구역 — 미니맵 이름 표시와 진입 감지에 쓴다 (기준 좌표계 1700x1200) */
+const PARK_ZONES = [
+  { key: "plaza", name: "중앙 광장", x: 690,  y: 460, w: 320, h: 280 },
+  { key: "north", name: "북쪽 능선", x: 360,  y: 150, w: 980, h: 200 },
+  { key: "west",  name: "서쪽 숲길", x: 230,  y: 480, w: 340, h: 240 },
+  { key: "east",  name: "동쪽 물가", x: 1130, y: 480, w: 340, h: 240 },
+  { key: "south", name: "남쪽 협곡", x: 360,  y: 860, w: 980, h: 210, locked: true }
+];
+function parkZones(){
+  const sx = PARK.W / 1700, sy = PARK.H / 1200;
+  return PARK_ZONES.map(z => ({ key: z.key, name: z.name, locked: z.locked,
+                                x: z.x*sx, y: z.y*sy, w: z.w*sx, h: z.h*sy }));
 }
-/* 길 위인가? (플레이어 반폭만큼 여유) */
+/* 노두가 잠긴 구역 안에 있는가 — 자동 이동·조사창 진입을 막는 데 쓴다 */
+function outcropLocked(layerId){
+  const o = (game.outcrops || []).find(x => x.layerId === layerId);
+  if(!o) return false;
+  const z = zoneAt(o.x, o.y);
+  return !!(z && zoneLocked(z.key));
+}
+/* 좌표가 속한 구역 (없으면 null) */
+function zoneAt(x, y){
+  return parkZones().find(z => x >= z.x && x <= z.x + z.w && y >= z.y && y <= z.y + z.h) || null;
+}
+
+/* walkableAt이 BFS 길찾기에서 셀마다 불리므로 결과를 캐시한다 (맵 크기가 바뀔 때만 다시 계산) */
+let _pathCache = { key: "", val: null };
+function parkPaths(){
+  const key = PARK.W + "x" + PARK.H + ":" + PARK_PATHS_BASE.length;
+  if(_pathCache.key === key) return _pathCache.val;
+  const sx = PARK.W / 1700, sy = PARK.H / 1200;
+  _pathCache = { key: key,
+    val: PARK_PATHS_BASE.map(p => ({ x: p.x*sx, y: p.y*sy, w: p.w*sx, h: p.h*sy, locked: p.locked })) };
+  return _pathCache.val;
+}
+/* 잠긴 구역인가? (열린 구역은 locked가 있어도 통행 가능) */
+function zoneLocked(key){
+  if(!key) return false;
+  if(key === "south") return !southUnlocked();
+  return false;
+}
+/* 남쪽(경계) 구역 해금 조건 — 경계 노두를 뺀 나머지를 모두 조사 완료
+   층 id를 하드코딩하지 않으므로 노두를 추가해도 자동 반영된다 */
+/* 노두의 좌표 (씬이 아직 안 만들어졌으면 데이터에서 가져온다) */
+function outcropPosOf(layerId){
+  const o = (game.outcrops || []).find(x => x.layerId === layerId);
+  if(o) return o;
+  const s = (roadSceneData.outcrops || []).find(x => x && x.layer === layerId);
+  return s ? { x: Number(s.x) || 0, y: Number(s.y) || 0 } : null;
+}
+/* 그 노두가 속한 구역 key */
+function layerZoneKey(layerId){
+  const pos = outcropPosOf(layerId);
+  if(!pos) return null;
+  const z = zoneAt(pos.x, pos.y);
+  return z ? z.key : null;
+}
+/* 남쪽 해금의 전제가 되는 노두들 = 남쪽 구역 밖에 있는 노두 전부.
+   ※ isBoundary 기준으로 잡으면 남쪽 안에 있는 노두(E)까지 전제에 들어가
+      "잠긴 구역을 조사해야 그 구역이 열리는" 순환이 되어 영영 열리지 않는다.
+      구역으로 판정하면 노두를 옮겨도 자동으로 따라온다. */
+function southGateLayers(){
+  return layerData.filter(l => layerZoneKey(l.id) !== "south");
+}
+let _southCache = { key: "", val: false };
+function southUnlocked(){
+  /* 조사 진행이 바뀌었을 때만 다시 계산 — 배열은 늘어나기만 하므로 길이로 판별한다 */
+  const key = state.completed.length + "/" + state.dugSlots.length + "/" + layerData.length;
+  if(_southCache.key === key) return _southCache.val;
+  const gate = southGateLayers();
+  const val = gate.length > 0 && gate.every(l => outcropDone(l.id));
+  _southCache = { key: key, val: val };
+  return val;
+}
+/* 남쪽이 열리기까지 남은 노두 수 */
+function southRemainingCount(){
+  return southGateLayers().filter(l => !outcropDone(l.id)).length;
+}
+/* 길 위인가? (플레이어 반폭만큼 여유) — 잠긴 길은 통행 불가 */
 function walkableAt(x, y){
   const M = 16;
-  return parkPaths().some(p => x >= p.x - M && x <= p.x + p.w + M && y >= p.y - M && y <= p.y + p.h + M);
+  return parkPaths().some(p =>
+    !zoneLocked(p.locked) &&
+    x >= p.x - M && x <= p.x + p.w + M && y >= p.y - M && y <= p.y + p.h + M);
 }
 /* 격자 BFS 길찾기: 노두 클릭 시 길을 따라 걸어가기 위한 경유지 계산 */
 function findPath(sx, sy, tx, ty){
@@ -4610,13 +4721,14 @@ function buildParkSprites(){
 /* 나무 클러스터 배치 (일부는 노두를 가려서 '발견'의 재미를 만든다) */
 function buildParkLayout(){
   park.trees = [];
+  /* 길 위에 얹히지 않도록 네 사분면의 빈 잔디에 둔다 */
   const clusters = [
-    { x: 520,  y: 330, n: 5 },
-    { x: 1210, y: 330, n: 6 },   /* 노두 C를 남쪽에서 가림 */
-    { x: 320,  y: 560, n: 4 },
-    { x: 640,  y: 980, n: 6 },   /* 노두 E를 남쪽에서 가림 */
-    { x: 980,  y: 200, n: 3 },
-    { x: 1350, y: 620, n: 4 }
+    { x: 560,  y: 360, n: 5 },   /* 북서 잔디 */
+    { x: 1180, y: 360, n: 6 },   /* 북동 잔디 */
+    { x: 420,  y: 780, n: 4 },   /* 남서 잔디 */
+    { x: 620,  y: 800, n: 6 },   /* 광장 남서쪽 */
+    { x: 1060, y: 300, n: 3 },   /* 북쪽 길 옆 */
+    { x: 1480, y: 830, n: 4 }    /* 남동 잔디 */
   ];
   clusters.forEach((cl, ci) => {
     for(let i = 0; i < cl.n; i++){
@@ -4700,6 +4812,36 @@ function exploredOutcropCount(){
 }
 
 /* 매 프레임 공원 그리기 */
+/* 잠긴 길: 보이되 갈 수 없다는 것이 드러나게 어둡게 덮고 입구를 막는다.
+   길이 아예 안 보이면 그쪽에 무언가 있다는 것조차 모른다. */
+function drawLockedPaths(ctx){
+  const locked = parkPaths().filter(p => zoneLocked(p.locked));
+  if(!locked.length) return;
+  ctx.save();
+  /* 어둡게 덮기 */
+  ctx.fillStyle = "rgba(24,18,10,.55)";
+  locked.forEach(p => ctx.fillRect(Math.round(p.x), Math.round(p.y), Math.round(p.w), Math.round(p.h)));
+  /* 광장에서 가장 가까운(=가장 위) 잠긴 길의 입구에 차단봉 */
+  let top = locked[0];
+  locked.forEach(p => { if(p.y < top.y) top = p; });
+  const bx = Math.round(top.x), by = Math.round(top.y) + 6, bw = Math.round(top.w);
+  ctx.fillStyle = "#4a3b2e"; ctx.fillRect(bx - 10, by, bw + 20, 14);
+  ctx.fillStyle = "#ffce4a";
+  for(let i = 0; i < bw + 20; i += 22) ctx.fillRect(bx - 10 + i, by, 11, 14);
+  ctx.fillStyle = "#4a3b2e";
+  ctx.fillRect(bx - 12, by - 6, 8, 34);
+  ctx.fillRect(bx + bw + 4, by - 6, 8, 34);
+  /* 자물쇠 + 남은 노두 수 */
+  const label = "🔒 조사 허가 필요 · 남은 노두 " + southRemainingCount() + "곳";
+  ctx.font = "900 14px sans-serif";
+  const tw = ctx.measureText(label).width + 16;
+  const lx = Math.round(top.x + top.w/2 - tw/2), ly = by + 26;
+  ctx.fillStyle = "#fffdf6"; ctx.fillRect(lx, ly, Math.round(tw), 24);
+  ctx.strokeStyle = "#4a3b2e"; ctx.lineWidth = 3; ctx.strokeRect(lx, ly, Math.round(tw), 24);
+  ctx.fillStyle = "#8a5a00"; ctx.fillText(label, lx + 8, ly + 17);
+  ctx.restore();
+}
+
 function drawPark(){
   const ctx = park.ctx;
   if(!ctx || !park.terrain) return;
@@ -4709,6 +4851,7 @@ function drawPark(){
   ctx.scale(park.zoom || 1, park.zoom || 1);
   ctx.translate(-Math.round(game.camX), -Math.round(game.camY));
   ctx.drawImage(park.terrain, 0, 0);
+  drawLockedPaths(ctx);
   /* y-정렬로 나무/노두/플레이어를 그려 자연스러운 가림 표현 */
   const ents = [];
   game.outcrops.forEach(o => ents.push({ y: o.y + 26, type: "outcrop", o: o }));
@@ -4794,6 +4937,27 @@ function drawMiniMap(){
   state.visitedCells.forEach(ci => {
     const cx = ci % 15, cy = Math.floor(ci / 15);
     g.drawImage(park.terrainMini, cx*cellW, cy*cellH, cellW, cellH, cx*cellW, cy*cellH, cellW, cellH);
+  });
+  /* 구역 이름 (한 번이라도 들어간 구역만) + 잠긴 구역 자물쇠 */
+  parkZones().forEach(z => {
+    const cx = (z.x + z.w/2) * sx, cy = (z.y + z.h/2) * sy;
+    if(zoneLocked(z.key)){
+      g.font = "900 9px sans-serif";
+      g.textAlign = "center";
+      g.fillStyle = "#e8c25c";
+      g.fillText("🔒", cx, cy + 3);
+      g.textAlign = "left";
+      return;
+    }
+    if(!state.visitedZones.includes(z.key)) return;
+    g.font = "900 8px sans-serif";
+    g.textAlign = "center";
+    g.fillStyle = "rgba(20,26,18,.75)";
+    const tw = g.measureText(z.name).width + 6;
+    g.fillRect(cx - tw/2, cy - 6, tw, 11);
+    g.fillStyle = "#e9f5df";
+    g.fillText(z.name, cx, cy + 2);
+    g.textAlign = "left";
   });
   /* 발견한 노두 점 */
   game.outcrops.forEach(o => {
@@ -5364,7 +5528,7 @@ function gameLoop(t){
       if(!at.waypoints.length){
         const layerId = at.layerId;
         game.autoTarget = null;
-        openOutcropModal(layerId);
+        if(!outcropLocked(layerId)) openOutcropModal(layerId);
       }else{
         const w = at.waypoints[0];
         const ad = Math.hypot(w.x - game.player.x, w.y - game.player.y) || 1;
@@ -5399,6 +5563,8 @@ function gameLoop(t){
         state.visitedCells.push(ci);
         saveState();
       }
+      checkZoneEntry();
+      checkLockedApproach();
     }
   }
   game.player.moving = moving;
@@ -5422,6 +5588,46 @@ function gameLoop(t){
 function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
 }
+/* 처음 들어선 구역이면 이름을 알려 주고 미니맵에 표시한다 */
+function checkZoneEntry(){
+  const z = zoneAt(game.player.x, game.player.y);
+  if(!z || z.locked && zoneLocked(z.key)) return;
+  if(state.visitedZones.includes(z.key)) return;
+  state.visitedZones.push(z.key);
+  saveState();
+  toast("📍 " + z.name);
+  playSound("place");
+}
+
+/* 잠긴 길 입구에 다가서면 이유를 알려 준다 (2.5초에 한 번만) */
+let lockedHintAt = 0;
+function checkLockedApproach(){
+  const locked = parkPaths().filter(p => zoneLocked(p.locked));
+  if(!locked.length) return;
+  const M = 70;
+  const near = locked.some(p =>
+    game.player.x >= p.x - M && game.player.x <= p.x + p.w + M &&
+    game.player.y >= p.y - M && game.player.y <= p.y + p.h + M);
+  if(!near) return;
+  const now = performance.now();
+  if(now - lockedHintAt < 2500) return;
+  lockedHintAt = now;
+  const n = southRemainingCount();
+  toast("🚧 아직 조사 허가가 나지 않은 구역이다. (남은 노두 " + n + "곳을 먼저 조사하자)");
+}
+
+/* 남쪽 구역이 방금 열렸는지 확인 — 노두 조사 완료 처리 뒤에 부른다 */
+function checkSouthUnlock(){
+  if(state.southOpenSeen) return;
+  if(!southUnlocked()) return;
+  state.southOpenSeen = true;
+  saveState();
+  setTimeout(() => {
+    toast("🔓 남쪽 협곡 구역이 열렸다!", "gold");
+    playSound("badge");
+  }, 700);
+}
+
 /* 가까운 노두 감지: 첫 근접이면 "새 노두 발견!" 토스트 + 미니맵 점,
    더 가까우면 "조사 가능 (E)" 말풍선 */
 function updateNearSite(){
@@ -5895,6 +6101,7 @@ function completeItem(itemId){
   }
   updateHud();
   checkBadges();
+  checkSouthUnlock();  /* 노두 조사가 끝나면 남쪽 구역이 열렸는지 확인 */
   maybeParkComplete(); /* 증거 4종을 다 모아야 최종 미션이 열리므로 여기서도 확인 */
   /* 전부 수집 시 축하 연출 */
   if(state.completed.length >= itemData.length){

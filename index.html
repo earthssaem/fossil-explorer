@@ -1244,6 +1244,96 @@ h1,h2,h3{margin:.3em 0;}
 .dig-site.empty .glint{display:none;}
 .dig-site.empty .site-item{display:none;}
 .dig-site.empty .empty-mark{display:flex;}
+/* --- 최종 미션: 가설 타당성 평가 --- */
+#finalMissionModal .hypo-card{width:min(880px, 97%); max-width:none;}
+.hypo-howto{
+  font-size:.82rem; font-weight:700; color:#7a6a4d;
+  line-height:1.5; margin:6px 0 10px; text-align:center;
+}
+.hypo-tray{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+  padding:10px; margin-bottom:12px;
+  background:#f4ecd8; border:4px solid #d8c49a;
+}
+.hypo-ev{
+  display:flex; align-items:center; gap:7px;
+  background:#fffdf6; border:3px solid var(--ink);
+  padding:6px 9px;
+  font-weight:900; font-size:.78rem; color:var(--ink);
+  cursor:pointer;
+  max-width:190px;
+}
+.hypo-ev .ev-icon{width:26px; height:26px; flex:0 0 auto; position:relative;}
+.hypo-ev.sel{background:var(--sun); box-shadow:0 0 0 4px rgba(255,206,74,.55);}
+.hypo-ev.placed{opacity:.5; cursor:default; text-decoration:line-through;}
+.hypo-ev.placed .ev-icon{filter:grayscale(.7);}
+.hypo-grid{
+  display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px;
+}
+@media (max-width:760px){
+  .hypo-grid{grid-template-columns:repeat(2, minmax(0,1fr));}
+  /* 증거 카드가 한 줄에 하나씩 쌓이면 화면을 다 잡아먹는다 — 2장씩 */
+  .hypo-tray{gap:6px; padding:8px;}
+  .hypo-ev{max-width:none; flex:1 1 42%; font-size:.72rem; padding:5px 6px;}
+  .hypo-ev .ev-icon{width:22px; height:22px;}
+}
+.hypo-h{
+  border:4px solid var(--ink);
+  background:#fffdf6;
+  padding:8px 7px;
+  display:flex; flex-direction:column; gap:6px;
+  cursor:pointer;
+}
+.hypo-h.armed{box-shadow:0 0 0 4px rgba(46,167,156,.5);}
+.hypo-h.reject{animation:shakeX .32s steps(3,end) 2;}
+@keyframes shakeX{0%,100%{transform:translateX(0);}50%{transform:translateX(-5px);}}
+.hypo-h .h-name{font-weight:900; font-size:.86rem; color:var(--ink); line-height:1.25;}
+.hypo-h .h-desc{font-size:.7rem; font-weight:700; color:#8a7a5d; line-height:1.4;}
+.hypo-h .h-score{
+  font-size:.74rem; font-weight:900; color:#7a6a4d;
+  border-top:3px dashed #d8c49a; padding-top:5px;
+}
+.hypo-h.full .h-score{color:var(--teal-dark);}
+.hypo-crit{display:flex; flex-direction:column; gap:3px;}
+.hypo-cell{
+  display:flex; align-items:flex-start; gap:5px;
+  font-size:.68rem; font-weight:800; line-height:1.3;
+  color:#a99a80;
+  background:#f2ece0; border:2px solid #ddd2bd;
+  padding:3px 5px;
+}
+.hypo-cell .cbox{
+  flex:0 0 auto; width:13px; height:13px;
+  border:2px solid #c3b498; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.6rem; line-height:1;
+}
+.hypo-cell.on{color:var(--teal-dark); background:#dff3ee; border-color:var(--teal-dark);}
+.hypo-cell.on .cbox{background:var(--teal); border-color:var(--teal-dark); color:#fff;}
+.hypo-legend{
+  font-size:.7rem; font-weight:700; color:#8a7a5d;
+  margin-top:8px; line-height:1.5;
+}
+.hypo-closing{display:none;}
+.hypo-closing.on{display:block; margin-top:12px;}
+.hypo-closing .cl-title{
+  background:var(--teal-dark); color:#fff;
+  border:4px solid var(--ink);
+  font-weight:900; padding:8px 10px; text-align:center;
+  font-size:.95rem; line-height:1.4;
+}
+.hypo-closing .cl-body{
+  border:4px solid var(--ink); border-top:none;
+  background:#fffdf6; padding:10px 12px;
+  font-weight:700; color:#5a4a3e; line-height:1.65; font-size:.85rem;
+}
+.hypo-closing .cl-body p{margin:0 0 8px;}
+.hypo-closing .cl-hi{
+  display:block; margin-top:4px;
+  background:var(--sun); border:3px solid var(--ink);
+  padding:8px 10px; font-weight:900; color:var(--ink);
+  line-height:1.5;
+}
 /* 빈손 결과 모달 */
 #emptyDigModal .modal-card{text-align:center; border-color:#c9bda6;}
 .empty-banner{
@@ -2146,13 +2236,17 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     </div>
   </div>
 
-  <!-- ============ 최종 미션 모달 ============ -->
+  <!-- ============ 최종 미션 모달 · 가설 타당성 평가 ============ -->
   <div class="modal-backdrop" id="finalMissionModal">
-    <div class="modal-card">
-      <h3 class="modal-title">🧩 최종 미션 · 이 지역의 과거 환경은 어떻게 변했을까?</h3>
+    <div class="modal-card hypo-card">
+      <h3 class="modal-title" id="finalTitle">🧩 최종 미션</h3>
       <div class="quiz-question" id="finalQuestion"></div>
-      <div class="quiz-choices" id="finalChoices"></div>
+      <p class="hypo-howto" id="finalHowto"></p>
+      <div class="hypo-tray" id="finalEvidence"></div>
+      <div class="hypo-grid" id="finalHypotheses"></div>
+      <div class="hypo-legend" id="finalLegend"></div>
       <div class="quiz-feedback" id="finalFeedback"></div>
+      <div class="hypo-closing" id="finalClosing"></div>
       <div class="modal-actions" id="finalActions"></div>
     </div>
   </div>
@@ -2881,22 +2975,43 @@ const DEFAULT_MISSION_DATA = {
   bonus: [
     "모든 지층의 정보를 해금해 보세요.",
     "표준 화석과 시상 화석의 차이를 구분해 보세요.",
-    "최종 미션에서 이 지역의 환경 변화를 추리해 보세요."
+    "경계층에서 찾은 증거로 대멸종의 원인 가설을 평가해 보세요."
   ],
-  /* 최종 미션 (모든 지층 조사 후 열림) */
+  /* 최종 미션: 대멸종 원인 가설의 타당성 평가 (모든 노두 조사 + 증거 4종 수집 후 열림)
+     ── 정답이 하나인 4지선다가 아니다. 학생이 증거를 가설에 배치하면서
+        평가 기준이 얼마나 채워지는지 스스로 확인하는 방식이다.
+        소행성 충돌설과 화산 폭발설이 둘 다 4칸을 채우는 것은 의도된 설계다. */
   finalMission: {
-    title: "이 지역의 과거 환경은 어떻게 변했을까?",
-    question: "지층 A와 B에서는 바다 환경의 단서가, 지층 C와 D에서는 육지 환경의 단서가 발견되었습니다. 이 지역에서 추론할 수 있는 변화로 가장 적절한 것은?",
-    choices: [
-      "과거 바다 환경이었던 지역이 이후 육지 환경으로 변했을 가능성이 있다.",
-      "지층이 모두 같은 날 만들어졌다.",
-      "공룡은 현재에도 같은 지역에서 번성하고 있다.",
-      "화석으로는 과거 환경을 전혀 알 수 없다."
+    title: "대멸종의 원인, 어느 가설이 타당한가?",
+    intro: "경계층에서 찾은 증거를 가설로 옮겨 보자. 증거가 그 가설을 뒷받침하면 해당 평가 기준 칸이 채워진다.",
+    howto: "증거 카드를 고른 뒤 가설 카드를 누르세요. (마우스로 끌어다 놓아도 됩니다) 하나의 증거는 여러 가설에 얼마든지 다시 시도할 수 있습니다.",
+    /* 교과서에 실린 가설 평가 기준 4가지 */
+    criteria: [
+      { key: "evidence",   short: "과학적 증거",   label: "가설을 뒷받침하는 과학적인 증거가 있는가?" },
+      { key: "consistent", short: "사실과 일치",   label: "다른 과학적 사실에 어긋나지 않는가?" },
+      { key: "global",     short: "전 지구적 변화", label: "전 지구적인 환경 변화를 초래하였는가?" },
+      { key: "power",      short: "멸종시킬 위력", label: "생물을 멸종할 만큼 위력적이었는가?" }
     ],
-    answer: "과거 바다 환경이었던 지역이 이후 육지 환경으로 변했을 가능성이 있다.",
-    hint: "바다 화석과 육지 화석이 함께 발견된다는 점에 주목하세요.",
-    explanation: "바다 환경을 알려주는 단서와 육지 환경을 알려주는 단서가 함께 발견되므로, 이 지역의 환경이 시간에 따라 변했음을 추리할 수 있습니다. 과거 바다에서 만들어진 지층이 현재 육지에서 관찰된다면 지층의 융기를 생각할 수 있습니다.",
-    closing: "화석은 단순한 돌이 아니라, 지층의 나이와 과거 환경을 알려주는 시간의 단서입니다."
+    hypotheses: [
+      { key: "asteroid", icon: "☄️", name: "소행성 충돌설",
+        desc: "거대한 소행성이 지구와 충돌하면서 먼지가 하늘을 뒤덮었다는 가설" },
+      { key: "volcano",  icon: "🌋", name: "대규모 화산 폭발설",
+        desc: "넓은 지역에서 화산이 오랫동안 분출하여 대기가 달라졌다는 가설" },
+      { key: "climate",  icon: "🌡", name: "기후 변화설",
+        desc: "기온과 해수면이 크게 바뀌면서 생물이 살기 어려워졌다는 가설" },
+      { key: "anoxia",   icon: "🌊", name: "해양 무산소설",
+        desc: "바닷물에 녹아 있는 산소가 크게 줄어 바다 생물이 사라졌다는 가설" }
+    ],
+    mismatchMsg: "이 증거로는 이 가설을 뒷받침하기 어렵다.",
+    matchMsg: "이 증거가 평가 기준을 채웠다.",
+    /* 마무리 문구 — "정답/오답" 같은 표현을 쓰지 않는다 */
+    closingTitle: "두 가설 모두 네 가지 기준을 충족했다.",
+    closingBody: [
+      "이 노두에서 찾은 증거만으로는 둘 중 어느 쪽이 대멸종의 주된 원인인지 가릴 수 없다. 실제로 과학자들도 대멸종의 원인을 하나로 확정하지 못했으며, 여러 원인이 함께 작용했을 것으로 본다.",
+      "기후 변화설과 해양 무산소설은 이 노두의 증거만으로는 판단할 수 없다."
+    ],
+    closingHighlight: "증거가 부족할 때는 틀렸다고 결론 내리는 것이 아니라, 판단을 미루는 것이 과학적인 태도다.",
+    closing: "화석과 지층은 과거를 알려주는 단서지만, 하나의 단서로 하나의 결론을 확정할 수는 없다."
   },
   /* 최종 미션을 마친 직후 이어서 묻는 마무리 문항 (개념 태그 DIV).
      아이템에 딸리지 않은 문항이므로 미션 데이터에 둔다. */
@@ -2992,7 +3107,8 @@ function defaultState(){
     evidenceCinematicShown: false, // 경계층 첫 증거 발견 연출을 봤는지
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
-    finalMissionDone: false, // 최종 미션(환경 변화 추리) 완료 여부
+    finalMissionDone: false, // 최종 미션(가설 평가) 완료 여부
+    hypothesisPlaced: {},    // 증거 id → 배치한 가설 key
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -3100,6 +3216,9 @@ function loadState(){
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);
+      if(!state.hypothesisPlaced || typeof state.hypothesisPlaced !== "object" || Array.isArray(state.hypothesisPlaced)){
+        state.hypothesisPlaced = {};
+      }
       /* 경계 노두가 아닌 층은 slot id = 아이템 id 이므로, 옛 저장본의 발굴 기록을 옮겨 준다 */
       state.discovered.forEach(id => {
         const it = itemData.find(x => x.id === id);
@@ -5156,24 +5275,44 @@ function openItemModal(itemId, fromCollection){
   }
 }
 
-/* ---------- 퀴즈 시스템 ---------- */
-const quiz = { itemId: null, index: 0, attempts: 0, solvedInModal: 0 };
+/* ---------- 퀴즈 시스템 ----------
+   아이템에 딸린 문항과 최종 미션 마무리 문항이 같은 화면을 쓴다.
+   quiz.list / quiz.heading / quiz.finishLabel / quiz.onFinish 로 구분한다. */
+const quiz = { itemId: null, index: 0, attempts: 0, solvedInModal: 0,
+               list: null, heading: "", finishLabel: "", onFinish: null };
 function startQuiz(itemId){
   const item = itemData.find(i => i.id === itemId);
   if(!item || !Array.isArray(item.quiz) || !item.quiz.length){ completeItem(itemId); return; }
   quiz.itemId = itemId;
+  quiz.list = item.quiz;
+  quiz.heading = "🔍 " + safe(item.name,"단서") + " · 단서를 보고 추리해 볼까요?";
+  quiz.finishLabel = "📚 도감에 새 기록 추가!";
+  quiz.onFinish = () => completeItem(itemId);
+  quiz.index = 0;
+  quiz.attempts = 0;
+  openModal("quizModal");
+  renderQuizQuestion();
+}
+/* 최종 미션 직후 마무리 문항 (대멸종과 생물다양성) */
+function startClosingQuiz(){
+  const list = Array.isArray(missionData.closingQuiz) ? missionData.closingQuiz : [];
+  if(!list.length){ openResultScreen(); return; }
+  quiz.itemId = null;
+  quiz.list = list;
+  quiz.heading = "🌏 마무리 · 대멸종 이후 생물다양성은 어떻게 되었을까?";
+  quiz.finishLabel = "📋 탐사 결과 보기";
+  quiz.onFinish = () => openResultScreen();
   quiz.index = 0;
   quiz.attempts = 0;
   openModal("quizModal");
   renderQuizQuestion();
 }
 function renderQuizQuestion(){
-  const item = itemData.find(i => i.id === quiz.itemId);
-  if(!item) { closeModal("quizModal"); return; }
-  const qs = item.quiz;
+  const qs = quiz.list;
+  if(!Array.isArray(qs) || !qs.length){ closeModal("quizModal"); return; }
   const q = qs[quiz.index];
   quiz.attempts = 0;
-  $("quizItemName").textContent = "🔍 " + safe(item.name,"단서") + " · 단서를 보고 추리해 볼까요?";
+  $("quizItemName").textContent = quiz.heading;
   /* 진행 점 */
   let dots = "";
   qs.forEach((_, i) => {
@@ -5203,9 +5342,8 @@ function renderQuizQuestion(){
   }
 }
 function checkAnswer(answer, btnEl){
-  const item = itemData.find(i => i.id === quiz.itemId);
-  if(!item) return;
-  const q = item.quiz[quiz.index];
+  if(!Array.isArray(quiz.list) || !quiz.list[quiz.index]) return;
+  const q = quiz.list[quiz.index];
   const correct = String(answer) === String(safe(q.answer, ""));
   const fb = $("quizFeedback");
   if(correct){
@@ -5251,18 +5389,18 @@ function checkAnswer(answer, btnEl){
   }
 }
 function afterQuestionSolved(){
-  const item = itemData.find(i => i.id === quiz.itemId);
-  const isLast = quiz.index >= item.quiz.length - 1;
+  const isLast = quiz.index >= quiz.list.length - 1;
   const actions = $("quizActions");
   actions.innerHTML = "";
   const b = document.createElement("button");
   b.className = "btn teal";
-  b.textContent = isLast ? "📚 도감에 새 기록 추가!" : "➡ 다음 단서 보기";
+  b.textContent = isLast ? safe(quiz.finishLabel, "확인") : "➡ 다음 단서 보기";
   b.addEventListener("click", () => {
     playSound("click");
     if(isLast){
       closeModal("quizModal");
-      completeItem(quiz.itemId);
+      const done = quiz.onFinish;
+      if(typeof done === "function") done();
     }else{
       quiz.index++;
       renderQuizQuestion();
@@ -5335,58 +5473,199 @@ function showAllCollected(){
 }
 function defaultCinematicGo(){ playSound("click"); $("cinematicOverlay").classList.remove("on"); }
 
-/* ---------- 최종 미션: 이 지역의 과거 환경 변화 추리 ---------- */
-let finalAttempts = 0;
+/* ---------- 최종 미션: 대멸종 원인 가설의 타당성 평가 ----------
+   정답을 하나 고르는 문제가 아니다. 증거를 가설에 배치하면서 평가 기준이
+   얼마나 채워지는지 학생이 직접 확인한다. 소행성 충돌설과 화산 폭발설이
+   둘 다 4칸을 채우는 것은 버그가 아니라 의도된 결과다. */
+let selectedEvidence = null;   // 현재 고른 증거 카드 id
+
+function finalMissionData(){
+  const fm = (missionData && missionData.finalMission) ? missionData.finalMission : DEFAULT_MISSION_DATA.finalMission;
+  const dflt = DEFAULT_MISSION_DATA.finalMission;
+  return {
+    title:       safe(fm.title, dflt.title),
+    intro:       safe(fm.intro, dflt.intro),
+    howto:       safe(fm.howto, dflt.howto),
+    criteria:    Array.isArray(fm.criteria) && fm.criteria.length ? fm.criteria : dflt.criteria,
+    hypotheses:  Array.isArray(fm.hypotheses) && fm.hypotheses.length ? fm.hypotheses : dflt.hypotheses,
+    mismatchMsg: safe(fm.mismatchMsg, dflt.mismatchMsg),
+    matchMsg:    safe(fm.matchMsg, dflt.matchMsg),
+    closingTitle: safe(fm.closingTitle, dflt.closingTitle),
+    closingBody: Array.isArray(fm.closingBody) ? fm.closingBody : dflt.closingBody,
+    closingHighlight: safe(fm.closingHighlight, dflt.closingHighlight),
+    closing:     safe(fm.closing, dflt.closing)
+  };
+}
+/* 배치된 증거로부터 각 가설이 채운 평가 기준을 계산한다 */
+function hypothesisFilled(hypKey){
+  const filled = {};
+  Object.keys(state.hypothesisPlaced || {}).forEach(evId => {
+    if(state.hypothesisPlaced[evId] !== hypKey) return;
+    const it = itemData.find(x => x.id === evId);
+    const sup = it && it.supports ? it.supports[hypKey] : null;
+    if(Array.isArray(sup)) sup.forEach(c => { filled[c] = true; });
+  });
+  return filled;
+}
+function allEvidencePlaced(){
+  const ev = evidenceItems();
+  return ev.length > 0 && ev.every(i => !!(state.hypothesisPlaced || {})[i.id]);
+}
+
 function openFinalMission(){
-  const fm = (missionData && missionData.finalMission) ? missionData.finalMission : (DEFAULT_MISSION_DATA.finalMission);
-  finalAttempts = 0;
-  $("finalQuestion").textContent = safe(fm.question, "");
+  const fm = finalMissionData();
+  selectedEvidence = null;
+  if(!state.hypothesisPlaced) state.hypothesisPlaced = {};
+  $("finalTitle").textContent = "🧩 최종 미션 · " + fm.title;
+  $("finalQuestion").textContent = fm.intro;
+  $("finalHowto").textContent = fm.howto;
   const fb = $("finalFeedback");
   fb.className = "quiz-feedback"; fb.textContent = "";
-  $("finalActions").innerHTML = "";
-  const box = $("finalChoices");
-  box.innerHTML = "";
-  const marks = ["①","②","③","④","⑤"];
-  (Array.isArray(fm.choices) ? fm.choices : []).forEach((c, i) => {
-    const b = document.createElement("button");
-    b.className = "quiz-choice";
-    b.innerHTML = "<span>" + safe(marks[i], "·") + "</span><span>" + escapeHTML(c) + "</span>";
-    b.addEventListener("click", () => checkFinalAnswer(c, b, fm));
-    box.appendChild(b);
-  });
+  $("finalLegend").innerHTML = "평가 기준 — " +
+    fm.criteria.map(c => "<b>" + escapeHTML(c.short) + "</b>: " + escapeHTML(c.label)).join(" · ");
+  renderFinalMission();
   openModal("finalMissionModal");
   playSound("place");
 }
-function checkFinalAnswer(answer, btnEl, fm){
-  const correct = String(answer) === String(safe(fm.answer, ""));
-  const fb = $("finalFeedback");
-  if(correct){
-    playSound("correct");
-    if(btnEl) btnEl.classList.add("correct");
-    document.querySelectorAll("#finalChoices .quiz-choice").forEach(b => b.disabled = true);
-    if(!state.finalMissionDone){
-      state.finalMissionDone = true;
-      state.score = safe(state.score,0) + 50;
-      saveState();
-      updateHud();
+
+function renderFinalMission(){
+  const fm = finalMissionData();
+  /* --- 증거 카드 트레이 --- */
+  const tray = $("finalEvidence");
+  tray.innerHTML = "";
+  evidenceItems().forEach(it => {
+    const placed = !!state.hypothesisPlaced[it.id];
+    const card = document.createElement("div");
+    card.className = "hypo-ev" + (placed ? " placed" : "") + (selectedEvidence === it.id ? " sel" : "");
+    card.innerHTML = '<div class="ev-icon item-visual-slot"></div><span>' + escapeHTML(safe(it.name, "증거")) + '</span>';
+    renderAssetImage(card.querySelector(".ev-icon"), it, "normal");
+    if(!placed){
+      card.draggable = true;
+      card.addEventListener("dragstart", e => {
+        selectedEvidence = it.id;
+        try{ e.dataTransfer.setData("text/plain", it.id); }catch(err){}
+      });
+      card.addEventListener("click", () => {
+        playSound("click");
+        selectedEvidence = (selectedEvidence === it.id) ? null : it.id;
+        renderFinalMission();
+      });
     }
-    fb.className = "quiz-feedback explain";
-    fb.textContent = "🎉 정답! 📝 " + safe(fm.explanation, "");
-    const actions = $("finalActions");
-    actions.innerHTML = "";
-    const b = document.createElement("button");
-    b.className = "btn teal";
-    b.textContent = "📋 탐사 결과 보기";
-    b.addEventListener("click", () => { playSound("click"); closeModal("finalMissionModal"); openResultScreen(); });
-    actions.appendChild(b);
-    checkBadges();
-  }else{
-    playSound("wrong");
-    if(btnEl){ btnEl.classList.add("wrong"); btnEl.disabled = true; }
-    finalAttempts++;
+    tray.appendChild(card);
+  });
+
+  /* --- 가설 카드 --- */
+  const grid = $("finalHypotheses");
+  grid.innerHTML = "";
+  fm.hypotheses.forEach(h => {
+    const filled = hypothesisFilled(h.key);
+    const cnt = fm.criteria.filter(c => filled[c.key]).length;
+    const card = document.createElement("div");
+    card.className = "hypo-h" + (selectedEvidence ? " armed" : "") + (cnt >= fm.criteria.length ? " full" : "");
+    let html = '<div class="h-name">' + safe(h.icon, "") + " " + escapeHTML(safe(h.name, "가설")) + '</div>' +
+               '<div class="h-desc">' + escapeHTML(safe(h.desc, "")) + '</div>' +
+               '<div class="hypo-crit">';
+    fm.criteria.forEach(c => {
+      html += '<div class="hypo-cell' + (filled[c.key] ? " on" : "") + '">' +
+                '<span class="cbox">' + (filled[c.key] ? "✔" : "") + '</span>' +
+                '<span>' + escapeHTML(c.short) + '</span>' +
+              '</div>';
+    });
+    html += '</div><div class="h-score">' + cnt + " / " + fm.criteria.length + " 기준 충족</div>";
+    card.innerHTML = html;
+    const drop = () => placeEvidence(selectedEvidence, h.key, card);
+    card.addEventListener("click", drop);
+    card.addEventListener("dragover", e => e.preventDefault());
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      let id = "";
+      try{ id = e.dataTransfer.getData("text/plain"); }catch(err){}
+      if(id) selectedEvidence = id;
+      drop();
+    });
+    grid.appendChild(card);
+  });
+}
+
+/* 증거를 가설에 배치한다 */
+function placeEvidence(evId, hypKey, cardEl){
+  const fm = finalMissionData();
+  const fb = $("finalFeedback");
+  if(!evId){
     fb.className = "quiz-feedback hint";
-    fb.textContent = "🌱 다시 생각해 봐요! 💡 " + safe(fm.hint, "");
+    fb.textContent = "먼저 아래 증거 카드를 하나 고르세요.";
+    return;
   }
+  if(state.hypothesisPlaced[evId]){ selectedEvidence = null; renderFinalMission(); return; }
+  const it = itemData.find(x => x.id === evId);
+  const sup = it && it.supports ? it.supports[hypKey] : null;
+  const hyp = fm.hypotheses.find(h => h.key === hypKey);
+  if(!Array.isArray(sup) || !sup.length){
+    /* 뒷받침하지 못하는 조합 — 칸을 채우지 않고 안내만 한다 (틀렸다고 하지 않는다) */
+    playSound("wrong");
+    if(cardEl){ cardEl.classList.remove("reject"); void cardEl.offsetWidth; cardEl.classList.add("reject"); }
+    fb.className = "quiz-feedback hint";
+    fb.textContent = "「" + safe(it && it.name, "이 증거") + "」 → " + safe(hyp && hyp.name, "이 가설") + ": " + fm.mismatchMsg;
+    return;
+  }
+  playSound("correct");
+  state.hypothesisPlaced[evId] = hypKey;
+  state.score = safe(state.score,0) + 15;
+  selectedEvidence = null;
+  saveState();
+  updateHud();
+  const names = sup.map(k => {
+    const c = fm.criteria.find(x => x.key === k);
+    return c ? c.short : k;
+  });
+  fb.className = "quiz-feedback explain";
+  fb.textContent = "「" + safe(it.name, "증거") + "」 → " + safe(hyp && hyp.name, "가설") + ": " +
+                   fm.matchMsg + " (" + names.join(" · ") + ")";
+  renderFinalMission();
+  if(allEvidencePlaced()) setTimeout(showHypothesisClosing, 500);
+}
+
+/* 증거를 모두 배치한 뒤의 마무리 — 어느 쪽이 정답이라고 말하지 않는다 */
+function showHypothesisClosing(){
+  const fm = finalMissionData();
+  const full = fm.hypotheses.filter(h => {
+    const f = hypothesisFilled(h.key);
+    return fm.criteria.every(c => f[c.key]);
+  });
+  const box = $("finalClosing");
+  let html = '<div class="cl-title">' +
+    (full.length >= 2 ? escapeHTML(fm.closingTitle)
+                      : "증거를 배치해 각 가설을 평가해 보았다.") + '</div><div class="cl-body">';
+  if(full.length >= 2){
+    html += '<p>네 기준을 모두 충족한 가설: <b>' +
+            full.map(h => escapeHTML(safe(h.name, ""))).join("</b>, <b>") + '</b></p>';
+  }
+  fm.closingBody.forEach(t => { html += '<p>' + escapeHTML(t) + '</p>'; });
+  html += '<span class="cl-hi">' + escapeHTML(fm.closingHighlight) + '</span></div>';
+  box.innerHTML = html;
+  box.classList.add("on");
+  if(!state.finalMissionDone){
+    state.finalMissionDone = true;
+    state.score = safe(state.score,0) + 50;
+    saveState();
+    updateHud();
+  }
+  checkBadges();
+  playSound("badge");
+  const actions = $("finalActions");
+  actions.innerHTML = "";
+  const b = document.createElement("button");
+  b.className = "btn teal";
+  const hasClosingQuiz = Array.isArray(missionData.closingQuiz) && missionData.closingQuiz.length > 0;
+  b.textContent = hasClosingQuiz ? "➡ 마무리 문항 풀기" : "📋 탐사 결과 보기";
+  b.addEventListener("click", () => {
+    playSound("click");
+    closeModal("finalMissionModal");
+    if(hasClosingQuiz) startClosingQuiz();
+    else openResultScreen();
+  });
+  actions.appendChild(b);
+  box.scrollIntoView({ behavior: game.reducedMotion ? "auto" : "smooth", block: "nearest" });
 }
 
 /* ---------- 층 정보 모달 ---------- */
@@ -5578,12 +5857,19 @@ function renderBadgeGrid(el){
 function openResultScreen(){
   const total = Math.max(1, itemData.length);
   const acc = state.quizAnswered > 0 ? Math.round(state.quizFirstCorrect / state.quizAnswered * 100) : 0;
-  const fm = (missionData && missionData.finalMission) ? missionData.finalMission : DEFAULT_MISSION_DATA.finalMission;
+  const fm = finalMissionData();
   let interp = "";
   if(state.finalMissionDone){
+    const full = fm.hypotheses.filter(h => {
+      const f = hypothesisFilled(h.key);
+      return fm.criteria.every(c => f[c.key]);
+    });
     interp = '<div style="border:4px solid var(--teal-dark); background:#e0f5ef; padding:12px 14px; margin-top:12px; line-height:1.6; font-weight:800; color:var(--teal-dark);">' +
-      '🌍 <b>과거 환경 추리:</b> ' + escapeHTML(safe(fm.explanation, "")) + '<br><br>' +
-      '💬 “' + escapeHTML(safe(fm.closing, "")) + '”</div>';
+      '⚖️ <b>가설 평가:</b> ' +
+      (full.length >= 2
+        ? '네 기준을 모두 충족한 가설은 ' + full.map(h => escapeHTML(safe(h.name,""))).join(", ") + ' 두 가지였다. ' + escapeHTML(fm.closingBody[0] || "")
+        : escapeHTML(fm.closingBody[0] || "")) +
+      '<br><br>💬 “' + escapeHTML(fm.closingHighlight) + '”</div>';
   }
   $("resultStats").innerHTML =
     '<div class="result-stat"><span>⭐ 총 점수</span><span class="val">' + safe(state.score,0) + '점</span></div>' +

@@ -1359,6 +1359,9 @@ h1,h2,h3{margin:.3em 0;}
   font-weight:900; font-size:.85rem; color:#5a4a3e;
 }
 .cc-row.low .cc-num{color:#b3261e;}
+.cc-row.side{border-top:3px solid #e4d9bf; border-bottom:none; margin-top:6px; padding-top:8px;}
+.cc-row.side .cc-name{color:#7a6a4d;}
+.cc-side{flex:0 0 auto; font-weight:900; font-size:.82rem; color:#5a4a3e; white-space:nowrap;}
 @media (max-width:620px){ .cc-name{flex-basis:110px; font-size:.76rem;} }
 
 /* --- 다양성 그래프 --- */
@@ -1405,6 +1408,14 @@ h1,h2,h3{margin:.3em 0;}
   line-height:1.55; font-size:.95rem;
 }
 .div-note2 b{color:#b3261e; font-size:1.1em;}
+/* 길 위의 상호작용 모달 */
+.prop-banner{
+  background:var(--navy); color:#fff;
+  border:4px solid var(--ink);
+  font-weight:900; padding:6px 10px; letter-spacing:.04em;
+}
+.prop-icon{font-size:3rem; margin:14px 0 2px;}
+#propModal .modal-card{border-color:#c8d4e2;}
 /* 빈손 결과 모달 */
 #emptyDigModal .modal-card{text-align:center; border-color:#c9bda6;}
 .empty-banner{
@@ -2144,6 +2155,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
         <div class="hud-chip">⭐ <span id="hudScore">0</span></div>
         <div class="hud-chip">⛏ 노두 <span id="hudOutcrops">0/0</span></div>
         <div class="hud-chip">📦 <span id="hudCollect">0/0</span></div>
+        <div class="hud-chip" id="hudShards">🪨 <span id="hudShardNum">0/5</span></div>
         <div class="hud-chip" id="hudCombo" style="display:none;">🔥 콤보 <span id="hudComboNum">0</span></div>
       </div>
       <div class="hud-group">
@@ -2199,6 +2211,19 @@ img, .item-img, .player-img{image-rendering:pixelated;}
         <button class="btn navy small" id="btnOutcropLayerInfo">🧩 층 정보 보기</button>
         <button class="btn ghost small" data-close="outcropModal">닫기</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ 길 위의 상호작용 (안내판·표지판·관찰 지점) ============ -->
+  <div class="modal-backdrop" id="propModal">
+    <div class="modal-card" style="text-align:center;">
+      <div class="prop-banner" id="propBanner">📋 안내판</div>
+      <div class="prop-icon" id="propIcon">📋</div>
+      <h3 class="modal-title" id="propTitle"></h3>
+      <p id="propBody" style="text-align:left; color:#5a4a3e; font-weight:700; line-height:1.7;"></p>
+      <div class="quiz-choices" id="propChoices"></div>
+      <div class="quiz-feedback" id="propFeedback"></div>
+      <div class="modal-actions" id="propActions"></div>
     </div>
   </div>
 
@@ -2331,7 +2356,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h3 style="color:var(--earth-dark);">📄 제출용 탐사 보고서</h3>
       <p style="font-weight:700; color:#7a6a4d; line-height:1.5;">아래 보고서를 이미지로 저장해 선생님께 제출하세요!</p>
       <div id="reportPreview" style="overflow-x:auto; margin:12px 0;">
-        <canvas id="reportCanvas" width="900" height="980" style="width:100%; max-width:560px; border:4px solid var(--ink); box-shadow:4px 4px 0 rgba(74,59,46,.3); image-rendering:auto;"></canvas>
+        <canvas id="reportCanvas" width="900" height="1050" style="width:100%; max-width:560px; border:4px solid var(--ink); box-shadow:4px 4px 0 rgba(74,59,46,.3); image-rendering:auto;"></canvas>
       </div>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" id="btnSaveReport">💾 보고서 이미지 저장</button>
@@ -3009,6 +3034,7 @@ const DEFAULT_BADGE_DATA = [
   { id: "layer_reader",    icon: "🧩", name: "지층 해석자",     desc: "지층 정보를 1개 이상 해금했어요!",   type: "layerUnlock",   value: 1 },
   { id: "evidence_hunter", icon: "🔬", name: "증거 수집가",     desc: "경계층의 증거를 모두 발굴했어요!",   type: "evidenceAll",   value: 1 },
   { id: "hypothesis_judge",icon: "⚖️", name: "가설 심사관",     desc: "가설 평가 미션을 마쳤어요!",         type: "finalMission",  value: 1 },
+  { id: "shard_collector", icon: "🪨", name: "파편 수집가",     desc: "흩어진 암석 파편을 모두 모았어요!",  type: "shardAll",      value: 1 },
   { id: "perfect",         icon: "👑", name: "완벽한 탐사대원", desc: "모든 화석을 수집했어요!",            type: "completeAll",   value: 1 }
 ];
 
@@ -3095,7 +3121,92 @@ const DEFAULT_NOTE_DATA = [
   { icon: "💥", title: "대멸종이란?", body: "많은 종류의 생물이 지질 시대의 기준에서 짧은 기간에, 넓은 지역에 걸쳐 한꺼번에 사라진 사건이다. 고생대 말에는 삼엽충이, 중생대 말에는 공룡과 암모나이트가 멸종하였다." },
   { icon: "🔬", title: "대멸종의 원인", body: "소행성 충돌, 대규모 화산 폭발, 기후 변화, 해양 무산소 등 여러 가설이 있다. 대멸종은 여러 원인이 복합적으로 작용한 경우가 많아, 하나의 원인으로 확정하기 어렵다." },
   { icon: "🧪", title: "가설을 평가하는 기준", body: "① 뒷받침하는 과학적인 증거가 있는가 ② 다른 과학적 사실에 어긋나지 않는가 ③ 전 지구적인 환경 변화를 초래하였는가 ④ 생물을 멸종할 만큼 위력적이었는가. 증거가 부족하면 틀렸다고 결론 내리지 말고 판단을 미룬다." },
-  { icon: "🌱", title: "대멸종과 생물다양성", body: "대멸종 이후 살아남은 생물이 비어 있는 생태 공간을 채우며 다양한 종으로 진화한다. 그래서 생물다양성은 다시 증가하지만, 생물종의 구성은 이전과 완전히 달라진다." }
+  { icon: "🌱", title: "대멸종과 생물다양성", body: "대멸종 이후 살아남은 생물이 비어 있는 생태 공간을 채우며 다양한 종으로 진화한다. 그래서 생물다양성은 다시 증가하지만, 생물종의 구성은 이전과 완전히 달라진다." },
+  /* lockedBy: "shards" — 암석 파편 5개를 모두 모으기 전까지 잠겨 있다 */
+  { icon: "🪨", title: "이 공원은 어떤 곳인가", lockedBy: "shards",
+    body: "이 탐사 코스는 여러 지질공원에서 볼 수 있는 특징을 하나로 모아 구성한 가상의 공원이다. 실제로는 한 지역에서 선캄브리아 시대부터 신생대까지의 지층이 모두 관찰되는 일은 매우 드물다. 특히 중생대 말과 신생대 초의 경계가 끊김 없이 남아 있는 노두는 세계적으로도 손에 꼽는다." }
+];
+
+
+/* --- 길 위의 상호작용 (교사가 수정할 데이터 영역)
+   type: "sign"(안내판·읽기) | "quizSign"(숨은 표지판·O/X)
+         | "observe"(관찰 지점·읽기) | "shard"(암석 파편·수집)
+   x, y : 1700x1200 기준 좌표. 반드시 길(walkableAt) 위에 두어야 접근할 수 있다.
+   zone : 소속 구역 키 — "south"인 항목은 남쪽 해금 전까지 보이지도 않는다.
+
+   ※ 숨은 표지판의 O/X 결과는 개념별 성취(conceptStats)에 합산하지 않는다.
+     선택적 요소라 학생마다 푼 문항 수가 달라, 합치면 개념별 비교가 무의미해진다.
+     별도로 state.signStats에만 기록한다. (tag는 분류·확장용으로만 둔다)
+   ※ 어떤 상호작용도 노두 퀴즈에 힌트를 주거나 오답을 지워 주지 않는다.  --- */
+const DEFAULT_PARK_PROPS = [
+  /* ===== 안내판 6 — 교과서에서 자주 놓치는 개념 한 문장 ===== */
+  { id:"sign_fossil_kind", type:"sign", zone:"plaza", x:850, y:730, icon:"📋",
+    title:"안내판 — 화석이란",
+    body:"화석은 생물의 뼈나 껍질뿐 아니라 발자국, 알, 배설물, 생물이 뚫은 구멍도 포함합니다." },
+  { id:"sign_geotime", type:"sign", zone:"north", x:850, y:400, icon:"📋",
+    title:"안내판 — 지질시대",
+    body:"지질시대는 지구가 탄생한 약 46억 년 전부터 현재까지를 말합니다. 지금 이 순간도 지질시대에 속합니다." },
+  { id:"sign_precambrian", type:"sign", zone:"north", x:600, y:210, icon:"📋",
+    title:"안내판 — 가장 긴 시대",
+    body:"선캄브리아 시대는 지질시대 전체의 약 88%를 차지합니다. 고생대·중생대·신생대로 갈수록 기간이 짧아집니다." },
+  { id:"sign_division", type:"sign", zone:"west", x:570, y:600, icon:"📋",
+    title:"안내판 — 시대를 나누는 기준",
+    body:"지질시대는 지층에 들어 있는 화석의 변화를 주요 기준으로 구분합니다." },
+  { id:"sign_index", type:"sign", zone:"east", x:1100, y:600, icon:"📋",
+    title:"안내판 — 두 종류의 화석",
+    body:"표준 화석은 지층이 만들어진 시대를, 시상 화석은 그때의 환경을 알려줍니다." },
+  { id:"sign_recovery", type:"sign", zone:"south", x:850, y:800, icon:"📋",
+    title:"안내판 — 대멸종 이후",
+    body:"대멸종에서 살아남은 생물은 비어 있던 생태 공간을 채우며 다양한 종으로 진화합니다." },
+
+  /* ===== 숨은 표지판 5 — 오래된 표지판의 설명이 맞는지 판단한다
+     정답이 X로만 몰리면 읽지 않고 X만 찍게 되므로 O가 정답인 것을 2개 섞었다. ===== */
+  { id:"qsign_dino_era", type:"quizSign", zone:"north", x:1100, y:210, icon:"🪧",
+    tag:"ERA",
+    statement:"공룡은 고생대에 번성하였다.",
+    answer:"X",
+    explanation:"공룡이 번성한 시대는 중생대입니다. 고생대에는 삼엽충·어류·양서류·양치식물 등이 번성하였습니다." },
+  { id:"qsign_now", type:"quizSign", zone:"plaza", x:730, y:500, icon:"🪧",
+    tag:"ERA",
+    statement:"지질시대는 이미 끝났고, 현재는 지질시대가 아니다.",
+    answer:"X",
+    explanation:"지구가 탄생한 이후 지질학적 과정이 진행되는 모든 시대가 지질시대입니다. 현재도 지질시대에 속합니다." },
+  { id:"qsign_trace", type:"quizSign", zone:"west", x:450, y:600, icon:"🪧",
+    tag:"ENV",
+    statement:"발자국이나 배설물처럼 생물이 남긴 흔적도 화석이다.",
+    answer:"O",
+    explanation:"맞습니다. 화석은 생물의 몸이 남은 것만이 아니라, 발자국·알·배설물·생물이 뚫은 구멍처럼 생물이 남긴 흔적도 포함합니다." },
+  { id:"qsign_index", type:"quizSign", zone:"east", x:1240, y:600, icon:"🪧",
+    tag:"IDX",
+    statement:"표준 화석은 생존 기간이 짧고 분포 면적이 넓을수록 좋다.",
+    answer:"O",
+    explanation:"맞습니다. 생존 기간이 짧을수록 시대를 좁게 특정할 수 있고, 분포가 넓을수록 여러 지역에서 발견되어 쓸모가 큽니다. 반대로 생존 기간이 길고 특정 환경에서만 사는 생물은 시상 화석에 적합합니다." },
+  { id:"qsign_diversity", type:"quizSign", zone:"south", x:1080, y:990, icon:"🪧",
+    tag:"DIV",
+    statement:"대멸종이 일어나면 생물다양성은 그 뒤로 계속 줄어들기만 한다.",
+    answer:"X",
+    explanation:"대멸종 직후에는 생물의 종과 개체수가 크게 줄지만, 살아남은 생물이 새로운 환경에 적응하며 다양한 종으로 진화해 생물다양성은 다시 증가합니다." },
+
+  /* ===== 관찰 지점 4 — 그 자리에서 눈에 보이는 것 ===== */
+  { id:"obs_bedding", type:"observe", zone:"north", x:850, y:250, icon:"🔍",
+    title:"관찰 — 줄무늬 지층",
+    body:"암벽에 나란한 줄무늬가 보인다. 퇴적물이 오랜 시간 차례로 쌓이면서 만들어진 층이다. 아래쪽 층이 먼저 쌓인 층이다." },
+  { id:"obs_clock", type:"observe", zone:"plaza", x:960, y:640, icon:"🔍",
+    title:"관찰 — 지질 시계",
+    body:"광장 바닥에 커다란 시계가 그려져 있다. 지구의 46억 년을 12시간으로 줄이면, 선캄브리아 시대만 10시간 35분이다. 인류의 역사는 1초도 되지 않는다." },
+  { id:"obs_preserve", type:"observe", zone:"west", x:680, y:600, icon:"🔍",
+    title:"관찰 — 무엇이 화석으로 남는가",
+    body:"부서진 조개껍데기 조각이 흩어져 있다. 뼈나 껍질처럼 단단한 부분이, 빠르게 묻힐수록 화석으로 남기 쉽다. 부드러운 몸은 거의 남지 않는다." },
+  { id:"obs_boundary", type:"observe", zone:"south", x:850, y:950, icon:"🔍",
+    title:"관찰 — 협곡의 검은 띠",
+    body:"협곡 벽면 가운데를 검은 띠 하나가 가로지른다. 위아래 암석과 색이 뚜렷하게 다르다. 이 띠를 경계로 무엇이 달라지는지 확인해 보자." },
+
+  /* ===== 암석 파편 5 — 가까이 가면 자동으로 주워진다 (걷는 리듬을 끊지 않는다) ===== */
+  { id:"shard_1", type:"shard", zone:"north", x:510,  y:210, icon:"🪨" },
+  { id:"shard_2", type:"shard", zone:"north", x:990,  y:210, icon:"🪨" },
+  { id:"shard_3", type:"shard", zone:"west",  x:380,  y:600, icon:"🪨" },
+  { id:"shard_4", type:"shard", zone:"east",  x:1020, y:600, icon:"🪨" },
+  { id:"shard_5", type:"shard", zone:"south", x:600,  y:990, icon:"🪨" }
 ];
 
 /* --- 탐험 공원 맵 설정 (교사가 수정할 데이터 영역)
@@ -3145,13 +3256,14 @@ const CONCEPT_KEYS = CONCEPT_TAGS.map(t => t.key);
    ========================================================================== */
 
 /* ---------- 전역 상태 ---------- */
-const SAVE_KEY = "stratumExplorer_save_v3";
+const SAVE_KEY = "stratumExplorer_save_v4";
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
 let badgeData  = deepClone(DEFAULT_BADGE_DATA);
 let missionData = deepClone(DEFAULT_MISSION_DATA);
 let noteData = deepClone(DEFAULT_NOTE_DATA);
+let propData = deepClone(DEFAULT_PARK_PROPS);
 let roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
 
 let state = defaultState();
@@ -3166,6 +3278,10 @@ function defaultState(){
     dugSlots: [],        // 발굴을 끝낸 조사 지점 slot id (경계 노두는 한 화석이 여러 지점에서 나옴)
     visitedCells: [],    // 지나간 맵 칸 (미니맵 안개 걷힘)
     visitedZones: [],    // 처음 발을 들인 구역 key (미니맵에 이름 표시)
+    propsSeen: [],       // 상호작용을 마친 길 위 오브젝트 id
+    shards: [],          // 주운 암석 파편 id
+    /* 숨은 표지판 집계 — 선택적 요소라 conceptStats와 절대 섞지 않는다 */
+    signStats: { correct: 0, total: 0, found: [] },
     southOpenSeen: false, // 남쪽 구역 해금 알림을 이미 봤는지
     parkDone: false,     // 노두 6개 모두 조사 완료 연출을 봤는지
     evidenceCinematicShown: false, // 경계층 첫 증거 발견 연출을 봤는지
@@ -3200,6 +3316,7 @@ const game = {
   input: { left: false, right: false, up: false, down: false },
   sites: [],                 // 조사 지점 런타임 정보
   nearSite: null,
+  nearProp: null,           // 반경 안의 길 위 오브젝트
   digging: null,             // {siteId, progress, timer}
   discoveryShown: false,
   soundOn: true,
@@ -3367,10 +3484,17 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","visitedZones"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","visitedZones","propsSeen","shards"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);
+      const ss = state.signStats;
+      state.signStats = {
+        correct: Math.max(0, Number(safe(ss && ss.correct, 0)) || 0),
+        total:   Math.max(0, Number(safe(ss && ss.total, 0)) || 0),
+        found:   Array.isArray(ss && ss.found) ? ss.found : []
+      };
+      state.signStats.correct = Math.min(state.signStats.correct, state.signStats.total);
       if(!state.hypothesisPlaced || typeof state.hypothesisPlaced !== "object" || Array.isArray(state.hypothesisPlaced)){
         state.hypothesisPlaced = {};
       }
@@ -4320,9 +4444,15 @@ function renderNoteCards(container){
   if(!container) return;
   let cards = "";
   (noteData || []).forEach(n => {
-    cards += '<div style="border:3px solid var(--ink); background:#fff; padding:10px 12px; margin:8px 0; box-shadow:3px 3px 0 rgba(74,59,46,.25);">' +
-      '<b style="color:var(--earth-dark);">' + escapeHTML(safe(n.icon,"📝")) + ' ' + escapeHTML(safe(n.title,"")) + '</b>' +
-      '<div style="font-weight:700; color:#5a4a3e; line-height:1.5; margin-top:4px; font-size:.95rem;">' + escapeHTML(safe(n.body,"")) + '</div></div>';
+    /* lockedBy: "shards" — 암석 파편을 모두 모으기 전에는 내용을 감춘다 */
+    const locked = n.lockedBy === "shards" && state.shards.length < shardTotal();
+    const title = locked ? "🔒 ???" : escapeHTML(safe(n.icon,"📝")) + " " + escapeHTML(safe(n.title,""));
+    const body = locked
+      ? "흩어진 암석 파편을 모두 모으면 열립니다. (" + state.shards.length + "/" + shardTotal() + ")"
+      : escapeHTML(safe(n.body,""));
+    cards += '<div style="border:3px solid ' + (locked ? "#c3b498" : "var(--ink)") + '; background:' + (locked ? "#f2ece0" : "#fff") + '; padding:10px 12px; margin:8px 0; box-shadow:3px 3px 0 rgba(74,59,46,.25);">' +
+      '<b style="color:' + (locked ? "#9a8a68" : "var(--earth-dark)") + ';">' + title + '</b>' +
+      '<div style="font-weight:700; color:' + (locked ? "#9a8a68" : "#5a4a3e") + '; line-height:1.5; margin-top:4px; font-size:.95rem;">' + body + '</div></div>';
   });
   container.innerHTML = '<h3 style="color:var(--earth-dark);">📔 탐사 노트</h3>' + cards;
 }
@@ -4855,6 +4985,10 @@ function drawPark(){
   /* y-정렬로 나무/노두/플레이어를 그려 자연스러운 가림 표현 */
   const ents = [];
   game.outcrops.forEach(o => ents.push({ y: o.y + 26, type: "outcrop", o: o }));
+  visibleProps().forEach(o => {
+    const q = propScaled(o);
+    ents.push({ y: q.y + 8, type: "prop", o: o, px: q.x, py: q.y });
+  });
   park.trees.forEach(tr => ents.push({ y: tr.y + 30, type: "tree", o: tr }));
   ents.push({ y: game.player.y + 34, type: "player" });
   ents.sort((a, b) => a.y - b.y);
@@ -4863,6 +4997,29 @@ function drawPark(){
     if(e.type === "tree"){
       const s = park.sprites.tree;
       ctx.drawImage(s, Math.round(e.o.x - s.width/2), Math.round(e.o.y - s.height + 32));
+    }else if(e.type === "prop"){
+      const done = propDone(e.o.id);
+      const near = game.nearProp && game.nearProp.id === e.o.id;
+      ctx.save();
+      ctx.globalAlpha = done ? 0.35 : 1;
+      /* 받침 */
+      ctx.fillStyle = "rgba(60,42,26,.30)";
+      ctx.fillRect(Math.round(e.px - 14), Math.round(e.py + 8), 28, 7);
+      /* 아이콘 */
+      ctx.font = "26px sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(safe(e.o.icon, "📋"), Math.round(e.px), Math.round(e.py - 6));
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      /* 아직 안 만난 것은 반짝인다 */
+      if(!done && blink){
+        ctx.fillStyle = "#ffce4a";
+        ctx.fillRect(Math.round(e.px + 13), Math.round(e.py - 24), 7, 7);
+      }
+      if(near && !done){
+        ctx.strokeStyle = "#ffce4a"; ctx.lineWidth = 3;
+        ctx.strokeRect(Math.round(e.px - 20), Math.round(e.py - 26), 40, 40);
+      }
+      ctx.restore();
     }else if(e.type === "outcrop"){
       const o = e.o;
       const s = park.sprites.outcrop[o.layerId];
@@ -4966,6 +5123,13 @@ function drawMiniMap(){
     const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
     g.fillStyle = dug ? "#3ec6b5" : "#ffce4a";
     g.fillRect(Math.round(o.x*sx) - 3, Math.round(o.y*sy) - 3, 6, 6);
+  });
+  /* 상호작용을 마친 오브젝트만 점으로 (미발견은 직접 찾아야 한다) */
+  visibleProps().forEach(o => {
+    if(!propDone(o.id)) return;
+    const q = propScaled(o);
+    g.fillStyle = o.type === "shard" ? "#c9a468" : "#9fd0f0";
+    g.fillRect(Math.round(q.x*sx) - 1, Math.round(q.y*sy) - 1, 3, 3);
   });
   /* 플레이어 점 (깜빡) */
   if(Math.floor(performance.now() / 300) % 2 === 0){
@@ -5565,6 +5729,7 @@ function gameLoop(t){
       }
       checkZoneEntry();
       checkLockedApproach();
+      pickUpShards();
     }
   }
   game.player.moving = moving;
@@ -5628,9 +5793,158 @@ function checkSouthUnlock(){
   }, 700);
 }
 
+/* ---------- 길 위의 상호작용 ----------
+   반경 70px 안에 들어가야 만난다 (노두 발견 210px보다 훨씬 좁게 잡아
+   일부러 다가가야 하도록). 상호작용은 한 번만 가능하다. */
+const PROP_RADIUS = 70;
+function propScaled(o){
+  const sx = PARK.W / 1700, sy = PARK.H / 1200;
+  return { x: o.x * sx, y: o.y * sy };
+}
+/* 지금 화면에 존재하는 오브젝트 (잠긴 구역 것은 아예 없는 셈 친다) */
+function visibleProps(){
+  return (propData || []).filter(o => !(o.zone && zoneLocked(o.zone)));
+}
+function propDone(id){
+  return state.propsSeen.indexOf(id) >= 0 || state.shards.indexOf(id) >= 0;
+}
+function shardTotal(){ return (propData || []).filter(o => o.type === "shard").length; }
+/* 아직 안 끝난 오브젝트 중 반경 안에서 가장 가까운 것 (파편 제외 — 파편은 자동 획득) */
+function nearestProp(){
+  let best = null, bd = PROP_RADIUS;
+  visibleProps().forEach(o => {
+    if(o.type === "shard" || propDone(o.id)) return;
+    const q = propScaled(o);
+    const d = Math.hypot(q.x - game.player.x, q.y - game.player.y);
+    if(d < bd){ best = o; bd = d; }
+  });
+  return best;
+}
+/* 파편은 다가가기만 하면 주워진다 */
+function pickUpShards(){
+  visibleProps().forEach(o => {
+    if(o.type !== "shard" || propDone(o.id)) return;
+    const q = propScaled(o);
+    if(Math.hypot(q.x - game.player.x, q.y - game.player.y) > PROP_RADIUS) return;
+    state.shards.push(o.id);
+    saveState();
+    updateHud();
+    const n = state.shards.length, tot = shardTotal();
+    toast("🪨 암석 파편을 주웠다. (" + n + "/" + tot + ")");
+    playSound("found");
+    if(n >= tot){
+      setTimeout(() => {
+        toast("📔 탐사 노트에 새 항목이 열렸어요!", "gold");
+        renderHelpMissions();
+      }, 900);
+    }
+    checkBadges();
+  });
+}
+/* 안내판·관찰 지점·숨은 표지판 열기 */
+function openProp(o){
+  if(!o || propDone(o.id)) return;
+  const isQuiz = o.type === "quizSign";
+  const kind = { sign: "📋 안내판", observe: "🔍 관찰 지점", quizSign: "🪧 숨은 표지판" }[o.type] || "📋";
+  $("propBanner").textContent = kind;
+  $("propIcon").textContent = safe(o.icon, "📋");
+  $("propFeedback").className = "quiz-feedback";
+  $("propFeedback").textContent = "";
+  $("propChoices").innerHTML = "";
+  $("propActions").innerHTML = "";
+  if(!isQuiz){
+    $("propTitle").textContent = safe(o.title, "");
+    $("propBody").textContent = safe(o.body, "");
+    finishProp(o);
+    addPropCloseButton("확인했어요");
+  }else{
+    $("propTitle").textContent = "오래된 표지판이다. 적힌 설명이 맞을까?";
+    $("propBody").textContent = "「" + safe(o.statement, "") + "」";
+    ["O", "X"].forEach(c => {
+      const b = document.createElement("button");
+      b.className = "quiz-choice";
+      b.innerHTML = "<span>" + (c === "O" ? "⭕" : "❌") + "</span><span>" + c + "</span>";
+      b.addEventListener("click", () => answerQuizSign(o, c, b));
+      $("propChoices").appendChild(b);
+    });
+  }
+  openModal("propModal");
+  playSound("place");
+}
+function addPropCloseButton(label){
+  const b = document.createElement("button");
+  b.className = "btn ghost small";
+  b.textContent = label;
+  b.addEventListener("click", () => { playSound("click"); closeModal("propModal"); });
+  $("propActions").appendChild(b);
+}
+/* 상호작용 완료 기록 — 다시 열리지 않는다 */
+function finishProp(o){
+  if(state.propsSeen.indexOf(o.id) < 0){
+    state.propsSeen.push(o.id);
+    state.score = safe(state.score, 0) + 5;
+    saveState();
+    updateHud();
+  }
+}
+/* 숨은 표지판 채점 — conceptStats에는 절대 합산하지 않는다 (signStats 전용) */
+function answerQuizSign(o, choice, btnEl){
+  document.querySelectorAll("#propChoices .quiz-choice").forEach(b => b.disabled = true);
+  const correct = String(choice) === String(safe(o.answer, ""));
+  const st = state.signStats;
+  if(st.found.indexOf(o.id) < 0) st.found.push(o.id);
+  st.total += 1;
+  if(correct) st.correct += 1;
+  finishProp(o);
+  if(correct){
+    if(btnEl) btnEl.classList.add("correct");
+    playSound("correct");
+    state.score = safe(state.score, 0) + 10;
+  }else{
+    if(btnEl) btnEl.classList.add("wrong");
+    playSound("wrong");
+  }
+  saveState();
+  updateHud();
+  /* 설명이 옳은 표지판이면 "그대로 두어도 좋다"로 끝난다 */
+  const head = correct
+    ? (o.answer === "X" ? "🪧 표지판을 바로잡았다." : "🪧 이 표지판의 설명은 옳다. 그대로 두어도 좋다.")
+    : "🪧 이 표지판은 아직 잘못된 채로 남아 있다.";
+  const fb = $("propFeedback");
+  fb.className = "quiz-feedback explain";
+  /* 틀려도 해설은 항상 보여 준다 (다시 풀 수는 없다) */
+  fb.textContent = head + " 📝 " + safe(o.explanation, "");
+  addPropCloseButton("계속 탐사하기");
+}
+
 /* 가까운 노두 감지: 첫 근접이면 "새 노두 발견!" 토스트 + 미니맵 점,
    더 가까우면 "조사 가능 (E)" 말풍선 */
 function updateNearSite(){
+  /* 길 위 오브젝트가 반경 안에 있으면 그쪽을 먼저 안내한다.
+     오브젝트 반경(70)이 노두(140)보다 좁으므로, 오브젝트를 끝내면
+     곧바로 노두 안내로 돌아간다. */
+  game.nearProp = nearestProp();
+  if(game.nearProp){
+    game.nearSite = null;
+    const hint = $("actionHint");
+    const show = !game.digging && !anyModalOpen();
+    hint.classList.toggle("on", show);
+    if(show){
+      const label = { sign: "📋 안내판 읽기 (E)", observe: "🔍 관찰하기 (E)", quizSign: "🪧 표지판 살펴보기 (E)" };
+      hint.querySelector(".bubble").textContent = label[game.nearProp.type] || "살펴보기 (E)";
+    }
+    /* 노두 첫 발견 판정은 계속 돌아야 하므로 아래 루프는 그대로 수행한다 */
+    (game.outcrops || []).forEach(o => {
+      const d = Math.hypot(o.x - game.player.x, o.y - game.player.y);
+      if(d < 210 && !state.foundOutcrops.includes(o.layerId)){
+        state.foundOutcrops.push(o.layerId);
+        saveState();
+        toast("🗺 새 지층 노두 발견! 미니맵에 표시됐어요 — " + safe((layerData.find(l=>l.id===o.layerId)||{}).label, "지층 " + o.layerId));
+        playSound("place");
+      }
+    });
+    return;
+  }
   let best = null, bestDist = 140;
   (game.outcrops || []).forEach(o => {
     const d = Math.hypot(o.x - game.player.x, o.y - game.player.y);
@@ -5687,6 +6001,7 @@ function cameraShake(){
 /* E/스페이스/조사 버튼: 가까운 노두의 확대 조사창 열기 */
 function tryAction(){
   if(anyModalOpen()) return;
+  if(game.nearProp){ playSound("click"); openProp(game.nearProp); return; }
   const o = game.nearSite;
   if(!o) return;
   playSound("click");
@@ -6343,6 +6658,8 @@ function updateHud(){
   $("hudScore").textContent = safe(state.score, 0);
   $("hudOutcrops").textContent = exploredOutcropCount() + "/" + layerData.length;
   $("hudCollect").textContent = state.completed.length + "/" + itemData.length;
+  const shardEl = $("hudShardNum");
+  if(shardEl) shardEl.textContent = state.shards.length + "/" + shardTotal();
   renderDexPanel();
   const comboEl = $("hudCombo");
   if(safe(state.combo,0) >= 2){
@@ -6399,6 +6716,7 @@ function checkBadges(){
       case "evidenceAll":   earned = evidenceItems().length > 0 &&
                                      evidenceItems().every(i => state.discovered.includes(i.id)); break;
       case "finalMission":  earned = !!state.finalMissionDone; break;
+      case "shardAll":      earned = shardTotal() > 0 && state.shards.length >= shardTotal(); break;
       default: earned = false;
     }
     if(earned){
@@ -6549,7 +6867,10 @@ function renderConceptScores(){
   const card = $("conceptCard");
   if(!card) return;
   const rows = conceptSummary();
-  if(!rows.length){ card.style.display = "none"; return; }
+  const side = sideQuestSummary();
+  const hasSide = side.signFound > 0 || side.shards > 0;
+  /* 개념 문항을 아직 안 풀었어도 표지판·파편 기록이 있으면 카드를 보여 준다 */
+  if(!rows.length && !hasSide){ card.style.display = "none"; return; }
   card.style.display = "";
   $("conceptList").innerHTML = rows.map(r => {
     let dots = "";
@@ -6562,7 +6883,27 @@ function renderConceptScores(){
              '<div class="cc-dots">' + dots + '</div>' +
              '<div class="cc-num">' + r.correct + " / " + r.total + '</div>' +
            '</div>';
-  }).join("");
+  }).join("") + sideQuestRowsHTML();
+}
+/* 숨은 표지판·암석 파편 — 개념별 성취와 분리된 줄.
+   선택적 요소라 학생마다 분모가 달라 개념별 성취에 합산하지 않는다. */
+function sideQuestSummary(){
+  const st = state.signStats || { correct: 0, total: 0, found: [] };
+  const signTotal = (propData || []).filter(o => o.type === "quizSign").length;
+  return {
+    signFound: (st.found || []).length, signTotal: signTotal,
+    signCorrect: st.correct, signAnswered: st.total,
+    shards: state.shards.length, shardTotal: shardTotal()
+  };
+}
+function sideQuestRowsHTML(){
+  const q = sideQuestSummary();
+  return '<div class="cc-row side"><div class="cc-name">🪧 숨은 표지판</div>' +
+           '<div class="cc-dots"></div>' +
+           '<div class="cc-side">' + q.signFound + "/" + q.signTotal + ' 발견 · ' + q.signCorrect + '문항 정답</div></div>' +
+         '<div class="cc-row side"><div class="cc-name">🪨 암석 파편</div>' +
+           '<div class="cc-dots"></div>' +
+           '<div class="cc-side">' + q.shards + "/" + q.shardTotal + ' 수집</div></div>';
 }
 
 /* ---------- 다양성 그래프 (최종 미션을 마친 뒤 결과 화면에 표시) ----------
@@ -6682,6 +7023,17 @@ function drawReport(){
       g.textAlign = "left";
     });
     y += 26 + concepts.length * 34;
+  }
+  /* 숨은 표지판·암석 파편 — 개념별 성취보다 아래에 둔다 (평가의 중심은 개념별 성취) */
+  {
+    const q = sideQuestSummary();
+    g.fillStyle = "#7a6a4d"; g.font = "800 19px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText("🪧 숨은 표지판", 62, y + 18);
+    g.fillText("🪨 암석 파편", 62, y + 44);
+    g.fillStyle = "#4a3b2e"; g.font = "900 19px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(q.signFound + " / " + q.signTotal + " 발견 · " + q.signCorrect + "문항 정답", 300, y + 18);
+    g.fillText(q.shards + " / " + q.shardTotal + " 수집", 300, y + 44);
+    y += 58;
   }
 
   /* ===== 성적 카드 6개 ===== */

@@ -2136,7 +2136,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <p style="line-height:1.7; font-weight:600; color:#44546e;">
         index.html 옆에 <b>images</b> 폴더를 만들고 아래 파일명으로 PNG를 넣으면 자동으로 교체됩니다.<br>
         · 캐릭터: <code>images/player-idle.png</code>, <code>player-walk.png</code>, <code>player-dig.png</code>, <code>player-inspect.png</code>, <code>player-discover.png</code><br>
-        · 화석: itemData 각 항목의 <code>img</code> 경로 (예: <code>images/coral.png</code>, <code>trilobite.png</code>, <code>fern.png</code>, <code>dinosaur.png</code>, <code>fusulina.png</code>, <code>ammonite.png</code>, <code>nummulites.png</code>, <code>mammoth.png</code>, <code>stromatolite.png</code>, <code>ediacara.png</code>)<br>
+        · 화석: itemData 각 항목의 <code>img</code> 경로 (예: <code>images/coral.png</code>, <code>trilobite.png</code>, <code>fern.png</code>, <code>dinosaur.png</code>, <code>ammonite.png</code>, <code>nummulites.png</code>, <code>mammoth.png</code>, <code>stromatolite.png</code>, <code>ediacara.png</code>)<br>
         이미지가 없거나 로드에 실패하면 언제나 기본 픽셀아트 그림이 대신 표시되어 게임이 깨지지 않습니다.
       </p>
     </div>
@@ -2202,38 +2202,11 @@ const gameAssets = {
 /* hiddenInfo1 = 시대, hiddenInfo2 = 환경 (퀴즈 완료 후 화석도감에서 해금)
    group = 분류(표준 화석 / 시상 화석 / 대표 화석)
    shape = 이미지가 없을 때 표시할 픽셀아트 화석 모양 */
+/* 아이템은 노두(지층) 순서 A→B→C→D→E→F 로 정렬되어 있다.
+   isEvidence: true 인 항목은 화석이 아니라 '지층 자체가 남긴 증거'이며,
+   supports 필드로 어떤 가설의 어떤 평가 기준을 뒷받침하는지 기술한다. */
 const DEFAULT_ITEM_DATA = [
-  {
-    id: "coral",
-    name: "산호",
-    img: "images/coral.png",
-    shape: "coral",
-    layer: "A",
-    group: "시상 화석",
-    hiddenInfo1: "여러 시대 (환경을 알려주는 화석)",
-    hiddenInfo2: "따뜻하고 수심이 얕은 바다",
-    description: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석이다.",
-    funNote: "환경 변화에 민감해 '과거 환경'을 알려줘요.",
-    visualHint: "가지 모양 또는 여러 개체가 모인 군체 구조",
-    discovered: false,
-    quiz: [
-      {
-        type: "choice",
-        question: "산호 화석이 알려주는 과거 환경으로 가장 적절한 것은?",
-        choices: ["따뜻하고 수심이 얕은 바다", "건조한 사막", "깊고 차가운 심해", "빙하로 덮인 산 정상"],
-        answer: "따뜻하고 수심이 얕은 바다",
-        hint: "산호는 특정 환경에서만 잘 자라요.",
-        explanation: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석입니다."
-      },
-      {
-        type: "ox",
-        question: "산호는 지층의 '시대'를 알려주는 표준 화석이다.",
-        answer: "X",
-        hint: "산호가 알려주는 것은 시대가 아니라…?",
-        explanation: "산호는 시대가 아니라 '환경'을 알려주는 시상 화석입니다. 시대를 알려주는 것은 표준 화석이에요."
-      }
-    ]
-  },
+  /* ===== 지층 A · 선캄브리아 시대 · 바다 ===== */
   {
     id: "stromatolite",
     name: "스트로마톨라이트",
@@ -2258,6 +2231,32 @@ const DEFAULT_ITEM_DATA = [
       }
     ]
   },
+  {
+    id: "ediacara",
+    name: "에디아카라 동물군",
+    img: "images/ediacara.png",
+    shape: "ediacara",
+    layer: "A",
+    group: "대표 화석군",
+    hiddenInfo1: "선캄브리아 시대 말",
+    hiddenInfo2: "바다",
+    description: "선캄브리아 시대 말에 나타난 다세포 생물 화석군이다.",
+    funNote: "단단한 껍데기 없이 부드러운 몸을 가졌어요.",
+    visualHint: "납작하고 부드러운 몸의 흔적",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "에디아카라 동물군이 살았던 시대는?",
+        choices: ["선캄브리아 시대 말", "고생대", "중생대", "신생대"],
+        answer: "선캄브리아 시대 말",
+        hint: "삼엽충보다도 더 오래된 생물이에요.",
+        explanation: "에디아카라 동물군은 선캄브리아 시대 말에 나타난 다세포 생물 화석군입니다."
+      }
+    ]
+  },
+
+  /* ===== 지층 B · 고생대 · 바다 ===== */
   {
     id: "trilobite",
     name: "삼엽충",
@@ -2291,26 +2290,59 @@ const DEFAULT_ITEM_DATA = [
     ]
   },
   {
-    id: "fusulina",
-    name: "방추충",
-    img: "images/fusulina.png",
-    shape: "fusulina",
+    id: "coral",
+    name: "산호",
+    img: "images/coral.png",
+    shape: "coral",
     layer: "B",
-    group: "표준 화석",
-    hiddenInfo1: "고생대",
-    hiddenInfo2: "바다",
-    description: "방추충은 고생대를 대표하는 작은 바다 생물 화석으로, 지층의 시대 판단에 이용된다.",
-    funNote: "삼엽충과 함께 고생대 말에 멸종했어요.",
-    visualHint: "쌀알 또는 방추 모양",
+    group: "시상 화석",
+    hiddenInfo1: "여러 시대 (환경을 알려주는 화석)",
+    hiddenInfo2: "따뜻하고 수심이 얕은 바다",
+    description: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석이다.",
+    funNote: "환경 변화에 민감해 '과거 환경'을 알려줘요.",
+    visualHint: "가지 모양 또는 여러 개체가 모인 군체 구조",
     discovered: false,
     quiz: [
       {
         type: "choice",
-        question: "방추충이 대표하는 지질 시대는?",
-        choices: ["고생대", "중생대", "신생대", "현재"],
-        answer: "고생대",
-        hint: "삼엽충과 같은 시대의 바다 생물이에요.",
-        explanation: "방추충은 고생대를 대표하는 표준 화석으로, 지층의 시대 판단에 이용됩니다."
+        question: "산호 화석이 알려주는 과거 환경으로 가장 적절한 것은?",
+        choices: ["따뜻하고 수심이 얕은 바다", "건조한 사막", "깊고 차가운 심해", "빙하로 덮인 산 정상"],
+        answer: "따뜻하고 수심이 얕은 바다",
+        hint: "산호는 특정 환경에서만 잘 자라요.",
+        explanation: "산호는 따뜻하고 얕은 바다에서 잘 자라므로 과거 환경을 알려주는 시상 화석입니다."
+      },
+      {
+        type: "ox",
+        question: "산호는 지층의 '시대'를 알려주는 표준 화석이다.",
+        answer: "X",
+        hint: "산호가 알려주는 것은 시대가 아니라…?",
+        explanation: "산호는 시대가 아니라 '환경'을 알려주는 시상 화석입니다. 시대를 알려주는 것은 표준 화석이에요."
+      }
+    ]
+  },
+
+  /* ===== 지층 C · 중생대 · 육지 ===== */
+  {
+    id: "dinosaur",
+    name: "공룡",
+    img: "images/dinosaur.png",
+    shape: "dino",
+    layer: "C",
+    group: "표준 화석",
+    hiddenInfo1: "중생대",
+    hiddenInfo2: "육지",
+    description: "공룡은 중생대를 대표하는 육상 동물로, 중생대 지층을 판단하는 단서가 된다.",
+    funNote: "중생대 말에 멸종했어요.",
+    visualHint: "큰 뼈, 이빨, 발자국 등의 흔적",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        question: "공룡 화석은 어느 지질 시대를 대표하는 표준 화석일까요?",
+        choices: ["선캄브리아 시대", "고생대", "중생대", "현재"],
+        answer: "중생대",
+        hint: "공룡이 번성했던 시대예요.",
+        explanation: "공룡은 중생대를 대표하는 육상 동물입니다."
       }
     ]
   },
@@ -2338,36 +2370,19 @@ const DEFAULT_ITEM_DATA = [
       }
     ]
   },
-  {
-    id: "dinosaur",
-    name: "공룡",
-    img: "images/dinosaur.png",
-    shape: "dino",
-    layer: "D",
-    group: "표준 화석",
-    hiddenInfo1: "중생대",
-    hiddenInfo2: "육지",
-    description: "공룡은 중생대를 대표하는 육상 동물로, 중생대 지층을 판단하는 단서가 된다.",
-    funNote: "중생대 말에 멸종했어요.",
-    visualHint: "큰 뼈, 이빨, 발자국 등의 흔적",
-    discovered: false,
-    quiz: [
-      {
-        type: "choice",
-        question: "공룡 화석은 어느 지질 시대를 대표하는 표준 화석일까요?",
-        choices: ["선캄브리아 시대", "고생대", "중생대", "현재"],
-        answer: "중생대",
-        hint: "공룡이 번성했던 시대예요.",
-        explanation: "공룡은 중생대를 대표하는 육상 동물입니다."
-      }
-    ]
-  },
+
+  /* ===== 지층 D · 중생대 말 → 신생대 초 경계 노두 · 바다 =====
+     암모나이트는 아래층에서, 증거 아이템 4종은 경계층에서 나온다. */
   {
     id: "ammonite",
     name: "암모나이트",
     img: "images/ammonite.png",
     shape: "ammonite",
-    layer: "E",
+    layer: "D",
+    /* 경계 노두의 '아래층'에서 나오므로 지층은 D(era "경계")이지만,
+       생물 자체는 중생대의 화석이다. 다양성 그래프는 item.era 를 우선 적용해
+       암모나이트를 중생대로 집계하고 경계층은 0으로 남긴다. */
+    era: "중생대",
     group: "표준 화석",
     hiddenInfo1: "중생대",
     hiddenInfo2: "바다",
@@ -2386,6 +2401,140 @@ const DEFAULT_ITEM_DATA = [
       }
     ]
   },
+  {
+    id: "iridium",
+    name: "이리듐이 많은 점토층",
+    shape: "iridium",
+    layer: "D",
+    isEvidence: true,
+    group: "지층 증거 (화석 아님)",
+    hiddenInfo1: "중생대 말 → 신생대 초 경계",
+    hiddenInfo2: "지층에 남은 사건의 흔적",
+    description: "경계층에 남은 아주 얇은 점토층으로, 지구의 지각에서는 보기 드문 원소가 유난히 많이 들어 있다.",
+    funNote: "이 원소는 지구 지각에는 드물지만 우주 물체에는 비교적 많아요.",
+    visualHint: "아주 얇고 검은 띠 모양의 점토",
+    supports: { asteroid: ["evidence", "global"] },
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        tag: "EXT",
+        question: "이 얇은 점토층에는 지구의 지각에서는 보기 드문 원소가 유난히 많이 들어 있다. 이런 원소가 많이 발견된다는 것은 무엇을 뒷받침하는 증거가 될까?",
+        choices: [
+          "지구 밖의 물체가 지구와 충돌했을 가능성",
+          "이 지역이 얕은 바다였을 가능성",
+          "이곳에 살던 생물이 갑자기 번성했을 가능성",
+          "지층이 만들어지는 데 매우 오랜 시간이 걸렸을 가능성"
+        ],
+        answer: "지구 밖의 물체가 지구와 충돌했을 가능성",
+        hint: "지구 지각에는 드물지만 우주 물체에는 많은 원소예요.",
+        explanation: "이리듐은 지구의 지각에는 드물지만 소행성 같은 우주 물체에는 비교적 많이 들어 있습니다. 그래서 이 층은 소행성 충돌설을 뒷받침하는 증거로 쓰입니다."
+      },
+      {
+        type: "ox",
+        tag: "EXT",
+        question: "이 점토층은 세계 여러 지역의 같은 시기 지층에서 함께 발견된다.",
+        answer: "O",
+        hint: "한 지역에서만 나온다면 전 지구적 사건이라 하기 어렵겠죠.",
+        explanation: "여러 지역에서 함께 발견되기 때문에, 이 사건이 전 지구적인 환경 변화를 일으켰다고 볼 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "shocked_quartz",
+    name: "충격을 받은 석영",
+    shape: "shocked_quartz",
+    layer: "D",
+    isEvidence: true,
+    group: "지층 증거 (화석 아님)",
+    hiddenInfo1: "중생대 말 → 신생대 초 경계",
+    hiddenInfo2: "지층에 남은 사건의 흔적",
+    description: "알갱이 안에 여러 방향으로 금이 간 석영으로, 순간적으로 매우 강한 충격을 받아야 만들어진다.",
+    funNote: "천천히 일어나는 일로는 이런 금이 생기지 않아요.",
+    visualHint: "알갱이 안에 여러 방향의 금이 간 석영",
+    supports: { asteroid: ["power", "consistent"] },
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        tag: "EXT",
+        question: "석영 알갱이 안에 여러 방향으로 금이 나 있다. 이런 흔적이 만들어지려면 어떤 일이 있어야 할까?",
+        choices: [
+          "아주 짧은 순간에 엄청나게 큰 힘이 가해져야 한다",
+          "오랜 시간에 걸쳐 물에 깎여야 한다",
+          "따뜻한 바닷물에 오래 잠겨 있어야 한다",
+          "생물이 껍데기를 만들어야 한다"
+        ],
+        answer: "아주 짧은 순간에 엄청나게 큰 힘이 가해져야 한다",
+        hint: "천천히 일어나는 일로는 이런 금이 생기지 않아요.",
+        explanation: "순간적으로 매우 강한 충격을 받아야 생기는 흔적입니다. 대멸종을 일으킬 만큼 위력적인 사건이 있었음을 뒷받침합니다."
+      }
+    ]
+  },
+  {
+    id: "ash_layer",
+    name: "두꺼운 화산재층",
+    shape: "ash_layer",
+    layer: "D",
+    isEvidence: true,
+    group: "지층 증거 (화석 아님)",
+    hiddenInfo1: "중생대 말 → 신생대 초 경계",
+    hiddenInfo2: "지층에 남은 사건의 흔적",
+    description: "회색 화산재가 두껍게 굳어 만들어진 층으로, 대규모 화산 활동이 있었음을 알려준다.",
+    funNote: "화산재가 하늘을 덮으면 햇빛이 가려져요.",
+    visualHint: "회색 화산재가 두껍게 굳은 층",
+    supports: { volcano: ["evidence", "global"] },
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        tag: "EXT",
+        question: "화산재가 하늘을 오랫동안 뒤덮으면 지구에 어떤 일이 일어날까?",
+        choices: [
+          "햇빛이 가려져 기온이 낮아지고 식물이 광합성을 하기 어려워진다",
+          "햇빛이 강해져 기온이 크게 올라간다",
+          "바닷물의 양이 갑자기 늘어난다",
+          "생물의 종류가 곧바로 늘어난다"
+        ],
+        answer: "햇빛이 가려져 기온이 낮아지고 식물이 광합성을 하기 어려워진다",
+        hint: "먹이사슬의 맨 아래부터 생각해 보세요.",
+        explanation: "햇빛이 차단되면 식물이 광합성을 하지 못하고, 먹이사슬이 무너지면서 많은 생물이 멸종할 수 있습니다."
+      }
+    ]
+  },
+  {
+    id: "sulfur_rock",
+    name: "황 성분이 많은 암석",
+    shape: "sulfur_rock",
+    layer: "D",
+    isEvidence: true,
+    group: "지층 증거 (화석 아님)",
+    hiddenInfo1: "중생대 말 → 신생대 초 경계",
+    hiddenInfo2: "지층에 남은 사건의 흔적",
+    description: "노랗게 변색된 암석으로, 대기에 황 성분이 많아졌던 시기가 있었음을 알려준다.",
+    funNote: "황 성분이 빗물에 녹으면 산성비가 돼요.",
+    visualHint: "노랗게 변색된 암석",
+    supports: { volcano: ["power", "consistent"] },
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        tag: "EXT",
+        question: "대규모 화산 활동으로 대기에 황 성분이 많아지면 나타날 수 있는 일은?",
+        choices: [
+          "산성비가 내려 토양과 바다의 성질이 바뀐다",
+          "대기 중 산소가 갑자기 늘어난다",
+          "지층이 더 빨리 쌓인다",
+          "화석이 더 잘 만들어진다"
+        ],
+        answer: "산성비가 내려 토양과 바다의 성질이 바뀐다",
+        hint: "황 성분이 빗물에 녹으면 어떤 비가 될까요?",
+        explanation: "산성비가 내려 토양이 산성화되고 바다 환경도 달라져, 많은 생물이 살기 어려운 조건이 됩니다."
+      }
+    ]
+  },
+
+  /* ===== 지층 E · 신생대 · 바다 (회복층) ===== */
   {
     id: "nummulites",
     name: "화폐석",
@@ -2410,30 +2559,8 @@ const DEFAULT_ITEM_DATA = [
       }
     ]
   },
-  {
-    id: "ediacara",
-    name: "에디아카라 동물군",
-    img: "images/ediacara.png",
-    shape: "ediacara",
-    layer: "E",
-    group: "대표 화석군",
-    hiddenInfo1: "선캄브리아 시대 말",
-    hiddenInfo2: "바다",
-    description: "선캄브리아 시대 말에 나타난 다세포 생물 화석군이다.",
-    funNote: "단단한 껍데기 없이 부드러운 몸을 가졌어요.",
-    visualHint: "납작하고 부드러운 몸의 흔적",
-    discovered: false,
-    quiz: [
-      {
-        type: "choice",
-        question: "에디아카라 동물군이 살았던 시대는?",
-        choices: ["선캄브리아 시대 말", "고생대", "중생대", "신생대"],
-        answer: "선캄브리아 시대 말",
-        hint: "삼엽충보다도 더 오래된 생물이에요.",
-        explanation: "에디아카라 동물군은 선캄브리아 시대 말에 나타난 다세포 생물 화석군입니다."
-      }
-    ]
-  },
+
+  /* ===== 지층 F · 신생대 · 육지 (회복층) ===== */
   {
     id: "mammoth",
     name: "매머드",
@@ -2457,31 +2584,60 @@ const DEFAULT_ITEM_DATA = [
         explanation: "매머드는 신생대에 살았던 큰 포유류로, 추운 기후와 관련된 대표 화석입니다."
       }
     ]
+  },
+  {
+    id: "oakleaf",
+    name: "참나무 잎",
+    shape: "leaf",
+    layer: "F",
+    group: "대표 화석 (속씨식물)",
+    hiddenInfo1: "신생대",
+    hiddenInfo2: "온난한 육지",
+    description: "참나무와 같은 속씨식물은 신생대 육지에서 번성하였다.",
+    funNote: "중생대에는 은행나무 같은 겉씨식물이, 신생대에는 속씨식물이 번성했어요.",
+    visualHint: "잎맥이 그물처럼 퍼진 넓은 잎",
+    discovered: false,
+    quiz: [
+      {
+        type: "choice",
+        tag: "ERA",
+        question: "참나무와 같은 속씨식물이 육지에서 번성한 지질 시대는?",
+        choices: ["신생대", "중생대", "고생대", "선캄브리아 시대"],
+        answer: "신생대",
+        hint: "겉씨식물이 번성한 시대의 다음 시대예요.",
+        explanation: "중생대에는 은행나무와 같은 겉씨식물이, 신생대에는 참나무와 같은 속씨식물이 번성하였습니다."
+      }
+    ]
   }
 ];
 
 /* --- 지층 데이터 (교사가 수정할 데이터 영역) — 노두마다 서로 다른 지층
    env: "바다" 또는 "육지" (최종 미션의 환경 변화 추론에 사용)
+   era: "선캄브리아" / "고생대" / "중생대" / "경계" / "신생대" (다양성 그래프 집계용)
+   isBoundary: true 인 노두는 아래층·경계층·위층 3단으로 렌더링된다.
+     이때 colorBoundary1/colorBoundary2 가 가운데 경계층(어두운 띠)의 색이 된다.
    hiddenName(짧은 정체) / hiddenInfo(해금 문구)는 그 지층 화석의 퀴즈를 완료해야 해금됨 --- */
 const DEFAULT_LAYER_DATA = [
-  { id: "A", label: "지층 A", env: "바다", color1: "#e0c084", color2: "#c8a060",
-    hiddenName: "따뜻하고 얕은 바다",
-    hiddenInfo: "산호 화석은 따뜻하고 수심이 얕은 바다 환경을 알려주는 단서입니다." },
-  { id: "B", label: "지층 B", env: "바다", color1: "#c89a6a", color2: "#ae7e4e",
-    hiddenName: "고생대 바다",
-    hiddenInfo: "삼엽충은 고생대를 대표하는 표준 화석입니다. 이 지층은 고생대 바다 환경과 관련이 있습니다." },
-  { id: "C", label: "지층 C", env: "육지", color1: "#b0805a", color2: "#946746",
-    hiddenName: "따뜻하고 습한 육지",
-    hiddenInfo: "고사리 화석은 따뜻하고 습한 육지 환경을 추리하는 단서입니다." },
-  { id: "D", label: "지층 D", env: "육지", color1: "#96704e", color2: "#7c583c",
-    hiddenName: "중생대 육지",
-    hiddenInfo: "공룡은 중생대를 대표하는 표준 화석입니다. 이 지층은 중생대 육지 환경과 관련이 있습니다." },
-  { id: "E", label: "지층 E", env: "바다", color1: "#7c5c40", color2: "#644830",
-    hiddenName: "여러 시대의 바다",
-    hiddenInfo: "암모나이트·화폐석 등 서로 다른 시대의 바다 화석이 함께 관찰되는 지층입니다." },
-  { id: "F", label: "지층 F", env: "육지", color1: "#644832", color2: "#4e3624",
-    hiddenName: "신생대 육지",
-    hiddenInfo: "매머드는 신생대를 대표하는 육상 포유류로, 이 지층은 신생대 육지 환경과 관련이 있습니다." }
+  { id: "A", label: "지층 A", era: "선캄브리아", env: "바다", color1: "#e0c084", color2: "#c8a060",
+    hiddenName: "선캄브리아 시대의 바다",
+    hiddenInfo: "스트로마톨라이트와 에디아카라 동물군이 발견되는, 선캄브리아 시대 바다에서 쌓인 지층입니다. 화석이 매우 드물게 발견됩니다." },
+  { id: "B", label: "지층 B", era: "고생대", env: "바다", color1: "#c89a6a", color2: "#ae7e4e",
+    hiddenName: "고생대의 바다",
+    hiddenInfo: "삼엽충과 산호가 함께 발견되는 지층입니다. 삼엽충은 시대를, 산호는 따뜻하고 얕은 바다라는 환경을 알려줍니다." },
+  { id: "C", label: "지층 C", era: "중생대", env: "육지", color1: "#b0805a", color2: "#946746",
+    hiddenName: "중생대의 육지",
+    hiddenInfo: "공룡과 고사리가 함께 발견되는 지층입니다. 공룡은 시대를, 고사리는 따뜻하고 습한 육지라는 환경을 알려줍니다." },
+  { id: "D", label: "지층 D", era: "경계", env: "바다", isBoundary: true,
+    color1: "#a8845e", color2: "#7c583c",
+    colorBoundary1: "#2b2118", colorBoundary2: "#171009",
+    hiddenName: "중생대 말 → 신생대 초 경계",
+    hiddenInfo: "많은 생물이 짧은 기간에 사라진 흔적이 남은 지층입니다. 아래층에는 화석이 풍부하지만 위층에서는 화석이 거의 발견되지 않고, 그 사이의 얇고 검은 경계층에는 화석 대신 지층 자체가 남긴 증거가 들어 있습니다." },
+  { id: "E", label: "지층 E", era: "신생대", env: "바다", color1: "#7c5c40", color2: "#644830",
+    hiddenName: "신생대의 바다",
+    hiddenInfo: "경계층 위쪽에서 쌓인 지층으로, 화폐석이 발견됩니다. 경계층 아래의 바다 화석과는 종류가 완전히 다릅니다." },
+  { id: "F", label: "지층 F", era: "신생대", env: "육지", color1: "#644832", color2: "#4e3624",
+    hiddenName: "신생대의 육지",
+    hiddenInfo: "매머드와 참나무 잎이 발견되는 지층입니다. 대멸종 이후 비어 있던 생태 공간을 포유류와 속씨식물이 채우며 다양하게 진화하였습니다." }
 ];
 
 /* --- 배지 데이터 (교사가 수정할 데이터 영역) --- */
@@ -2521,10 +2677,10 @@ const DEFAULT_MISSION_DATA = {
 /* --- 탐사 노트 (도움말·화석도감에 카드형으로 표시) --- */
 const DEFAULT_NOTE_DATA = [
   { icon: "🪨", title: "화석이란?", body: "과거에 살았던 생물의 몸체나 흔적이 지층 속에 남은 것이다." },
-  { icon: "🕰", title: "표준 화석", body: "지층의 시대를 알려주는 화석. 생존 기간이 짧고, 넓은 지역에 많이 분포할수록 좋다. (삼엽충·방추충·암모나이트·공룡·화폐석·매머드)" },
+  { icon: "🕰", title: "표준 화석", body: "지층의 시대를 알려주는 화석. 생존 기간이 짧고, 넓은 지역에 많이 분포할수록 좋다. (삼엽충·암모나이트·공룡·화폐석·매머드)" },
   { icon: "🌊", title: "시상 화석", body: "과거 환경을 알려주는 화석. 특정 환경에서 잘 살고 환경 변화에 민감할수록 좋다. (산호·고사리)" },
-  { icon: "🦕", title: "지질 시대 대표 화석", body: "선캄브리아: 스트로마톨라이트·에디아카라 / 고생대: 삼엽충·방추충 / 중생대: 암모나이트·공룡 / 신생대: 화폐석·매머드" },
-  { icon: "💥", title: "대멸종", body: "많은 생물이 짧은 기간에 넓은 지역에서 사라진 사건. 고생대 말에는 삼엽충·방추충이, 중생대 말에는 공룡·암모나이트가 멸종했다." }
+  { icon: "🦕", title: "지질 시대 대표 화석", body: "선캄브리아: 스트로마톨라이트·에디아카라 / 고생대: 삼엽충 / 중생대: 암모나이트·공룡 / 신생대: 화폐석·매머드·참나무 잎" },
+  { icon: "💥", title: "대멸종", body: "많은 생물이 짧은 기간에 넓은 지역에서 사라진 사건. 고생대 말에는 삼엽충이, 중생대 말에는 공룡·암모나이트가 멸종했다." }
 ];
 
 /* --- 탐험 공원 맵 설정 (교사가 수정할 데이터 영역)
@@ -2548,8 +2704,8 @@ const DEFAULT_ROAD_SCENE_DATA = {
    ========================================================================== */
 
 /* ---------- 전역 상태 ---------- */
-const SAVE_KEY = "stratumExplorer_save_v1";
-const TEACHER_KEY = "stratumExplorer_teacherData_v1";
+const SAVE_KEY = "stratumExplorer_save_v2";
+const TEACHER_KEY = "stratumExplorer_teacherData_v2";
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
@@ -2792,9 +2948,11 @@ const FALLBACK_COLORS = ["#2ea79c","#ff8c42","#8a6fbf","#e05a7a","#4a90d9","#7fa
 /* 화석별 대표 색 (없으면 순번 색) — 픽셀 fallback을 화석답게 */
 const FOSSIL_COLORS = {
   coral: "#ff7a6e", stromatolite: "#7fae3f", trilobite: "#8a6fbf",
-  fusulina: "#e0b24a", fern: "#4e9f52", dino: "#5aa06a",
+  fern: "#4e9f52", dino: "#5aa06a",
   ammonite: "#4a90d9", coin: "#d9a842", ediacara: "#e07aa0", mammoth: "#a9764e",
-  dinosaur: "#5aa06a", nummulites: "#d9a842"
+  dinosaur: "#5aa06a", nummulites: "#d9a842", leaf: "#6aa84f", oakleaf: "#6aa84f",
+  /* 경계층 증거 아이템 (화석이 아니므로 암석·광물 계열 색) */
+  iridium: "#4a4a52", shocked_quartz: "#9aa7b8", ash_layer: "#8c8c8c", sulfur_rock: "#d8c033"
 };
 function itemColor(item){
   if(item){
@@ -2807,7 +2965,7 @@ function itemColor(item){
 }
 /* 아이템 도트 스프라이트 맵 (12x12) — A:본색, B:외곽선/진한색, L:밝은색,
    W:흰 반짝, D:진한 무늬, R:포인트
-   화석별 전용 맵(coral/trilobite/fern/dino/fusulina/ammonite/coin/mammoth/
+   화석별 전용 맵(coral/trilobite/fern/dino/ammonite/coin/mammoth/
    stromatolite/ediacara)과 기본 도형(spiral/segmented/…)을 함께 둔다. */
 const ITEM_PIXEL_MAPS = {
   coral: [
@@ -2866,18 +3024,61 @@ const ITEM_PIXEL_MAPS = {
     ".BA..BA.....",
     ".BB..BB....."
   ],
-  fusulina: [
+  /* --- 경계층 증거 아이템 (화석 아님) --- */
+  iridium: [           /* 아주 얇고 검은 띠 모양의 점토 */
     "............",
+    "............",
+    ".LLLLLLLLLL.",
+    ".LLLLLLLLLL.",
+    "BBBBBBBBBBBB",
+    "BAAAAAAAAAAB",
+    "BBBBBBBBBBBB",
+    ".DDDDDDDDDD.",
+    ".DDDDDDDDDD.",
+    "............",
+    "............",
+    "............"
+  ],
+  shocked_quartz: [    /* 알갱이 안에 여러 방향의 금이 간 석영 */
     "....BBBB....",
     "..BBLLLLBB..",
     ".BLLAAAALLB.",
-    "BLAAAAAAAALB",
-    "BLAAAAAAAALB",
-    "BLAAAAAAAALB",
+    ".BLADAAADAB.",
+    "BLAADAADAALB",
+    "BLAAADDAAALB",
+    "BLAADAADAALB",
+    ".BLADAAADAB.",
     ".BLLAAAALLB.",
     "..BBLLLLBB..",
     "....BBBB....",
+    "............"
+  ],
+  ash_layer: [         /* 회색 화산재가 두껍게 굳은 층 */
     "............",
+    "BBBBBBBBBBBB",
+    "BLLLLLLLLLLB",
+    "BAAAAAAAAAAB",
+    "BADAAAADAAAB",
+    "BAAAAAAAAAAB",
+    "BAAADAAAADAB",
+    "BAAAAAAAAAAB",
+    "BADAAADAAAAB",
+    "BLLLLLLLLLLB",
+    "BBBBBBBBBBBB",
+    "............"
+  ],
+  sulfur_rock: [       /* 노랗게 변색된 암석 */
+    "............",
+    "....BBBB....",
+    "..BBAAAABB..",
+    ".BAALLLLAAB.",
+    ".BALLWWLLAB.",
+    "BAALLWWLLAAB",
+    "BAAALLLLAAAB",
+    "BAADAAAADAAB",
+    ".BAAADAAAAB.",
+    "..BBAAAABB..",
+    "....BBBB....",
     "............"
   ],
   ammonite: [

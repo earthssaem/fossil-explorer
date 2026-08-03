@@ -1864,54 +1864,6 @@ h1,h2,h3{margin:.3em 0;}
 .badge-token.locked{filter:grayscale(1); opacity:.55;}
 
 /* ---------- 교사용 ---------- */
-#teacherScreen{background:linear-gradient(180deg,#eef2f8 0%, #dde6ef 100%);}
-.teacher-note{
-  background:#fff8e0;
-  border:3px solid #f0c76a;
-  border-radius:var(--radius-md);
-  padding:14px 16px;
-  line-height:1.6;
-  font-weight:600;
-  color:#6a4e10;
-}
-.teacher-textarea{
-  width:100%;
-  min-height:260px;
-  border-radius:var(--radius-sm);
-  border:3px solid #c8d4e2;
-  padding:12px;
-  font-family:ui-monospace, Consolas, monospace;
-  font-size:.85rem;
-  resize:vertical;
-  background:#fbfdff;
-  color:#22385c;
-}
-.teacher-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
-.teacher-msg{
-  margin-top:10px;
-  font-weight:800;
-  min-height:1.4em;
-  white-space:pre-line;   /* 경고를 여러 줄로 보여 준다 */
-  line-height:1.6;
-}
-.teacher-msg.ok{color:var(--teal-dark);}
-.teacher-msg.err{color:#c0392b;}
-.teacher-msg.warn{
-  color:#8a5a00;
-  background:#fff4d6;
-  border:3px solid #e0b64a;
-  padding:10px 12px;
-}
-.teacher-tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
-.teacher-tab{
-  padding:9px 18px;
-  border-radius:999px;
-  font-weight:800;
-  background:#fff;
-  border:3px solid #c8d4e2;
-  color:var(--navy);
-}
-.teacher-tab.on{background:var(--navy); color:#fff; border-color:var(--navy);}
 
 /* ---------- 결과 화면 ---------- */
 #resultScreen{background:linear-gradient(180deg,#fdeecd 0%, #f2ddb4 100%);}
@@ -2053,9 +2005,6 @@ img, .item-img, .player-img{image-rendering:pixelated;}
 .quiz-feedback{border-radius:0;}
 .quiz-feedback.hint{border:4px solid #d8a63a;}
 .quiz-feedback.explain{border:4px solid var(--teal-dark);}
-.teacher-textarea, .teacher-tab, .teacher-note{border-radius:0;}
-.teacher-tab{border:3px solid var(--ink);}
-.teacher-tab.on{background:var(--ink); border-color:var(--ink);}
 #actionHint .bubble{
   border-radius:0;
   border:4px solid var(--ink);
@@ -2155,10 +2104,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
         <button class="btn wide" id="btnStart">🧭 탐사 시작!</button>
         <button class="btn teal wide" id="btnHelp">📖 게임 방법</button>
         <button class="btn navy wide" id="btnCollectionFromStart">📚 화석도감</button>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-          <button class="btn ghost small" id="btnRestart">🔄 처음부터 다시 시작</button>
-          <button class="btn ghost small" id="btnTeacher">🛠 교사용 설정</button>
-        </div>
+        <button class="btn ghost small" id="btnRestart">🔄 처음부터 다시 시작</button>
       </div>
     </div>
   </section>
@@ -2360,72 +2306,6 @@ img, .item-img, .player-img{image-rendering:pixelated;}
     </div>
   </section>
 
-  <!-- ============ 8. 교사용 화면 ============ -->
-  <section id="teacherScreen" class="screen panel-screen">
-    <div class="back-bar" style="width:min(860px,96%);">
-      <button class="btn ghost small" data-goto="startScreen">← 돌아가기</button>
-      <h2 class="screen-title">🛠 교사용 설정</h2>
-    </div>
-    <div class="panel-card">
-      <div class="teacher-note">
-        💡 <b>교사 안내</b><br>
-        · 화석 데이터는 <b>itemData</b>에서 수정할 수 있습니다 (이름·시대·환경·분류·설명·관찰 포인트).<br>
-        · 각 화석의 <b>quiz 배열</b>을 수정하면 문항을 바꿀 수 있습니다.<br>
-        · 이미지 파일은 <b>images 폴더</b>에 넣으면 자동으로 교체됩니다 (예: coral.png, trilobite.png). 없으면 기본 픽셀 그림이 표시됩니다.<br>
-        · 지층·환경 변화 해석은 <b>layerData</b>와 <b>missionData.finalMission</b>에서 수정할 수 있습니다.<br>
-        · 아래 <b>진행 상황 완전 초기화</b> 버튼으로 학생용 테스트를 다시 시작할 수 있습니다. JSON에 오류가 있어도 기존 데이터는 안전하게 유지됩니다.
-      </div>
-    </div>
-    <div class="panel-card">
-      <h3 style="color:var(--navy);">🏷 대멸종 단원용 필드 안내</h3>
-      <div class="teacher-note">
-        <b>문항의 <code>tag</code></b> — 개념별 성취 집계에 쓰입니다. 아래 다섯 중 하나여야 하며,
-        없거나 다른 값이면 <b>그 문항은 집계에서 빠집니다</b>. 적용할 때 경고로 알려 드립니다.<br>
-        · <code>ENV</code> 화석 → 과거 환경 추론 &nbsp; · <code>ERA</code> 화석 → 지질 시대 구분 &nbsp;
-        · <code>IDX</code> 표준화석 / 시상화석 구분<br>
-        · <code>EXT</code> 대멸종의 원인과 증거 &nbsp; · <code>DIV</code> 대멸종과 생물다양성<br><br>
-        <b>지층(layerData)</b><br>
-        · <code>era</code> — <code>"선캄브리아"</code> / <code>"고생대"</code> / <code>"중생대"</code> /
-          <code>"경계"</code> / <code>"신생대"</code>. 다양성 그래프를 이 값으로 묶습니다.<br>
-        · <code>isBoundary: true</code> — 그 노두를 아래층·경계층·위층 3단으로 렌더링하고
-          아래에서 위로만 파도록 잠급니다. <code>colorBoundary1/2</code>가 가운데 검은 띠의 색입니다.<br><br>
-        <b>아이템(itemData)</b><br>
-        · <code>era</code> — 지층의 시대와 다를 때만 씁니다. 암모나이트는 경계 노두 아래층에서
-          나오지만 중생대의 화석이므로 <code>era: "중생대"</code>를 두어 경계층이 0으로 남습니다.<br>
-        · <code>isEvidence: true</code> — 화석이 아니라 지층이 남긴 증거. 경계층에서만 나오고
-          다양성 그래프에서 제외됩니다.<br>
-        · <code>supports</code> — 증거가 어떤 가설의 어떤 기준을 뒷받침하는지.
-          예: <code>{ "asteroid": ["evidence", "global"] }</code><br>
-        &nbsp;&nbsp;가설 키: <code>asteroid</code> / <code>volcano</code> / <code>climate</code> / <code>anoxia</code><br>
-        &nbsp;&nbsp;기준 키: <code>evidence</code>(과학적 증거) / <code>consistent</code>(사실과 일치) /
-          <code>global</code>(전 지구적 변화) / <code>power</code>(멸종시킬 위력)<br><br>
-        ⚠ <b>교육과정 유의</b> — 기(紀) 단위 시기와 구체적 연대 수치는 쓰지 않고 대(代) 수준으로만
-        서술합니다. "선캄브리아대"가 아니라 <b>"선캄브리아 시대"</b>로 적습니다.
-        대멸종의 원인은 하나로 확정하지 않습니다.
-      </div>
-    </div>
-    <div class="panel-card">
-      <div class="teacher-tabs" id="teacherTabs"></div>
-      <textarea class="teacher-textarea" id="teacherTextarea" spellcheck="false"></textarea>
-      <div class="teacher-row">
-        <button class="btn teal small" id="btnTeacherCopy">📋 JSON 복사</button>
-        <button class="btn small" id="btnTeacherApply">✅ 붙여넣은 JSON 적용</button>
-        <button class="btn navy small" id="btnTeacherRestore">↩ 기본 데이터 복원</button>
-        <button class="btn ghost small" id="btnTeacherReset">🗑 진행 상황 완전 초기화</button>
-      </div>
-      <div class="teacher-msg" id="teacherMsg"></div>
-    </div>
-    <div class="panel-card">
-      <h3 style="color:var(--navy);">🖼 이미지 교체 안내</h3>
-      <p style="line-height:1.7; font-weight:600; color:#44546e;">
-        index.html 옆에 <b>images</b> 폴더를 만들고 아래 파일명으로 PNG를 넣으면 자동으로 교체됩니다.<br>
-        · 캐릭터: <code>images/player-idle.png</code>, <code>player-walk.png</code>, <code>player-dig.png</code>, <code>player-inspect.png</code>, <code>player-discover.png</code><br>
-        · 화석: itemData 각 항목의 <code>img</code> 경로 (예: <code>images/coral.png</code>, <code>trilobite.png</code>, <code>fern.png</code>, <code>dinosaur.png</code>, <code>ammonite.png</code>, <code>nummulites.png</code>, <code>mammoth.png</code>, <code>stromatolite.png</code>, <code>ediacara.png</code>)<br>
-        이미지가 없거나 로드에 실패하면 언제나 기본 픽셀아트 그림이 대신 표시되어 게임이 깨지지 않습니다.
-      </p>
-    </div>
-  </section>
-
   <!-- ============ 9. 결과 화면 ============ -->
   <section id="resultScreen" class="screen panel-screen">
     <div class="back-bar" style="width:min(860px,96%);">
@@ -2472,8 +2352,50 @@ img, .item-img, .player-img{image-rendering:pixelated;}
 "use strict";
 /* ==========================================================================
    ██ 교사가 수정할 데이터 영역 ██
-   아래 데이터만 수정하면 게임 내용이 바뀝니다.
-   (교사용 설정 화면에서 JSON으로도 수정할 수 있습니다)
+   이 파일(index.html)의 아래 데이터만 고치면 게임 내용이 바뀝니다.
+   메모장·VS Code 등 아무 편집기로나 열어 고친 뒤 저장하면 됩니다.
+   "여기서부터 엔진 코드" 배너 위까지가 데이터입니다.
+
+   ── 문항의 tag (개념별 성취 집계에 쓰임) ─────────────────────────────
+     ENV  화석 → 과거 환경 추론
+     ERA  화석 → 지질 시대 구분
+     IDX  표준화석 / 시상화석 구분
+     EXT  대멸종의 원인과 증거
+     DIV  대멸종과 생물다양성
+   tag가 없거나 위 다섯 중 하나가 아니면 그 문항은 집계에서 빠집니다.
+   (브라우저 콘솔 F12 에 경고가 뜹니다)
+
+   ── 지층(layerData) ────────────────────────────────────────────────
+     era          "선캄브리아" / "고생대" / "중생대" / "경계" / "신생대"
+                  다양성 그래프를 이 값으로 묶습니다.
+     isBoundary   true 이면 그 노두를 아래층·경계층·위층 3단으로 그리고
+                  아래에서 위로만 파도록 잠급니다.
+     colorBoundary1/2  가운데 검은 띠(경계층)의 색.
+
+   ── 아이템(itemData) ───────────────────────────────────────────────
+     era          지층의 시대와 다를 때만 씁니다. 암모나이트는 경계 노두
+                  아래층에서 나오지만 중생대 화석이므로 era:"중생대"를 두어
+                  경계층이 0으로 남습니다.
+     isEvidence   true 이면 화석이 아니라 지층이 남긴 증거입니다.
+                  경계층에서만 나오고 다양성 그래프에서 제외됩니다.
+     supports     증거가 어떤 가설의 어떤 기준을 뒷받침하는지.
+                  예: { asteroid: ["evidence", "global"] }
+                  가설: asteroid / volcano / climate / anoxia
+                  기준: evidence(과학적 증거) / consistent(사실과 일치)
+                        global(전 지구적 변화) / power(멸종시킬 위력)
+     img          images 폴더에 같은 이름의 PNG를 넣으면 그림이 교체됩니다.
+                  파일이 없으면 기본 도트 그림이 대신 나오므로 비워 두어도 됩니다.
+
+   ── 교육과정 유의점 ────────────────────────────────────────────────
+   · 기(紀) 단위 시기와 구체적 연대 수치를 쓰지 않고 대(代) 수준으로만 씁니다.
+   · "선캄브리아대"가 아니라 "선캄브리아 시대"로 적습니다.
+   · 대멸종의 원인을 하나로 확정하지 않습니다.
+   · 지질 시대를 묻는 4지선다에 "현재"를 오답으로 넣지 않습니다.
+     (현재도 지질시대이므로 오개념을 심어 줍니다)
+
+   ── 진행 상황 초기화 ───────────────────────────────────────────────
+   시작 화면의 "🔄 처음부터 다시 시작" 버튼, 또는 주소 뒤에 ?reset=1 을
+   붙여 열면 저장된 진행 상황이 지워집니다.
    ========================================================================== */
 
 /* --- 이미지 에셋 경로 (images 폴더에 파일을 넣으면 자동 적용) --- */
@@ -3216,7 +3138,6 @@ const CONCEPT_KEYS = CONCEPT_TAGS.map(t => t.key);
 
 /* ---------- 전역 상태 ---------- */
 const SAVE_KEY = "stratumExplorer_save_v2";
-const TEACHER_KEY = "stratumExplorer_teacherData_v2";
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
@@ -3383,6 +3304,42 @@ function diversitySplit(collectedOnly){
   return { rows: rows, before: before, after: after, survivors: survivors };
 }
 
+/* 파일의 데이터를 직접 고쳤을 때 실수를 잡아 준다.
+   학생 화면에는 아무것도 띄우지 않고 브라우저 콘솔(F12)에만 남긴다. */
+function validateContentData(){
+  const warns = [];
+  const seen = {};
+  itemData.forEach((it, i) => {
+    const where = "itemData[" + i + "] " + safe(it.name, safe(it.id, "?"));
+    if(!it.id) warns.push(where + ": id가 없습니다.");
+    else if(seen[it.id]) warns.push(where + ": id가 중복되었습니다 (" + it.id + ").");
+    else seen[it.id] = true;
+    if(!layerData.some(l => l.id === it.layer)) warns.push(where + ": layer \"" + safe(it.layer,"") + "\" 에 해당하는 지층이 없습니다.");
+    (Array.isArray(it.quiz) ? it.quiz : []).forEach((q, qi) => {
+      const t = String(safe(q.tag, "")).trim().toUpperCase();
+      if(!t) warns.push(where + " 문항 " + (qi+1) + ": tag가 없습니다 → 개념별 성취에서 빠집니다.");
+      else if(CONCEPT_KEYS.indexOf(t) < 0) warns.push(where + " 문항 " + (qi+1) + ": tag \"" + safe(q.tag,"") + "\" 는 " + CONCEPT_KEYS.join("/") + " 중 하나여야 합니다.");
+      if(q.type === "choice" && Array.isArray(q.choices) && q.choices.indexOf(q.answer) < 0){
+        warns.push(where + " 문항 " + (qi+1) + ": answer가 choices 안에 없습니다.");
+      }
+      if(q.type === "choice" && Array.isArray(q.choices) && q.choices.indexOf("현재") >= 0){
+        warns.push(where + " 문항 " + (qi+1) + ": 선택지에 \"현재\"가 있습니다 — 현재도 지질시대이므로 오개념이 됩니다.");
+      }
+    });
+    if(it.isEvidence && (!it.supports || typeof it.supports !== "object")){
+      warns.push(where + ": isEvidence인데 supports가 없어 가설 평가에서 어떤 기준도 채우지 못합니다.");
+    }
+  });
+  layerData.forEach(l => {
+    if(!l.era) warns.push("layerData " + safe(l.id,"?") + ": era가 없어 다양성 그래프에서 빠집니다.");
+  });
+  if(!layerData.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다 — 경계 노두 3단 연출과 경계층 증거가 나타나지 않습니다.");
+  if(warns.length && window.console && console.warn){
+    console.warn("[화석 탐정] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));
+  }
+  return warns;
+}
+
 /* 결과 화면·보고서에서 쓰는 표시용 목록 (문항이 하나도 없는 개념은 제외) */
 function conceptSummary(){
   const cs = normalizeConceptStats(state.conceptStats);
@@ -3414,17 +3371,6 @@ function loadState(){
       });
     }
   }catch(e){ /* localStorage 차단/오류 → 기본 상태로 진행 */ }
-  try{
-    const t = localStorage.getItem(TEACHER_KEY);
-    if(t){
-      const d = JSON.parse(t);
-      if(Array.isArray(d.itemData) && d.itemData.length) itemData = d.itemData;
-      if(Array.isArray(d.layerData) && d.layerData.length) layerData = d.layerData;
-      if(Array.isArray(d.badgeData)) badgeData = d.badgeData;
-      if(d.missionData) missionData = d.missionData;
-      if(d.roadSceneData) roadSceneData = Object.assign(deepClone(DEFAULT_ROAD_SCENE_DATA), d.roadSceneData);
-    }
-  }catch(e){ /* 교사 데이터 손상 → 기본 데이터 유지 */ }
 }
 function saveState(){
   try{
@@ -3432,26 +3378,11 @@ function saveState(){
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   }catch(e){ /* 저장 불가 환경에서도 게임은 계속 */ }
 }
-function saveTeacherData(){
-  try{
-    localStorage.setItem(TEACHER_KEY, JSON.stringify({ itemData, layerData, badgeData, missionData, roadSceneData }));
-  }catch(e){ }
-}
-/* 진행 상황 초기화
-   full=false: 플레이 진행만 초기화 (교사 데이터 유지)
-   full=true : localStorage를 완전히 비움 (교사 데이터 포함) */
-function resetProgress(full){
+/* 진행 상황 초기화 — 콘텐츠는 항상 파일의 DEFAULT_* 를 쓰므로 지울 것은 진행 상황뿐이다 */
+function resetProgress(){
   state = defaultState();
   try{
     localStorage.removeItem(SAVE_KEY);
-    if(full){
-      localStorage.removeItem(TEACHER_KEY);
-      itemData = deepClone(DEFAULT_ITEM_DATA);
-      layerData = deepClone(DEFAULT_LAYER_DATA);
-      badgeData = deepClone(DEFAULT_BADGE_DATA);
-      missionData = deepClone(DEFAULT_MISSION_DATA);
-      roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
-    }
   }catch(e){ /* localStorage 차단 환경에서도 계속 */ }
   game.discoveryShown = false;
   game.digging = null;
@@ -6626,142 +6557,6 @@ function saveReport(){
 }
 
 /* ---------- 교사용 설정 모드 ---------- */
-const TEACHER_TABS = [
-  { key: "itemData",      label: "아이템(itemData)" },
-  { key: "layerData",     label: "층(layerData)" },
-  { key: "badgeData",     label: "배지(badgeData)" },
-  { key: "missionData",   label: "미션(missionData)" },
-  { key: "roadSceneData", label: "길 구간(roadSceneData)" }
-];
-let teacherTab = "itemData";
-function currentTeacherData(key){
-  switch(key){
-    case "itemData": return itemData;
-    case "layerData": return layerData;
-    case "badgeData": return badgeData;
-    case "missionData": return missionData;
-    case "roadSceneData": return roadSceneData;
-    default: return {};
-  }
-}
-function openTeacherMode(){
-  renderScreen("teacherScreen");
-  renderTeacherTabs();
-  loadTeacherTextarea();
-  teacherMsg("", "");
-}
-function renderTeacherTabs(){
-  const tabs = $("teacherTabs");
-  tabs.innerHTML = "";
-  TEACHER_TABS.forEach(t => {
-    const b = document.createElement("button");
-    b.className = "teacher-tab" + (t.key === teacherTab ? " on" : "");
-    b.textContent = t.label;
-    b.addEventListener("click", () => {
-      teacherTab = t.key;
-      renderTeacherTabs();
-      loadTeacherTextarea();
-      teacherMsg("", "");
-    });
-    tabs.appendChild(b);
-  });
-}
-function loadTeacherTextarea(){
-  try{
-    $("teacherTextarea").value = JSON.stringify(currentTeacherData(teacherTab), null, 2);
-  }catch(e){
-    $("teacherTextarea").value = "";
-  }
-}
-function teacherMsg(text, kind){
-  const m = $("teacherMsg");
-  m.textContent = text;
-  m.className = "teacher-msg " + (kind || "");
-}
-/* JSON 적용: 오류가 있어도 기존 데이터는 유지 */
-function applyTeacherData(){
-  const raw = $("teacherTextarea").value;
-  let parsed;
-  try{
-    parsed = JSON.parse(raw);
-  }catch(e){
-    teacherMsg("❌ JSON 형식 오류: " + e.message + " — 기존 데이터는 그대로 유지됩니다.", "err");
-    return;
-  }
-  /* 간단한 구조 검증 */
-  const warns = [];
-  try{
-    if(teacherTab === "itemData"){
-      if(!Array.isArray(parsed) || !parsed.length) throw new Error("itemData는 1개 이상의 항목을 가진 배열이어야 합니다.");
-      const seenIds = {};
-      parsed.forEach((it, i) => {
-        const where = (i+1) + "번째 항목(" + safe(it && it.name, safe(it && it.id, "?")) + ")";
-        if(!it.id) throw new Error((i+1) + "번째 항목에 id가 없습니다.");
-        if(!it.name) throw new Error((i+1) + "번째 항목에 name이 없습니다.");
-        if(seenIds[it.id]) throw new Error("id가 중복되었습니다: " + it.id);
-        seenIds[it.id] = true;
-        if(!Array.isArray(it.quiz)) it.quiz = [];
-        /* 태그 검증 — 없거나 잘못된 값이면 개념별 성취 집계에서 누락된다 */
-        it.quiz.forEach((q, qi) => {
-          const t = String(safe(q.tag, "")).trim().toUpperCase();
-          if(!t) warns.push(where + "의 " + (qi+1) + "번 문항에 tag가 없습니다.");
-          else if(CONCEPT_KEYS.indexOf(t) < 0) warns.push(where + "의 " + (qi+1) + "번 문항 tag가 올바르지 않습니다: \"" + safe(q.tag,"") + "\"");
-        });
-        /* 증거 아이템은 supports가 있어야 가설 평가에서 쓸 수 있다 */
-        if(it.isEvidence && (!it.supports || typeof it.supports !== "object")){
-          warns.push(where + "은 isEvidence인데 supports가 없습니다. 가설 평가에서 어떤 기준도 채우지 못합니다.");
-        }
-      });
-      itemData = parsed;
-    }else if(teacherTab === "layerData"){
-      if(!Array.isArray(parsed) || !parsed.length) throw new Error("layerData는 1개 이상의 항목을 가진 배열이어야 합니다.");
-      parsed.forEach((l, i) => {
-        if(!l.id) throw new Error((i+1) + "번째 층에 id가 없습니다.");
-        if(!l.era) warns.push("지층 " + l.id + "에 era가 없습니다. 다양성 그래프 집계에서 빠집니다.");
-      });
-      if(!parsed.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다. 경계 노두 3단 연출과 경계층 증거가 나타나지 않습니다.");
-      layerData = parsed;
-    }else if(teacherTab === "badgeData"){
-      if(!Array.isArray(parsed)) throw new Error("badgeData는 배열이어야 합니다.");
-      badgeData = parsed;
-    }else if(teacherTab === "missionData"){
-      if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("missionData는 객체여야 합니다.");
-      missionData = parsed;
-    }else if(teacherTab === "roadSceneData"){
-      if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("roadSceneData는 객체여야 합니다.");
-      roadSceneData = Object.assign(deepClone(DEFAULT_ROAD_SCENE_DATA), parsed);
-    }
-    saveTeacherData();
-    renderHelpMissions();
-    renderStartProgress();
-    updateHud();
-    if(warns.length){
-      /* 적용은 하되, 집계에서 빠질 수 있는 항목을 알려 준다 */
-      teacherMsg("⚠ 적용했지만 확인이 필요합니다 (" + warns.length + "건)\n· " +
-                 warns.slice(0, 6).join("\n· ") +
-                 (warns.length > 6 ? "\n· … 외 " + (warns.length - 6) + "건" : ""), "warn");
-      playSound("wrong");
-    }else{
-      teacherMsg("✅ 적용 완료! (" + teacherTab + " 갱신, 자동 저장됨)", "ok");
-      playSound("correct");
-    }
-  }catch(e){
-    teacherMsg("❌ 데이터 구조 오류: " + e.message + " — 기존 데이터는 그대로 유지됩니다.", "err");
-  }
-}
-function restoreDefaults(){
-  itemData = deepClone(DEFAULT_ITEM_DATA);
-  layerData = deepClone(DEFAULT_LAYER_DATA);
-  badgeData = deepClone(DEFAULT_BADGE_DATA);
-  missionData = deepClone(DEFAULT_MISSION_DATA);
-  roadSceneData = deepClone(DEFAULT_ROAD_SCENE_DATA);
-  try{ localStorage.removeItem(TEACHER_KEY); }catch(e){}
-  loadTeacherTextarea();
-  renderHelpMissions();
-  renderStartProgress();
-  updateHud();
-  teacherMsg("↩ 기본 데이터로 복원했습니다.", "ok");
-}
 
 /* ---------- 토스트 ---------- */
 function toast(msg, kind){
@@ -6852,7 +6647,6 @@ function bindUI(){
     toast("🗺 " + escapeHTML(state.nickname) + " 탐사대원, 지질공원의 지층 노두 " + layerData.length + "곳을 찾아 화석을 조사해요!");
   });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
-  $("btnTeacher").addEventListener("click", () => { playSound("click"); openTeacherMode(); });
   $("btnCollectionFromStart").addEventListener("click", () => {
     playSound("click");
     collectionReturnTo = "startScreen";
@@ -6904,29 +6698,9 @@ function bindUI(){
   document.querySelectorAll("[data-close]").forEach(b => {
     b.addEventListener("click", () => { playSound("click"); closeModal(b.getAttribute("data-close")); });
   });
-  /* 교사용 */
-  $("btnTeacherCopy").addEventListener("click", () => {
-    const text = $("teacherTextarea").value;
-    const done = () => teacherMsg("📋 JSON이 클립보드에 복사되었습니다.", "ok");
-    const fail = () => {
-      try{ $("teacherTextarea").select(); document.execCommand("copy"); done(); }
-      catch(e){ teacherMsg("복사에 실패했습니다. 텍스트를 직접 선택해 복사해 주세요.", "err"); }
-    };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done).catch(fail);
-    }else fail();
-  });
-  $("btnTeacherApply").addEventListener("click", () => { playSound("click"); applyTeacherData(); });
-  $("btnTeacherRestore").addEventListener("click", () => { playSound("click"); restoreDefaults(); });
-  $("btnTeacherReset").addEventListener("click", () => {
-    playSound("click");
-    resetProgress(true); /* localStorage 완전 초기화 (교사 데이터 포함) */
-    loadTeacherTextarea();
-    teacherMsg("🗑 저장 데이터를 완전히 초기화했습니다. (진행 상황 + 편집 데이터)", "ok");
-  });
   $("btnRestart").addEventListener("click", () => {
     playSound("click");
-    resetProgress(false); /* 진행 상황만 초기화, 교사 데이터는 유지 */
+    resetProgress();
     renderScreen("startScreen");
     toast("🔄 처음부터 새로운 탐사를 시작할 준비 완료!");
   });
@@ -6961,11 +6735,14 @@ function initGame(){
   try{
     if(/[?&]reset=1/.test(location.search)){
       localStorage.removeItem(SAVE_KEY);
-      localStorage.removeItem(TEACHER_KEY);
       if(history.replaceState) history.replaceState(null, "", location.pathname);
     }
   }catch(e){ }
+  /* 예전 버전의 교사용 편집 화면이 남긴 저장본 정리 (이제 읽지 않는 데이터) */
+  try{ localStorage.removeItem("stratumExplorer_teacherData_v2");
+       localStorage.removeItem("stratumExplorer_teacherData_v1"); }catch(e){ }
   loadState();
+  validateContentData();  /* 데이터를 직접 고쳤을 때의 실수를 콘솔에 알림 */
   preloadAssets();
   bindUI();
   bindInputs();

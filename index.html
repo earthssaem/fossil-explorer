@@ -1334,6 +1334,50 @@ h1,h2,h3{margin:.3em 0;}
   padding:8px 10px; font-weight:900; color:var(--ink);
   line-height:1.5;
 }
+/* --- 다양성 그래프 --- */
+.div-row{
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:6px;
+}
+.div-row .d-era{
+  flex:0 0 88px;
+  font-weight:900; font-size:.8rem; color:#5a4a3e;
+  text-align:right;
+}
+.div-row .d-track{
+  flex:1 1 auto; position:relative;
+  height:22px;
+  background:#efe6d2;
+  border:3px solid #d8c49a;
+}
+.div-row .d-bar{
+  position:absolute; left:0; top:0; bottom:0;
+  background:repeating-linear-gradient(90deg, var(--teal) 0 9px, var(--teal-dark) 9px 12px);
+  border-right:3px solid var(--ink);
+  min-width:0;
+  transition:width .5s steps(6,end);
+}
+.div-row .d-num{
+  flex:0 0 54px;
+  font-weight:900; font-size:.82rem; color:#5a4a3e;
+}
+.div-row.is-boundary .d-era{color:#2b2118;}
+.div-row.is-boundary .d-track{background:#2b2118; border-color:#000;}
+.div-row.is-boundary .d-num{color:#8a7a5d;}
+.div-notes{margin-top:12px;}
+.div-note1{
+  font-weight:800; color:#5a4a3e; line-height:1.6;
+  font-size:.88rem; margin-bottom:8px;
+}
+.div-note2{
+  background:var(--sun);
+  border:4px solid var(--ink);
+  box-shadow:4px 4px 0 rgba(74,59,46,.3);
+  padding:10px 12px;
+  font-weight:900; color:var(--ink);
+  line-height:1.55; font-size:.95rem;
+}
+.div-note2 b{color:#b3261e; font-size:1.1em;}
 /* 빈손 결과 모달 */
 #emptyDigModal .modal-card{text-align:center; border-color:#c9bda6;}
 .empty-banner{
@@ -2326,6 +2370,11 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h2 class="screen-title">📋 탐사 결과</h2>
     </div>
     <div class="panel-card" id="resultStats"></div>
+    <div class="panel-card" id="diversityCard" style="display:none;">
+      <h3 style="color:var(--earth-dark);">📊 발견한 화석 종류 수</h3>
+      <div id="diversityChart"></div>
+      <div id="diversityNotes"></div>
+    </div>
     <div class="panel-card">
       <h3 style="color:var(--earth-dark);">🏅 획득한 배지</h3>
       <div class="badge-grid" id="resultBadges"></div>
@@ -3195,6 +3244,61 @@ function recordConcept(tag, firstTry){
   state.conceptStats[t].total += 1;
   if(firstTry) state.conceptStats[t].correct += 1;
 }
+/* ---------- 생물다양성 집계 (다양성 그래프) ----------
+   도감에 등록한 화석을 시대별로 묶어 '종류 수'를 센다.
+   증거 아이템(isEvidence)은 화석이 아니므로 제외한다.
+   시대는 item.era를 우선 적용한다 — 암모나이트는 경계 노두의 아래층에서
+   나오지만 생물 자체는 중생대의 화석이므로 경계층에 쌓이면 안 된다. */
+function eraOfItem(item){
+  if(!item) return null;
+  if(item.era) return item.era;
+  const ly = layerById(safe(item.layer, null));
+  return ly ? safe(ly.era, null) : null;
+}
+/* layerData에 나타나는 순서대로 시대 목록을 만든다 */
+function eraOrder(){
+  const seen = [];
+  layerData.forEach(l => {
+    const e = safe(l.era, null);
+    if(e && seen.indexOf(e) < 0) seen.push(e);
+  });
+  return seen;
+}
+function boundaryEra(){
+  const ly = layerData.find(l => l.isBoundary);
+  return ly ? safe(ly.era, null) : null;
+}
+/* 시대별 화석 종류 수 — collectedOnly=true면 도감에 등록한 것만 센다 */
+function diversityByEra(collectedOnly){
+  const order = eraOrder();
+  const rows = order.map(e => ({ era: e, count: 0, items: [] }));
+  itemData.forEach(it => {
+    if(it.isEvidence) return;
+    if(collectedOnly && !state.completed.includes(it.id)) return;
+    const e = eraOfItem(it);
+    const row = rows.find(r => r.era === e);
+    if(row){ row.count++; row.items.push(it); }
+  });
+  return rows;
+}
+/* 경계층 이전 / 이후로 나눈 화석 목록 */
+function diversitySplit(collectedOnly){
+  const order = eraOrder();
+  const bEra = boundaryEra();
+  const bIdx = bEra ? order.indexOf(bEra) : -1;
+  const rows = diversityByEra(collectedOnly);
+  const before = [], after = [];
+  rows.forEach((r, i) => {
+    if(bIdx < 0 || i === bIdx) return;
+    (i < bIdx ? before : after).push.apply(i < bIdx ? before : after, r.items);
+  });
+  /* 경계층 이후에 다시 나타난 화석 중, 경계층 이전에도 있던 종류
+     (아이템 이름으로 대조 — 교사가 같은 화석을 양쪽 층에 두면 잡힌다) */
+  const beforeNames = before.map(i => safe(i.name, i.id));
+  const survivors = after.filter(i => beforeNames.indexOf(safe(i.name, i.id)) >= 0);
+  return { rows: rows, before: before, after: after, survivors: survivors };
+}
+
 /* 결과 화면·보고서에서 쓰는 표시용 목록 (문항이 하나도 없는 개념은 제외) */
 function conceptSummary(){
   const cs = normalizeConceptStats(state.conceptStats);
@@ -5879,10 +5983,57 @@ function openResultScreen(){
     '<div class="result-stat"><span>🔓 해금한 지층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
     '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>' +
     interp;
+  renderDiversityChart();
   renderBadgeGrid($("resultBadges"));
   $("reportSavedMsg").textContent = "";
   drawReport();
   renderScreen("resultScreen");
+}
+
+/* ---------- 다양성 그래프 (최종 미션을 마친 뒤 결과 화면에 표시) ----------
+   대멸종 이후 생물다양성은 다시 증가하지만 생물종의 구성은 완전히 달라진다 —
+   이 단원의 결론을 학생 자신의 발굴 기록으로 보여 주는 것이 목적이다. */
+function renderDiversityChart(){
+  const card = $("diversityCard");
+  if(!card) return;
+  if(!state.finalMissionDone){ card.style.display = "none"; return; }
+  card.style.display = "";
+  const split = diversitySplit(true);
+  const rows = split.rows;
+  const bEra = boundaryEra();
+  const max = Math.max(1, rows.reduce((m, r) => Math.max(m, r.count), 0));
+
+  let html = "";
+  rows.forEach(r => {
+    const isB = r.era === bEra;
+    const pct = Math.round(r.count / max * 100);
+    html += '<div class="div-row' + (isB ? " is-boundary" : "") + '">' +
+      '<div class="d-era">' + escapeHTML(r.era === "선캄브리아" ? "선캄브리아" : r.era) + (isB ? "층" : "") + '</div>' +
+      '<div class="d-track"><div class="d-bar" style="width:' + pct + '%;"></div></div>' +
+      '<div class="d-num">' + (r.count > 0 ? r.count + "종" : "(없음) 0") + '</div>' +
+    '</div>';
+  });
+  $("diversityChart").innerHTML = html;
+
+  /* 아래 두 줄 — 두 번째 줄이 이 단원의 결론이므로 강조한다 */
+  const afterN = split.after.length;
+  const survN = split.survivors.length;
+  const line1 = afterN > 0
+    ? "경계층 이후 화석 종류 수는 다시 회복되었다."
+    : "경계층 이후의 화석은 아직 도감에 등록되지 않았다.";
+  let line2;
+  if(afterN <= 0){
+    line2 = "경계층 위쪽 지층을 마저 조사하면, 회복된 화석의 정체를 확인할 수 있다.";
+  }else if(survN === 0){
+    line2 = "그런데 회복된 화석 중 경계층 이전에도 있던 종류는 — <b>0개</b>다.";
+  }else{
+    line2 = "그런데 회복된 화석 중 경계층 이전에도 있던 종류는 — <b>" + survN + "개</b>뿐이다.";
+  }
+  $("diversityNotes").innerHTML =
+    '<div class="div-notes">' +
+      '<div class="div-note1">' + escapeHTML(line1) + '</div>' +
+      '<div class="div-note2">' + line2 + '</div>' +
+    '</div>';
 }
 
 /* ---------- 제출용 탐사 보고서 이미지 (Canvas → PNG 다운로드) ---------- */

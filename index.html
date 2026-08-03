@@ -1891,9 +1891,17 @@ h1,h2,h3{margin:.3em 0;}
   margin-top:10px;
   font-weight:800;
   min-height:1.4em;
+  white-space:pre-line;   /* 경고를 여러 줄로 보여 준다 */
+  line-height:1.6;
 }
 .teacher-msg.ok{color:var(--teal-dark);}
 .teacher-msg.err{color:#c0392b;}
+.teacher-msg.warn{
+  color:#8a5a00;
+  background:#fff4d6;
+  border:3px solid #e0b64a;
+  padding:10px 12px;
+}
 .teacher-tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
 .teacher-tab{
   padding:9px 18px;
@@ -2366,6 +2374,34 @@ img, .item-img, .player-img{image-rendering:pixelated;}
         · 이미지 파일은 <b>images 폴더</b>에 넣으면 자동으로 교체됩니다 (예: coral.png, trilobite.png). 없으면 기본 픽셀 그림이 표시됩니다.<br>
         · 지층·환경 변화 해석은 <b>layerData</b>와 <b>missionData.finalMission</b>에서 수정할 수 있습니다.<br>
         · 아래 <b>진행 상황 완전 초기화</b> 버튼으로 학생용 테스트를 다시 시작할 수 있습니다. JSON에 오류가 있어도 기존 데이터는 안전하게 유지됩니다.
+      </div>
+    </div>
+    <div class="panel-card">
+      <h3 style="color:var(--navy);">🏷 대멸종 단원용 필드 안내</h3>
+      <div class="teacher-note">
+        <b>문항의 <code>tag</code></b> — 개념별 성취 집계에 쓰입니다. 아래 다섯 중 하나여야 하며,
+        없거나 다른 값이면 <b>그 문항은 집계에서 빠집니다</b>. 적용할 때 경고로 알려 드립니다.<br>
+        · <code>ENV</code> 화석 → 과거 환경 추론 &nbsp; · <code>ERA</code> 화석 → 지질 시대 구분 &nbsp;
+        · <code>IDX</code> 표준화석 / 시상화석 구분<br>
+        · <code>EXT</code> 대멸종의 원인과 증거 &nbsp; · <code>DIV</code> 대멸종과 생물다양성<br><br>
+        <b>지층(layerData)</b><br>
+        · <code>era</code> — <code>"선캄브리아"</code> / <code>"고생대"</code> / <code>"중생대"</code> /
+          <code>"경계"</code> / <code>"신생대"</code>. 다양성 그래프를 이 값으로 묶습니다.<br>
+        · <code>isBoundary: true</code> — 그 노두를 아래층·경계층·위층 3단으로 렌더링하고
+          아래에서 위로만 파도록 잠급니다. <code>colorBoundary1/2</code>가 가운데 검은 띠의 색입니다.<br><br>
+        <b>아이템(itemData)</b><br>
+        · <code>era</code> — 지층의 시대와 다를 때만 씁니다. 암모나이트는 경계 노두 아래층에서
+          나오지만 중생대의 화석이므로 <code>era: "중생대"</code>를 두어 경계층이 0으로 남습니다.<br>
+        · <code>isEvidence: true</code> — 화석이 아니라 지층이 남긴 증거. 경계층에서만 나오고
+          다양성 그래프에서 제외됩니다.<br>
+        · <code>supports</code> — 증거가 어떤 가설의 어떤 기준을 뒷받침하는지.
+          예: <code>{ "asteroid": ["evidence", "global"] }</code><br>
+        &nbsp;&nbsp;가설 키: <code>asteroid</code> / <code>volcano</code> / <code>climate</code> / <code>anoxia</code><br>
+        &nbsp;&nbsp;기준 키: <code>evidence</code>(과학적 증거) / <code>consistent</code>(사실과 일치) /
+          <code>global</code>(전 지구적 변화) / <code>power</code>(멸종시킬 위력)<br><br>
+        ⚠ <b>교육과정 유의</b> — 기(紀) 단위 시기와 구체적 연대 수치는 쓰지 않고 대(代) 수준으로만
+        서술합니다. "선캄브리아대"가 아니라 <b>"선캄브리아 시대"</b>로 적습니다.
+        대멸종의 원인은 하나로 확정하지 않습니다.
       </div>
     </div>
     <div class="panel-card">
@@ -3042,12 +3078,16 @@ const DEFAULT_LAYER_DATA = [
 ];
 
 /* --- 배지 데이터 (교사가 수정할 데이터 영역) --- */
+/* type: discoverCount / completeRate / layerUnlock / completeAll
+        / evidenceAll(경계층 증거 전부 발굴) / finalMission(가설 평가 완료) */
 const DEFAULT_BADGE_DATA = [
-  { id: "first_find",  icon: "🥇", name: "첫 발견자",       desc: "첫 화석을 발견했어요!",              type: "discoverCount", value: 1 },
-  { id: "rookie",      icon: "⛏", name: "초보 탐사대원",   desc: "화석 3개를 발견했어요!",             type: "discoverCount", value: 3 },
-  { id: "collector",   icon: "📚", name: "화석 수집가",     desc: "전체 화석 50% 이상 수집!",           type: "completeRate",  value: 0.5 },
-  { id: "layer_reader",icon: "🧩", name: "지층 해석자",     desc: "지층 정보를 1개 이상 해금했어요!",   type: "layerUnlock",   value: 1 },
-  { id: "perfect",     icon: "👑", name: "완벽한 탐사대원", desc: "모든 화석을 수집했어요!",            type: "completeAll",   value: 1 }
+  { id: "first_find",      icon: "🥇", name: "첫 발견자",       desc: "첫 화석을 발견했어요!",              type: "discoverCount", value: 1 },
+  { id: "rookie",          icon: "⛏", name: "초보 탐사대원",   desc: "화석 3개를 발견했어요!",             type: "discoverCount", value: 3 },
+  { id: "collector",       icon: "📚", name: "화석 수집가",     desc: "전체 화석 50% 이상 수집!",           type: "completeRate",  value: 0.5 },
+  { id: "layer_reader",    icon: "🧩", name: "지층 해석자",     desc: "지층 정보를 1개 이상 해금했어요!",   type: "layerUnlock",   value: 1 },
+  { id: "evidence_hunter", icon: "🔬", name: "증거 수집가",     desc: "경계층의 증거를 모두 발굴했어요!",   type: "evidenceAll",   value: 1 },
+  { id: "hypothesis_judge",icon: "⚖️", name: "가설 심사관",     desc: "가설 평가 미션을 마쳤어요!",         type: "finalMission",  value: 1 },
+  { id: "perfect",         icon: "👑", name: "완벽한 탐사대원", desc: "모든 화석을 수집했어요!",            type: "completeAll",   value: 1 }
 ];
 
 /* --- 미션 데이터 (교사가 수정할 데이터 영역) --- */
@@ -3122,28 +3162,40 @@ const DEFAULT_MISSION_DATA = {
   ]
 };
 
-/* --- 탐사 노트 (도움말·화석도감에 카드형으로 표시) --- */
+/* --- 탐사 노트 (도움말·화석도감에 카드형으로 표시)
+   ※ 대(代) 수준으로만 서술한다. 기(紀) 단위 시기나 구체적인 연대 수치는 쓰지 않는다.
+      "선캄브리아대"가 아니라 "선캄브리아 시대"로 적는다. --- */
 const DEFAULT_NOTE_DATA = [
-  { icon: "🪨", title: "화석이란?", body: "과거에 살았던 생물의 몸체나 흔적이 지층 속에 남은 것이다." },
+  { icon: "🪨", title: "화석이란?", body: "과거에 살았던 생물의 몸체나 흔적이 지층 속에 남은 것이다. 뼈나 껍데기처럼 단단한 부분이 남기 쉽다." },
   { icon: "🕰", title: "표준 화석", body: "지층의 시대를 알려주는 화석. 생존 기간이 짧고, 넓은 지역에 많이 분포할수록 좋다. (삼엽충·암모나이트·공룡·화폐석·매머드)" },
   { icon: "🌊", title: "시상 화석", body: "과거 환경을 알려주는 화석. 특정 환경에서 잘 살고 환경 변화에 민감할수록 좋다. (산호·고사리)" },
-  { icon: "🦕", title: "지질 시대 대표 화석", body: "선캄브리아: 스트로마톨라이트·에디아카라 / 고생대: 삼엽충 / 중생대: 암모나이트·공룡 / 신생대: 화폐석·매머드·참나무 잎" },
-  { icon: "💥", title: "대멸종", body: "많은 생물이 짧은 기간에 넓은 지역에서 사라진 사건. 고생대 말에는 삼엽충이, 중생대 말에는 공룡·암모나이트가 멸종했다." }
+  { icon: "🦕", title: "지질 시대 대표 화석", body: "선캄브리아 시대: 스트로마톨라이트·에디아카라 / 고생대: 삼엽충 / 중생대: 암모나이트·공룡 / 신생대: 화폐석·매머드·참나무 잎" },
+  { icon: "💥", title: "대멸종이란?", body: "많은 종류의 생물이 지질 시대의 기준에서 짧은 기간에, 넓은 지역에 걸쳐 한꺼번에 사라진 사건이다. 고생대 말에는 삼엽충이, 중생대 말에는 공룡과 암모나이트가 멸종하였다." },
+  { icon: "🔬", title: "대멸종의 원인", body: "소행성 충돌, 대규모 화산 폭발, 기후 변화, 해양 무산소 등 여러 가설이 있다. 대멸종은 여러 원인이 복합적으로 작용한 경우가 많아, 하나의 원인으로 확정하기 어렵다." },
+  { icon: "🧪", title: "가설을 평가하는 기준", body: "① 뒷받침하는 과학적인 증거가 있는가 ② 다른 과학적 사실에 어긋나지 않는가 ③ 전 지구적인 환경 변화를 초래하였는가 ④ 생물을 멸종할 만큼 위력적이었는가. 증거가 부족하면 틀렸다고 결론 내리지 말고 판단을 미룬다." },
+  { icon: "🌱", title: "대멸종과 생물다양성", body: "대멸종 이후 살아남은 생물이 비어 있는 생태 공간을 채우며 다양한 종으로 진화한다. 그래서 생물다양성은 다시 증가하지만, 생물종의 구성은 이전과 완전히 달라진다." }
 ];
 
 /* --- 탐험 공원 맵 설정 (교사가 수정할 데이터 영역)
    width/height: 맵 크기(px, 화면보다 크게 — 카메라가 플레이어를 따라감)
-   outcrops: 노두 위치 [{layer, x, y}] — 층 id와 맵 좌표 --- */
+   outcrops: 노두 위치 [{layer, x, y}] — 층 id와 맵 좌표
+
+   ★ 배치 원칙: A→B→C→D→E→F가 한 붓 그리기처럼 이어지도록 뱀 모양으로 둔다.
+     북쪽 줄을 왼쪽→오른쪽(A·B·C)으로 걷고, 그대로 남쪽으로 내려와
+     오른쪽→왼쪽(D·E·F)으로 돌아온다. 시대 순서가 곧 걷는 순서가 된다.
+       A(북·왼쪽) → B(북·가운데) → C(북·오른쪽)
+                                      ↓
+       F(남·왼쪽) ← E(남·가운데) ← D(남·오른쪽)                        --- */
 const DEFAULT_ROAD_SCENE_DATA = {
   width: 1500,
   height: 1050,
   outcrops: [
-    { layer: "A", x: 250,  y: 210 },
-    { layer: "B", x: 760,  y: 150 },
-    { layer: "C", x: 1265, y: 260 },   /* 나무숲 뒤에 살짝 숨김 */
-    { layer: "D", x: 210,  y: 780 },
-    { layer: "E", x: 700,  y: 900 },   /* 나무숲 뒤에 살짝 숨김 */
-    { layer: "F", x: 1265, y: 880 }
+    { layer: "A", x: 250,  y: 210 },   /* 선캄브리아 시대 · 왼쪽 세로길 북단 */
+    { layer: "B", x: 760,  y: 150 },   /* 고생대 · 가운데 세로길 북단 */
+    { layer: "C", x: 1265, y: 260 },   /* 중생대 · 오른쪽 세로길 북단 (나무숲 뒤에 살짝 숨김) */
+    { layer: "D", x: 1265, y: 880 },   /* 경계 노두 · 오른쪽 세로길 남단 */
+    { layer: "E", x: 700,  y: 900 },   /* 신생대 바다 · 가운데 세로길 남단 (나무숲 뒤에 살짝 숨김) */
+    { layer: "F", x: 210,  y: 780 }    /* 신생대 육지 · 왼쪽 진입로 남단 */
   ]
 };
 
@@ -4132,11 +4184,11 @@ function inPond(x, y){
    (기준 좌표계 1500x1050 — 맵 크기가 바뀌면 비율에 맞게 스케일) */
 const PARK_PATHS_BASE = [
   { x: 0,    y: 440, w: 1500, h: 90 },   /* 가로 큰길 */
-  { x: 230,  y: 150, w: 80,   h: 900 },  /* 왼쪽 세로길 (노두 A·D 방면) */
+  { x: 230,  y: 150, w: 80,   h: 900 },  /* 왼쪽 세로길 (노두 A·F 방면) */
   { x: 700,  y: 110, w: 80,   h: 940 },  /* 가운데 세로길 (노두 B·E 방면) */
-  { x: 1240, y: 190, w: 80,   h: 860 },  /* 오른쪽 세로길 (노두 C·F 방면) */
-  { x: 150,  y: 740, w: 170,  h: 80 },   /* 노두 D 진입로 */
-  { x: 1240, y: 840, w: 170,  h: 80 },   /* 노두 F 진입로 */
+  { x: 1240, y: 190, w: 80,   h: 860 },  /* 오른쪽 세로길 (노두 C·D 방면) */
+  { x: 150,  y: 740, w: 170,  h: 80 },   /* 노두 F 진입로 */
+  { x: 1240, y: 840, w: 170,  h: 80 },   /* 노두 D 진입로 */
   { x: 1240, y: 190, w: 130,  h: 80 }    /* 노두 C 진입로 */
 ];
 function parkPaths(){
@@ -5879,6 +5931,10 @@ function checkBadges(){
       case "completeRate":  earned = (state.completed.length / total) >= safe(b.value,0.5); break;
       case "layerUnlock":   earned = state.unlockedLayers.length >= safe(b.value,1); break;
       case "completeAll":   earned = state.completed.length >= total; break;
+      /* 경계층 증거 4종을 모두 발굴했는가 (퀴즈까지는 아니어도 됨) */
+      case "evidenceAll":   earned = evidenceItems().length > 0 &&
+                                     evidenceItems().every(i => state.discovered.includes(i.id)); break;
+      case "finalMission":  earned = !!state.finalMissionDone; break;
       default: earned = false;
     }
     if(earned){
@@ -6307,18 +6363,37 @@ function applyTeacherData(){
     return;
   }
   /* 간단한 구조 검증 */
+  const warns = [];
   try{
     if(teacherTab === "itemData"){
       if(!Array.isArray(parsed) || !parsed.length) throw new Error("itemData는 1개 이상의 항목을 가진 배열이어야 합니다.");
+      const seenIds = {};
       parsed.forEach((it, i) => {
+        const where = (i+1) + "번째 항목(" + safe(it && it.name, safe(it && it.id, "?")) + ")";
         if(!it.id) throw new Error((i+1) + "번째 항목에 id가 없습니다.");
         if(!it.name) throw new Error((i+1) + "번째 항목에 name이 없습니다.");
+        if(seenIds[it.id]) throw new Error("id가 중복되었습니다: " + it.id);
+        seenIds[it.id] = true;
         if(!Array.isArray(it.quiz)) it.quiz = [];
+        /* 태그 검증 — 없거나 잘못된 값이면 개념별 성취 집계에서 누락된다 */
+        it.quiz.forEach((q, qi) => {
+          const t = String(safe(q.tag, "")).trim().toUpperCase();
+          if(!t) warns.push(where + "의 " + (qi+1) + "번 문항에 tag가 없습니다.");
+          else if(CONCEPT_KEYS.indexOf(t) < 0) warns.push(where + "의 " + (qi+1) + "번 문항 tag가 올바르지 않습니다: \"" + safe(q.tag,"") + "\"");
+        });
+        /* 증거 아이템은 supports가 있어야 가설 평가에서 쓸 수 있다 */
+        if(it.isEvidence && (!it.supports || typeof it.supports !== "object")){
+          warns.push(where + "은 isEvidence인데 supports가 없습니다. 가설 평가에서 어떤 기준도 채우지 못합니다.");
+        }
       });
       itemData = parsed;
     }else if(teacherTab === "layerData"){
       if(!Array.isArray(parsed) || !parsed.length) throw new Error("layerData는 1개 이상의 항목을 가진 배열이어야 합니다.");
-      parsed.forEach((l, i) => { if(!l.id) throw new Error((i+1) + "번째 층에 id가 없습니다."); });
+      parsed.forEach((l, i) => {
+        if(!l.id) throw new Error((i+1) + "번째 층에 id가 없습니다.");
+        if(!l.era) warns.push("지층 " + l.id + "에 era가 없습니다. 다양성 그래프 집계에서 빠집니다.");
+      });
+      if(!parsed.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다. 경계 노두 3단 연출과 경계층 증거가 나타나지 않습니다.");
       layerData = parsed;
     }else if(teacherTab === "badgeData"){
       if(!Array.isArray(parsed)) throw new Error("badgeData는 배열이어야 합니다.");
@@ -6334,8 +6409,16 @@ function applyTeacherData(){
     renderHelpMissions();
     renderStartProgress();
     updateHud();
-    teacherMsg("✅ 적용 완료! (" + teacherTab + " 갱신, 자동 저장됨)", "ok");
-    playSound("correct");
+    if(warns.length){
+      /* 적용은 하되, 집계에서 빠질 수 있는 항목을 알려 준다 */
+      teacherMsg("⚠ 적용했지만 확인이 필요합니다 (" + warns.length + "건)\n· " +
+                 warns.slice(0, 6).join("\n· ") +
+                 (warns.length > 6 ? "\n· … 외 " + (warns.length - 6) + "건" : ""), "warn");
+      playSound("wrong");
+    }else{
+      teacherMsg("✅ 적용 완료! (" + teacherTab + " 갱신, 자동 저장됨)", "ok");
+      playSound("correct");
+    }
   }catch(e){
     teacherMsg("❌ 데이터 구조 오류: " + e.message + " — 기존 데이터는 그대로 유지됩니다.", "err");
   }

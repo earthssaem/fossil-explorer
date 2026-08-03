@@ -1334,6 +1334,33 @@ h1,h2,h3{margin:.3em 0;}
   padding:8px 10px; font-weight:900; color:var(--ink);
   line-height:1.5;
 }
+/* --- 개념별 성취 --- */
+.concept-sub{font-size:.78rem; font-weight:700; color:#8a7a5d; line-height:1.5; margin-bottom:10px;}
+.cc-row{
+  display:flex; align-items:center; gap:8px;
+  padding:4px 0;
+  border-bottom:2px dashed #e4d9bf;
+}
+.cc-row:last-child{border-bottom:none;}
+.cc-name{
+  flex:0 0 140px;
+  font-weight:900; font-size:.82rem; color:#5a4a3e;
+  line-height:1.3;
+}
+.cc-dots{
+  flex:1 1 auto;
+  font-size:.9rem; letter-spacing:1px;
+  color:var(--teal-dark); font-weight:900;
+  word-break:break-all; line-height:1.2;
+}
+.cc-dots .off{color:#cfc4ab;}
+.cc-num{
+  flex:0 0 56px; text-align:right;
+  font-weight:900; font-size:.85rem; color:#5a4a3e;
+}
+.cc-row.low .cc-num{color:#b3261e;}
+@media (max-width:620px){ .cc-name{flex-basis:110px; font-size:.76rem;} }
+
 /* --- 다양성 그래프 --- */
 .div-row{
   display:flex; align-items:center; gap:8px;
@@ -2369,6 +2396,11 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <button class="btn ghost small" id="btnResultBack">← 돌아가기</button>
       <h2 class="screen-title">📋 탐사 결과</h2>
     </div>
+    <div class="panel-card" id="conceptCard" style="display:none;">
+      <h3 style="color:var(--earth-dark);">🧠 개념별 성취</h3>
+      <p class="concept-sub">첫 시도에 맞힌 문항만 채워집니다. 어느 개념을 다시 볼지 확인해 보세요.</p>
+      <div id="conceptList"></div>
+    </div>
     <div class="panel-card" id="resultStats"></div>
     <div class="panel-card" id="diversityCard" style="display:none;">
       <h3 style="color:var(--earth-dark);">📊 발견한 화석 종류 수</h3>
@@ -2383,7 +2415,7 @@ img, .item-img, .player-img{image-rendering:pixelated;}
       <h3 style="color:var(--earth-dark);">📄 제출용 탐사 보고서</h3>
       <p style="font-weight:700; color:#7a6a4d; line-height:1.5;">아래 보고서를 이미지로 저장해 선생님께 제출하세요!</p>
       <div id="reportPreview" style="overflow-x:auto; margin:12px 0;">
-        <canvas id="reportCanvas" width="900" height="600" style="width:100%; max-width:520px; border:4px solid var(--ink); box-shadow:4px 4px 0 rgba(74,59,46,.3); image-rendering:auto;"></canvas>
+        <canvas id="reportCanvas" width="900" height="980" style="width:100%; max-width:560px; border:4px solid var(--ink); box-shadow:4px 4px 0 rgba(74,59,46,.3); image-rendering:auto;"></canvas>
       </div>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn" id="btnSaveReport">💾 보고서 이미지 저장</button>
@@ -5983,11 +6015,34 @@ function openResultScreen(){
     '<div class="result-stat"><span>🔓 해금한 지층</span><span class="val">' + state.unlockedLayers.length + " / " + layerData.length + '</span></div>' +
     '<div class="result-stat"><span>🏅 획득 배지</span><span class="val">' + state.badges.length + " / " + badgeData.length + '</span></div>' +
     interp;
+  renderConceptScores();
   renderDiversityChart();
   renderBadgeGrid($("resultBadges"));
   $("reportSavedMsg").textContent = "";
   drawReport();
   renderScreen("resultScreen");
+}
+
+/* ---------- 개념별 성취 (결과 화면) ----------
+   교사가 어느 개념을 다시 짚어야 할지 판단하는 용도이므로 총점·콤보보다 위에 둔다. */
+function renderConceptScores(){
+  const card = $("conceptCard");
+  if(!card) return;
+  const rows = conceptSummary();
+  if(!rows.length){ card.style.display = "none"; return; }
+  card.style.display = "";
+  $("conceptList").innerHTML = rows.map(r => {
+    let dots = "";
+    for(let i = 0; i < r.total; i++){
+      dots += (i < r.correct) ? "<span>●</span>" : '<span class="off">○</span>';
+    }
+    const low = r.total > 0 && (r.correct / r.total) < 0.5;
+    return '<div class="cc-row' + (low ? " low" : "") + '" title="' + escapeHTML(r.desc) + '">' +
+             '<div class="cc-name">' + escapeHTML(r.label) + '</div>' +
+             '<div class="cc-dots">' + dots + '</div>' +
+             '<div class="cc-num">' + r.correct + " / " + r.total + '</div>' +
+           '</div>';
+  }).join("");
 }
 
 /* ---------- 다양성 그래프 (최종 미션을 마친 뒤 결과 화면에 표시) ----------
@@ -6064,7 +6119,53 @@ function drawReport(){
   g.font = "700 20px 'Segoe UI','Noto Sans KR',sans-serif";
   g.fillStyle = "#7a6a4d";
   g.fillText("🕐 " + safe(state.startedAt, "-") + "  ~  " + new Date().toLocaleString(), 60, 226);
-  /* 성적 카드 6개 */
+
+  /* ===== 개념별 성취 =====
+     교사가 제출물만 보고 어느 개념을 다시 짚어야 할지 판단하는 항목이므로
+     총점·콤보보다 위에 배치한다. */
+  let y = 268;
+  const concepts = conceptSummary();
+  g.fillStyle = "#4a3b2e"; g.font = "900 26px 'Segoe UI','Noto Sans KR',sans-serif";
+  const cTitle = "🧠 개념별 성취";
+  g.fillText(cTitle, 60, y);
+  const cTitleW = g.measureText(cTitle).width;   // 제목 폭을 재서 부제가 겹치지 않게 둔다
+  g.fillStyle = "#8a7a5d"; g.font = "700 17px 'Segoe UI','Noto Sans KR',sans-serif";
+  g.fillText("(첫 시도에 맞힌 문항만 채워집니다)", 60 + cTitleW + 14, y + 3);
+  y += 22;
+  if(!concepts.length){
+    g.fillStyle = "#8a7a5d"; g.font = "700 20px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText("아직 푼 문항이 없습니다.", 60, y + 24);
+    y += 44;
+  }else{
+    const dotX = 300, dotRight = W - 150;
+    concepts.forEach((r, i) => {
+      const cy = y + 26 + i * 34;
+      /* 줄 배경 (한 칸 걸러 옅게) */
+      if(i % 2 === 0){ g.fillStyle = "#f6efdd"; g.fillRect(52, cy - 15, W - 104, 30); }
+      g.fillStyle = "#4a3b2e"; g.font = "900 20px 'Segoe UI','Noto Sans KR',sans-serif";
+      g.fillText(r.label, 62, cy);
+      /* 성취 도트 — 문항이 많아도 폭 안에 들어오도록 간격을 줄인다 */
+      const step = Math.min(22, (dotRight - dotX) / Math.max(1, r.total));
+      const rad = Math.max(3, Math.min(8, step * 0.36));
+      for(let k = 0; k < r.total; k++){
+        const px = dotX + step * k + step / 2;
+        g.beginPath();
+        g.arc(px, cy, rad, 0, Math.PI * 2);
+        if(k < r.correct){ g.fillStyle = "#1d9184"; g.fill(); }
+        else{ g.fillStyle = "#fff"; g.fill(); g.strokeStyle = "#c3b498"; g.lineWidth = 2; g.stroke(); }
+      }
+      const weak = r.total > 0 && (r.correct / r.total) < 0.5;
+      g.fillStyle = weak ? "#b3261e" : "#4a3b2e";
+      g.font = "900 21px 'Segoe UI','Noto Sans KR',sans-serif";
+      g.textAlign = "right";
+      g.fillText(r.correct + " / " + r.total, W - 62, cy);
+      g.textAlign = "left";
+    });
+    y += 26 + concepts.length * 34;
+  }
+
+  /* ===== 성적 카드 6개 ===== */
+  y += 22;
   const stats = [
     ["⭐ 총 점수", safe(state.score,0) + "점"],
     ["🦴 수집한 화석", state.completed.length + " / " + total],
@@ -6073,32 +6174,46 @@ function drawReport(){
     ["🔥 최고 콤보", String(safe(state.maxCombo,0))],
     ["🏅 획득 배지", state.badges.length + " / " + badgeData.length]
   ];
-  const cardW = (W - 120 - 40) / 3, cardH = 92;
+  const cardW = (W - 120 - 40) / 3, cardH = 86;
   stats.forEach((s, i) => {
     const cx = 60 + (i % 3) * (cardW + 20);
-    const cy = 260 + Math.floor(i / 3) * (cardH + 20);
+    const cy = y + Math.floor(i / 3) * (cardH + 16);
     g.fillStyle = "#fff"; g.fillRect(cx, cy, cardW, cardH);
     g.strokeStyle = "#4a3b2e"; g.lineWidth = 4; g.strokeRect(cx, cy, cardW, cardH);
     g.fillStyle = "#7a6a4d"; g.font = "800 19px 'Segoe UI','Noto Sans KR',sans-serif";
-    g.fillText(s[0], cx + 16, cy + 28);
-    g.fillStyle = "#1d9184"; g.font = "900 34px 'Segoe UI','Noto Sans KR',sans-serif";
-    g.fillText(s[1], cx + 16, cy + 62);
+    g.fillText(s[0], cx + 16, cy + 26);
+    g.fillStyle = "#1d9184"; g.font = "900 32px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(s[1], cx + 16, cy + 60);
   });
-  /* 수집 도감 요약 (아이템별 상태 도트) */
+  y += cardH * 2 + 16;
+
+  /* ===== 수집 도감 요약 =====
+     아이템 수가 늘어도 캔버스를 넘지 않도록 여러 줄로 접는다. */
+  y += 40;
   g.fillStyle = "#4a3b2e"; g.font = "900 24px 'Segoe UI','Noto Sans KR',sans-serif";
-  g.fillText("📚 화석도감 수집 현황", 60, 496);
+  g.fillText("📚 화석도감 수집 현황", 60, y);
+  y += 20;
+  const perRow = 5, boxW = (W - 120 - (perRow - 1) * 12) / perRow, boxH = 52;
   itemData.forEach((it, i) => {
-    const bx = 60 + i * 132, by = 516;
+    const bx = 60 + (i % perRow) * (boxW + 12);
+    const by = y + Math.floor(i / perRow) * (boxH + 12);
     const completed = state.completed.includes(it.id);
     const discovered = state.discovered.includes(it.id) || completed;
     g.fillStyle = completed ? "#3ec6b5" : (discovered ? "#ffd166" : "#d8cbb0");
-    g.fillRect(bx, by, 120, 54);
-    g.strokeStyle = "#4a3b2e"; g.lineWidth = 3; g.strokeRect(bx, by, 120, 54);
-    g.fillStyle = "#4a3b2e"; g.font = "900 16px 'Segoe UI','Noto Sans KR',sans-serif";
-    g.fillText("No." + String(i+1).padStart(2,"0"), bx + 10, by + 20);
-    g.font = "700 15px 'Segoe UI','Noto Sans KR',sans-serif";
-    g.fillText(completed ? "⭐ 완료" : (discovered ? "🔍 발견" : "🔒 미발견"), bx + 10, by + 40);
+    g.fillRect(bx, by, boxW, boxH);
+    g.strokeStyle = "#4a3b2e"; g.lineWidth = 3; g.strokeRect(bx, by, boxW, boxH);
+    g.fillStyle = "#4a3b2e"; g.font = "900 15px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(fitText(g, safe(it.name, "?"), boxW - 16), bx + 8, by + 18);
+    g.font = "700 14px 'Segoe UI','Noto Sans KR',sans-serif";
+    g.fillText(completed ? "⭐ 완료" : (discovered ? "🔍 발견" : "🔒 미발견"), bx + 8, by + 38);
   });
+}
+/* 주어진 폭에 맞게 글자를 잘라 준다 (넘치면 … 을 붙임) */
+function fitText(g, text, maxW){
+  let t = String(text);
+  if(g.measureText(t).width <= maxW) return t;
+  while(t.length > 1 && g.measureText(t + "…").width > maxW) t = t.slice(0, -1);
+  return t + "…";
 }
 function saveReport(){
   drawReport();

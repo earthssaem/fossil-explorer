@@ -284,7 +284,7 @@ function buildProps(){
     "oLlLLLLLLLLllllo",
     ".oooooooooooooo."
   ], PP, { solid: { x: -7, y: -5, w: 14, h: 5 } });
-  /* 스트로마톨라이트 돔 (선캄브리아 물가) */
+  /* 스트로마톨라이트 돔 (선캄브리아 시대 구역 물가) */
   defProp("strom", [
     ".....oooooo.....",
     "...ooSuuuuSoo...",
@@ -438,7 +438,7 @@ function buildProps(){
   defProp("ranger", PLAYER_FRONT_MAP, RANGER_PAL, { ax: 7, ay: 17, solid: { x: -5, y: -4, w: 10, h: 4 } });
 }
 
-/* ---------- 노두(강가 절개면) 스프라이트: 층 색으로 생성 ---------- */
+/* ---------- 노두(강물이 깎은 절벽) 스프라이트: 층 색으로 생성 ---------- */
 function buildOutcropProp(ly, below){
   const W = 48, H = 26;
   const c = makeCanvas(W, H);

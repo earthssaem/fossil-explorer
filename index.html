@@ -14,21 +14,24 @@
 
   <!-- ============ 1. 시작 화면 ============ -->
   <section id="startScreen" class="screen active">
-    <div class="start-bg">
-      <div class="start-strata"></div>
-    </div>
+    <div class="start-bg" id="startBg"></div>
     <div class="start-card pixel-panel">
-      <div class="start-hero" id="startHero"></div>
+      <button class="start-sound" id="btnSoundTitle" title="소리 켜기/끄기"><i data-icon="sound"></i></button>
+      <div class="hero-wrap">
+        <div class="hero-bubble" id="heroBubble"></div>
+        <div class="start-hero" id="startHero"></div>
+      </div>
       <h1 class="start-title">화석 탐정<span class="accent">지층의 시간을 찾아라</span></h1>
-      <p class="start-sub">남쪽에서 북쪽으로 걸으며 노두를 조사하고,<br>흩어진 지층 기록을 하나로 잇는다.</p>
+      <p class="start-sub" id="startSub">노두 6곳에 흩어진 단서 14개. 지층의 시간을 되찾아라!</p>
       <div class="start-nick">
         <label for="nickInput">탐사대원 닉네임</label>
         <input id="nickInput" type="text" maxlength="12" placeholder="닉네임 입력" autocomplete="off">
         <p class="nick-hint">실명은 쓰지 않고, 나만의 닉네임을 적는다.</p>
       </div>
+      <div class="start-dex" id="startDex" title="탐사 도감 열기"></div>
       <div class="start-badge-row" id="startProgressRow"></div>
       <div class="start-buttons">
-        <button class="btn primary wide" id="btnStart">탐사 시작</button>
+        <div class="cta-wrap"><button class="btn primary wide cta" id="btnStart">탐사 시작</button></div>
         <div class="btn-row">
           <button class="btn teal" id="btnHelp"><i data-icon="book"></i>게임 방법</button>
           <button class="btn blue" id="btnCollectionFromStart"><i data-icon="bone"></i>탐사 도감</button>
@@ -262,6 +265,7 @@
   </section>
 
 </div>
+<div id="screenWipe" aria-hidden="true"></div>
 <div id="toastZone"></div>
 
 <script src="js/data/items.js"></script>
@@ -275,6 +279,7 @@
 <script src="js/core/progress.js"></script>
 <script src="js/world/tiles.js"></script>
 <script src="js/world/map.js"></script>
+<script src="js/world/title.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>

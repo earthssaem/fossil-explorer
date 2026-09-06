@@ -709,12 +709,20 @@ const PLAYER_PAL = {
   P:"#4a5d78", o:"#7a5236",   /* 바지 / 부츠 */
   K:"#8a5a3c", k:"#c9a468",   /* 배낭 / 배낭 주머니 */
   a:"#7a5236",                /* 뒷머리 */
-  g:"#9fb2c4", L:"#55a8d6"    /* 망치 / 루페 */
+  g:"#9fb2c4", L:"#55a8d6",   /* 망치 / 루페 */
+  Q:"#c48f1a", X:"#c94c3d"    /* 왕관 / 왕관 보석 (모든 단서를 모은 대원) */
 };
-function playerFallbackSVG(){
+/* 모든 단서를 모은 탐사대원의 왕관 (안전모 위에 얹는다) */
+const PLAYER_CROWN_ROWS = [
+  "...X...X...X..",
+  "...Q.Q.Q.Q.Q..",
+  "...QQQQQQQQQ.."
+];
+function playerFallbackSVG(opt){
   /* 꼬마 탐사대원 (앞모습, 14x18 도트 스프라이트):
-     노란 안전모 + 반짝 눈 + 볼터치 + 조끼 + 망치/루페 */
-  return pixelSVG([
+     노란 안전모 + 반짝 눈 + 볼터치 + 조끼 + 망치/루페
+     opt.crown: 왕관을 씌운다 (시작 화면, 전체 수집 보상) */
+  const rows = [
     "....HHHHHH....",
     "...HHHHHHHH...",
     "...HHHHHHHH...",
@@ -733,7 +741,8 @@ function playerFallbackSVG(){
     "....PP..PP....",
     "...oo....oo...",
     ".............."
-  ], PLAYER_PAL, "player-svg");
+  ];
+  return pixelSVG(opt && opt.crown ? PLAYER_CROWN_ROWS.concat(rows) : rows, PLAYER_PAL, "player-svg");
 }
 /* 뒷모습 꼬마 탐사대원 (3D 길 구간용, 14x18 도트 스프라이트): 큰 배낭 + 안전모 */
 function spriteFromMap(rows, palette, scale){

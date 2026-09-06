@@ -620,7 +620,7 @@ function enterWorld(){
     window.addEventListener("resize", resizeWorldCanvas);
   }
   if(!WORLD.tile.length){
-    buildTiles(worldData.zones);
+    if(!TILES.shadow) buildTiles(worldData.zones);   // 시작 화면 배경이 먼저 만들었으면 재사용
     buildPlayerSprites();
     buildWorld();
   }

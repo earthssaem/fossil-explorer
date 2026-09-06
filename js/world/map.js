@@ -152,7 +152,7 @@ function buildWorld(){
       WORLD.props.push({ key: "track", x: (pz.col + 1 + k * 1.3) * T + 4, y: (pz.row + 1 + (k % 2)) * T + 8, flat: true });
     }
   }
-  /* 8. 노두 (강가 절개면) */
+  /* 8. 노두 (강물이 깎아 만든 절벽) */
   const reserved = [];   // 소품 배치 금지 셀 (c,r)
   const reserve = (c, r, w, h) => { for(let rr = r; rr < r + h; rr++) for(let cc = c; cc < c + w; cc++) reserved.push(cellIdx(cc, rr)); };
   (worldData.outcrops || []).forEach(o => {
@@ -433,7 +433,7 @@ function positionHint(){
 }
 
 /* ---------- 지질도 미니맵 ---------- */
-const GEO_COLORS = { "선캄브리아": "#c98bb8", "고생대": "#79b3d8", "중생대": "#8fcf8a", "경계": "#3a3230", "신생대": "#f0d46a" };
+const GEO_COLORS = { "선캄브리아 시대": "#c98bb8", "고생대": "#79b3d8", "중생대": "#8fcf8a", "중생대 말~신생대 초": "#3a3230", "신생대": "#f0d46a" };
 function eraColorOfZone(zid){
   const z = zoneById(zid); const ly = z ? layerById(z.layer) : null;
   return ly ? (GEO_COLORS[ly.era] || "#bbb") : "#bbb";
@@ -546,9 +546,9 @@ function tryAction(){
     const doneN = items.filter(i => state.completed.includes(i.id)).length;
     const lines = [
       "이 계단은 " + (z ? z.name : "앞 구역") + "의 노두 조사를 마쳐야 열립니다.",
-      safe(ly && ly.label, "노두") + " 진행: 화석 " + doneN + " / " + items.length + " 도감 등록" +
-        (isBoundaryLayer(n.o.needs) ? (boundaryFullyDug(n.o.needs) ? " · 아래층·경계층·위층 조사 완료" : " · 아래층→경계층→위층 순서로 모두 파야 합니다") : "") + ".",
-      "지층은 아래에서 위로 쌓입니다. 아래층을 먼저 읽어야 위층의 변화를 알 수 있어요."
+      safe(ly && ly.label, "노두") + " 진행: 단서 " + doneN + " / " + items.length + " 도감 등록" +
+        (isBandedLayer(n.o.needs) ? (boundaryFullyDug(n.o.needs) ? " · 모든 띠 조사 완료" : " · 노두의 모든 띠를 아래층부터 차례로 조사해야 합니다") : "") + ".",
+      "앞 구역의 변화를 시간 순서대로 확인한 뒤 다음 구역으로 가는 게임 진행 규칙입니다."
     ];
     openDialog("관문 안내", lines);
     return;
@@ -558,8 +558,8 @@ function tryAction(){
     const left = layerData.length - exploredOutcropCount();
     openDialog("전망대", [
       "여기서는 공원 전체의 지층이 한눈에 보입니다. 남쪽 입구가 가장 오래된 층, 이곳이 가장 젊은 층이에요.",
-      left > 0 ? "아직 조사하지 않은 노두가 " + left + "곳 남았습니다. 노두를 모두 조사하면 여기서 최종 미션이 열립니다."
-               : "경계층의 증거 4종을 모두 도감에 등록하면 여기서 최종 미션이 열립니다."
+      left > 0 ? "아직 조사하지 않은 노두가 " + left + "곳 남았습니다. 노두를 모두 조사하면 여기서 흩어진 기록을 하나로 잇는 최종 미션이 열립니다."
+               : "경계층에 남은 흔적을 모두 도감에 등록하면 여기서 최종 미션이 열립니다."
     ]);
   }
 }
@@ -573,7 +573,7 @@ function maybeParkComplete(){
   const show = () => {
     if(anyModalOpen()){ setTimeout(show, 800); return; }
     $("cinematicTitle").textContent = "모든 노두 조사 완료";
-    $("cinematicSub").textContent = "지질공원의 노두 " + layerData.length + "곳을 전부 조사했다. 북쪽 전망대에서 최종 미션이 기다린다.";
+    $("cinematicSub").textContent = "지질공원의 노두 " + layerData.length + "곳을 전부 조사했다. 북쪽 전망대에서 흩어진 기록을 하나로 잇자.";
     const btn = $("btnCinematicGo");
     btn.textContent = "전망대로 가자";
     btn.onclick = () => {

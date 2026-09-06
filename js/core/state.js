@@ -1,7 +1,7 @@
 /* ---------- 상태 · 저장 · 개념별 성취 · 다양성 집계 · 데이터 점검 · 사운드 ---------- */
 
 /* ---------- 전역 상태 ---------- */
-const SAVE_KEY = "stratumExplorer_save_v2";
+const SAVE_KEY = "stratumExplorer_save_v3";
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
@@ -24,8 +24,8 @@ function defaultState(){
     evidenceCinematicShown: false, // 경계층 첫 증거 발견 연출을 봤는지
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
-    finalMissionDone: false, // 최종 미션(가설 평가) 완료 여부
-    hypothesisPlaced: {},    // 증거 id → 배치한 가설 key
+    finalMissionDone: false, // 최종 미션(층서 복원) 완료 여부
+    mission: {},             // 최종 미션 진행 { stage, placed:[], envDone:[], matched:{}, closingDone }
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -102,59 +102,12 @@ function recordConcept(tag, firstTry){
   state.conceptStats[t].total += 1;
   if(firstTry) state.conceptStats[t].correct += 1;
 }
-/* ---------- 생물다양성 집계 (다양성 그래프) ----------
-   도감에 등록한 화석을 시대별로 묶어 '종류 수'를 센다.
-   증거 아이템(isEvidence)은 화석이 아니므로 제외한다.
-   시대는 item.era를 우선 적용한다 — 암모나이트는 경계 노두의 아래층에서
-   나오지만 생물 자체는 중생대의 화석이므로 경계층에 쌓이면 안 된다. */
+/* 아이템의 시대 (item.era 가 있으면 우선) */
 function eraOfItem(item){
   if(!item) return null;
   if(item.era) return item.era;
   const ly = layerById(safe(item.layer, null));
   return ly ? safe(ly.era, null) : null;
-}
-/* layerData에 나타나는 순서대로 시대 목록을 만든다 */
-function eraOrder(){
-  const seen = [];
-  layerData.forEach(l => {
-    const e = safe(l.era, null);
-    if(e && seen.indexOf(e) < 0) seen.push(e);
-  });
-  return seen;
-}
-function boundaryEra(){
-  const ly = layerData.find(l => l.isBoundary);
-  return ly ? safe(ly.era, null) : null;
-}
-/* 시대별 화석 종류 수 — collectedOnly=true면 도감에 등록한 것만 센다 */
-function diversityByEra(collectedOnly){
-  const order = eraOrder();
-  const rows = order.map(e => ({ era: e, count: 0, items: [] }));
-  itemData.forEach(it => {
-    if(it.isEvidence) return;
-    if(collectedOnly && !state.completed.includes(it.id)) return;
-    const e = eraOfItem(it);
-    const row = rows.find(r => r.era === e);
-    if(row){ row.count++; row.items.push(it); }
-  });
-  return rows;
-}
-/* 경계층 이전 / 이후로 나눈 화석 목록 */
-function diversitySplit(collectedOnly){
-  const order = eraOrder();
-  const bEra = boundaryEra();
-  const bIdx = bEra ? order.indexOf(bEra) : -1;
-  const rows = diversityByEra(collectedOnly);
-  const before = [], after = [];
-  rows.forEach((r, i) => {
-    if(bIdx < 0 || i === bIdx) return;
-    (i < bIdx ? before : after).push.apply(i < bIdx ? before : after, r.items);
-  });
-  /* 경계층 이후에 다시 나타난 화석 중, 경계층 이전에도 있던 종류
-     (아이템 이름으로 대조 — 교사가 같은 화석을 양쪽 층에 두면 잡힌다) */
-  const beforeNames = before.map(i => safe(i.name, i.id));
-  const survivors = after.filter(i => beforeNames.indexOf(safe(i.name, i.id)) >= 0);
-  return { rows: rows, before: before, after: after, survivors: survivors };
 }
 
 /* 파일의 데이터를 직접 고쳤을 때 실수를 잡아 준다.
@@ -179,14 +132,20 @@ function validateContentData(){
         warns.push(where + " 문항 " + (qi+1) + ": 선택지에 \"현재\"가 있습니다 — 현재도 지질시대이므로 오개념이 됩니다.");
       }
     });
-    if(it.isEvidence && (!it.supports || typeof it.supports !== "object")){
-      warns.push(where + ": isEvidence인데 supports가 없어 가설 평가에서 어떤 기준도 채우지 못합니다.");
+    const lyOf = layerData.find(l => l.id === it.layer);
+    if(lyOf && Array.isArray(lyOf.bands) && lyOf.bands.length && !lyOf.bands.some(b => b.key === it.band)){
+      warns.push(where + ": 지층 " + it.layer + "은(는) 띠(bands)로 나뉘어 있는데 band 값 \"" + safe(it.band, "") + "\" 이(가) 어느 띠와도 맞지 않습니다.");
     }
   });
   layerData.forEach(l => {
     if(!l.era) warns.push("layerData " + safe(l.id,"?") + ": era가 없어 다양성 그래프에서 빠집니다.");
   });
-  if(!layerData.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다 — 경계 노두 3단 연출과 경계층 증거가 나타나지 않습니다.");
+  if(!layerData.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다 — 경계 노두의 검은 띠가 나타나지 않습니다.");
+  const fm = DEFAULT_MISSION_DATA.finalMission || {};
+  (fm.cards || []).forEach(c => {
+    if(!layerData.some(l => l.id === c.layer)) warns.push("최종 미션 카드 " + c.id + ": 지층 " + c.layer + " 이(가) 없습니다.");
+    (c.evidence || []).forEach(id => { if(!itemData.some(i => i.id === id)) warns.push("최종 미션 카드 " + c.id + ": 근거 화석 " + id + " 이(가) 없습니다."); });
+  });
   if(warns.length && window.console && console.warn){
     console.warn("[화석 탐정] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));
   }
@@ -214,13 +173,11 @@ function loadState(){
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);
-      if(!state.hypothesisPlaced || typeof state.hypothesisPlaced !== "object" || Array.isArray(state.hypothesisPlaced)){
-        state.hypothesisPlaced = {};
-      }
-      /* 경계 노두가 아닌 층은 slot id = 아이템 id 이므로, 옛 저장본의 발굴 기록을 옮겨 준다 */
+      if(!state.mission || typeof state.mission !== "object" || Array.isArray(state.mission)) state.mission = {};
+      /* 띠가 없는 층은 slot id = 아이템 id 이므로, 발굴 기록을 맞춰 준다 */
       state.discovered.forEach(id => {
         const it = itemData.find(x => x.id === id);
-        if(it && !isBoundaryLayer(it.layer) && state.dugSlots.indexOf(id) < 0) state.dugSlots.push(id);
+        if(it && !isBandedLayer(it.layer) && state.dugSlots.indexOf(id) < 0) state.dugSlots.push(id);
       });
     }
   }catch(e){ /* localStorage 차단/오류 → 기본 상태로 진행 */ }

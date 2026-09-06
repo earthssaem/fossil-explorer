@@ -45,9 +45,8 @@ function applyIcons(root){
   });
 }
 /* 배지 id → 아이콘 (데이터의 icon 필드는 예비용) */
-const BADGE_ICONS = { first_find: "lens", rookie: "pick", collector: "book", layer_reader: "map", evidence_hunter: "fossil", hypothesis_judge: "brain", perfect: "medal" };
+const BADGE_ICONS = { first_find: "lens", rookie: "pick", collector: "book", layer_reader: "map", evidence_hunter: "fossil", strat_restorer: "flag", perfect: "medal" };
 function badgeIcon(b){ return iconSVG(BADGE_ICONS[b.id] || "medal"); }
-const HYPO_ICONS = { asteroid: "meteor", volcano: "volcano", climate: "thermo", anoxia: "wave" };
 
 /* ---------- 화면 전환 ---------- */
 function renderScreen(name){
@@ -295,7 +294,7 @@ function bindUI(){
   const lg = $("miniLegend");
   if(lg){
     lg.innerHTML = Object.keys(GEO_COLORS).map(k =>
-      '<span><i style="background:' + GEO_COLORS[k] + '"></i>' + escapeHTML(k) + '</span>').join("");
+      '<span><i style="background:' + GEO_COLORS[k] + '"></i>' + escapeHTML(k === "중생대 말~신생대 초" ? "경계층" : k) + '</span>').join("");
   }
 }
 

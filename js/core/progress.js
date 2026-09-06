@@ -24,7 +24,7 @@ function checkBadges(){
       case "completeRate":  earned = (state.completed.length / total) >= safe(b.value,0.5); break;
       case "layerUnlock":   earned = state.unlockedLayers.length >= safe(b.value,1); break;
       case "completeAll":   earned = state.completed.length >= total; break;
-      /* 경계층 증거 4종을 모두 발굴했는가 (퀴즈까지는 아니어도 됨) */
+      /* 경계층에 남은 흔적을 모두 발굴했는가 (퀴즈까지는 아니어도 됨) */
       case "evidenceAll":   earned = evidenceItems().length > 0 &&
                                      evidenceItems().every(i => state.discovered.includes(i.id)); break;
       case "finalMission":  earned = !!state.finalMissionDone; break;
@@ -79,7 +79,7 @@ function renderCollection(){
       (completed ? '<div class="card-get">GET</div>' : '') +
       (isNew ? '<div class="card-new">NEW</div>' : '') +
       '<div class="card-ring"><div class="card-visual item-visual-slot"></div></div>' +
-      '<div class="card-name">' + (discovered ? escapeHTML(safe(item.name, "단서")) : "???") + '</div>' +
+      '<div class="card-name">' + (discovered ? escapeHTML(itemDisplayName(item)) : "???") + '</div>' +
       '<div class="card-sub">' + (discovered ? escapeHTML(safe(layer && layer.label, "?")) : "미발견") +
         (completed ? " · " + escapeHTML(safe(item.group, "")) : "") + '</div>' +
       '<div class="card-state">' + (completed ? iconSVG("star") + iconSVG("star") + iconSVG("star") : (discovered ? iconSVG("lens") : iconSVG("lock"))) + '</div>';
@@ -117,35 +117,34 @@ function renderBadgeGrid(el){
 function openResultScreen(){
   const total = Math.max(1, itemData.length);
   const acc = state.quizAnswered > 0 ? Math.round(state.quizFirstCorrect / state.quizAnswered * 100) : 0;
-  const fm = finalMissionData();
-  let interp = "";
-  if(state.finalMissionDone){
-    const full = fm.hypotheses.filter(h => {
-      const f = hypothesisFilled(h.key);
-      return fm.criteria.every(c => f[c.key]);
-    });
-    interp = '<div class="result-interp"><b>가설 평가</b> ' +
-      (full.length >= 2
-        ? '네 기준을 모두 충족한 가설은 ' + full.map(h => escapeHTML(safe(h.name, ""))).join(", ") + ' 두 가지였다. ' + escapeHTML(fm.closingBody[0] || "")
-        : escapeHTML(fm.closingBody[0] || "")) +
-      '<div class="result-quote">“' + escapeHTML(fm.closingHighlight) + '”</div></div>';
-  }
+  const m = missionState();
+  const cardsN = Math.max(1, missionCards().length);
   const stat = (icon, label, val) => '<div class="result-stat"><span><i data-icon="' + icon + '"></i>' + label + '</span><span class="val">' + val + '</span></div>';
   $("resultStats").innerHTML =
-    stat("star", "총 점수", safe(state.score, 0) + "점") +
-    stat("bone", "수집한 화석", state.completed.length + " / " + total) +
     stat("pick", "조사한 노두", exploredOutcropCount() + " / " + layerData.length) +
-    stat("brain", "퀴즈 첫 시도 정답률", acc + "%") +
-    stat("map", "해금한 지층", state.unlockedLayers.length + " / " + layerData.length) +
-    stat("medal", "획득 배지", state.badges.length + " / " + badgeData.length) +
-    interp;
+    stat("bone", "발견한 단서", state.completed.length + " / " + total) +
+    stat("map", "완성한 지층", m.placed.length + " / " + cardsN) +
+    stat("book", "탐사 도감 완성도", Math.round(state.completed.length / total * 100) + "%") +
+    stat("brain", "퀴즈 정답률 (첫 시도)", acc + "%") +
+    stat("star", "총 점수", safe(state.score, 0) + "점") +
+    stat("medal", "획득 배지", state.badges.length + " / " + badgeData.length);
   applyIcons($("resultStats"));
   renderConceptScores();
-  renderDiversityChart();
+  renderResultColumn();
   renderBadgeGrid($("resultBadges"));
   $("reportSavedMsg").textContent = "";
   drawReport();
   renderScreen("resultScreen");
+}
+/* 완성한 지층 기록 미리보기 */
+function renderResultColumn(){
+  const m = missionState();
+  const cardsN = missionCards().length;
+  $("resultColumn").innerHTML = stratColumnHTML(m.placed, { small: true });
+  $("resultColumnNote").textContent = state.finalMissionDone
+    ? "서로 떨어져 있던 노두 " + layerData.length + "곳의 기록을 하나의 층서 기둥으로 완성했다."
+    : (m.placed.length ? "층서 기둥 " + m.placed.length + " / " + cardsN + " 완성. 전망대의 최종 미션에서 마저 완성할 수 있다."
+                       : "노두를 모두 조사한 뒤 북쪽 전망대에서 최종 미션을 하면 이 기둥이 채워진다.");
 }
 
 /* ---------- 개념별 성취 (결과 화면) ---------- */
@@ -167,41 +166,6 @@ function renderConceptScores(){
              '<div class="cc-num">' + r.correct + " / " + r.total + '</div>' +
            '</div>';
   }).join("");
-}
-
-/* ---------- 다양성 그래프 (최종 미션을 마친 뒤 결과 화면에 표시) ---------- */
-function renderDiversityChart(){
-  const card = $("diversityCard");
-  if(!card) return;
-  if(!state.finalMissionDone){ card.style.display = "none"; return; }
-  card.style.display = "";
-  const split = diversitySplit(true);
-  const rows = split.rows;
-  const bEra = boundaryEra();
-  const max = Math.max(1, rows.reduce((m, r) => Math.max(m, r.count), 0));
-  let html = "";
-  rows.forEach(r => {
-    const isB = r.era === bEra;
-    const pct = Math.round(r.count / max * 100);
-    html += '<div class="div-row' + (isB ? " is-boundary" : "") + '">' +
-      '<div class="d-era">' + escapeHTML(r.era) + (isB ? "층" : "") + '</div>' +
-      '<div class="d-track"><div class="d-bar" style="width:' + pct + '%;"></div></div>' +
-      '<div class="d-num">' + (r.count > 0 ? r.count + "종" : "0") + '</div>' +
-    '</div>';
-  });
-  $("diversityChart").innerHTML = html;
-  const afterN = split.after.length;
-  const survN = split.survivors.length;
-  const line1 = afterN > 0
-    ? "경계층 이후 화석 종류 수는 다시 회복되었다."
-    : "경계층 이후의 화석은 아직 도감에 등록되지 않았다.";
-  let line2;
-  if(afterN <= 0) line2 = "경계층 위쪽 지층을 마저 조사하면, 회복된 화석의 정체를 확인할 수 있다.";
-  else if(survN === 0) line2 = "그런데 회복된 화석 중 경계층 이전에도 있던 종류는 <b>0개</b>다.";
-  else line2 = "그런데 회복된 화석 중 경계층 이전에도 있던 종류는 <b>" + survN + "개</b>뿐이다.";
-  $("diversityNotes").innerHTML =
-    '<div class="div-notes"><div class="div-note1">' + escapeHTML(line1) + '</div>' +
-    '<div class="div-note2">' + line2 + '</div></div>';
 }
 
 /* ---------- 제출용 탐사 보고서 이미지 (Canvas → PNG 다운로드) ---------- */
@@ -267,12 +231,13 @@ function drawReport(){
   }
   /* 성적 카드 6개 */
   y += 22;
+  const mst = missionState();
   const stats = [
-    ["총 점수", safe(state.score, 0) + "점"],
-    ["수집한 화석", state.completed.length + " / " + total],
     ["조사한 노두", exploredOutcropCount() + " / " + layerData.length],
-    ["퀴즈 정답률", acc + "%"],
-    ["최고 콤보", String(safe(state.maxCombo, 0))],
+    ["발견한 단서", state.completed.length + " / " + total],
+    ["완성한 지층", mst.placed.length + " / " + Math.max(1, missionCards().length)],
+    ["퀴즈 정답률 (첫 시도)", acc + "%"],
+    ["총 점수", safe(state.score, 0) + "점"],
     ["획득 배지", state.badges.length + " / " + badgeData.length]
   ];
   const cardW = (W - 120 - 40) / 3, cardH = 86;
@@ -287,22 +252,26 @@ function drawReport(){
     g.fillText(s[1], cx + 16, cy + 60);
   });
   y += cardH * 2 + 16;
-  /* 수집 도감 요약 */
+  /* 완성한 지층 기록 + 수집 도감 요약 (좌우 배치) */
   y += 40;
   g.fillStyle = "#3b2a20"; g.font = "900 22px " + REPORT_FONT;
-  g.fillText("화석도감 수집 현황", 60, y);
+  g.fillText("완성한 지층 기록", 60, y);
+  g.fillText("탐사 도감 수집 현황", 330, y);
   y += 20;
-  const perRow = 5, boxW = (W - 120 - (perRow - 1) * 12) / perRow, boxH = 52;
+  drawColumnOnCanvas(g, 60, y, 230, 250, mst.placed);
+  g.fillStyle = "#7a6048"; g.font = "700 13px " + REPORT_FONT;
+  g.fillText(state.finalMissionDone ? "최종 미션 완료" : "층서 기둥 " + mst.placed.length + " / " + missionCards().length, 60, y + 282);
+  const perRow = 4, gridX = 330, boxW = (W - gridX - 60 - (perRow - 1) * 10) / perRow, boxH = 52;
   itemData.forEach((it, i) => {
-    const bx = 60 + (i % perRow) * (boxW + 12);
-    const by = y + Math.floor(i / perRow) * (boxH + 12);
+    const bx = gridX + (i % perRow) * (boxW + 10);
+    const by = y + Math.floor(i / perRow) * (boxH + 10);
     const completed = state.completed.includes(it.id);
     const discovered = state.discovered.includes(it.id) || completed;
     g.fillStyle = completed ? "#3ec6b5" : (discovered ? "#ffd166" : "#d8cbb0");
     g.fillRect(bx, by, boxW, boxH);
     g.strokeStyle = "#3b2a20"; g.lineWidth = 3; g.strokeRect(bx, by, boxW, boxH);
     g.fillStyle = "#3b2a20"; g.font = "900 14px " + REPORT_FONT;
-    g.fillText(fitText(g, safe(it.name, "?"), boxW - 16), bx + 8, by + 18);
+    g.fillText(fitText(g, itemDisplayName(it), boxW - 16), bx + 8, by + 18);
     g.font = "700 13px " + REPORT_FONT;
     g.fillText(completed ? "완료" : (discovered ? "발견" : "미발견"), bx + 8, by + 38);
   });

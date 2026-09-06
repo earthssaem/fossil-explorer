@@ -20,7 +20,7 @@
     <div class="start-card pixel-panel">
       <div class="start-hero" id="startHero"></div>
       <h1 class="start-title">화석 탐정<span class="accent">지층의 시간을 찾아라</span></h1>
-      <p class="start-sub">기울어진 지층을 따라 남쪽에서 북쪽으로,<br>선캄브리아 시대에서 신생대까지 걸어가며 노두를 조사한다.</p>
+      <p class="start-sub">남쪽에서 북쪽으로 걸으며 노두를 조사하고,<br>흩어진 지층 기록을 하나로 잇는다.</p>
       <div class="start-nick">
         <label for="nickInput">탐사대원 닉네임</label>
         <input id="nickInput" type="text" maxlength="12" placeholder="닉네임 입력" autocomplete="off">
@@ -31,7 +31,7 @@
         <button class="btn primary wide" id="btnStart">탐사 시작</button>
         <div class="btn-row">
           <button class="btn teal" id="btnHelp"><i data-icon="book"></i>게임 방법</button>
-          <button class="btn blue" id="btnCollectionFromStart"><i data-icon="bone"></i>화석도감</button>
+          <button class="btn blue" id="btnCollectionFromStart"><i data-icon="bone"></i>탐사 도감</button>
         </div>
         <button class="btn ghost small" id="btnRestart"><i data-icon="reset"></i>처음부터 다시 시작</button>
       </div>
@@ -46,11 +46,11 @@
     </div>
     <div class="panel-card pixel-panel">
       <div class="help-step"><div class="help-num">1</div><div><b>이동</b><br>W·A·S·D 또는 방향키로 걷는다. 노두나 팻말을 클릭하면 길을 따라 자동으로 걸어간다. 모바일은 화면의 방향 버튼을 쓴다.</div></div>
-      <div class="help-step"><div class="help-num">2</div><div><b>지층은 북쪽으로 기울어 있다</b><br>남쪽 입구가 가장 오래된 지층, 북쪽 전망대가 가장 젊은 지층이다. 구역 사이 절벽은 계단으로만 오르내리고, 계단의 관문은 앞 구역의 노두를 다 조사해야 열린다.</div></div>
-      <div class="help-step"><div class="help-num">3</div><div><b>강가 절개면이 노두</b><br>강이 지층을 가로질러 골짜기를 팠다. 강가의 노두 6곳에는 각 구역의 지층만 드러난다. 노두 앞에서 E 또는 클릭으로 조사창을 연다.</div></div>
-      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 퀴즈</b><br>반짝이는 지점을 눌러 화석을 발굴하면 도감에 등록된다. 퀴즈를 풀면 화석의 시대·환경·분류와 지층의 정체가 해금된다.</div></div>
-      <div class="help-step"><div class="help-num">5</div><div><b>층서 기둥을 완성하라</b><br>노두마다 보이는 조각을 이어 붙이면 공원 전체의 층서 기둥이 완성된다. 표준 화석이 층을 잇는 열쇠다.</div></div>
-      <div class="help-step"><div class="help-num">6</div><div><b>경계층과 최종 미션</b><br>경계층 협곡의 노두는 아래층 → 경계층 → 위층 순서로 판다. 증거 4종을 모으면 북쪽 전망대에서 대멸종 가설 평가 미션이 열린다.</div></div>
+      <div class="help-step"><div class="help-num">2</div><div><b>북쪽으로 갈수록 젊은 지층</b><br>이 공원은 북쪽으로 갈수록 지대가 높아지고, 지층은 아래에서 위로 쌓이므로 북쪽으로 갈수록 더 젊은 지층 위를 걷게 된다. 구역 사이 절벽은 계단으로만 오르내리고, 계단의 관문은 앞 구역의 노두를 다 조사해야 열린다.</div></div>
+      <div class="help-step"><div class="help-num">3</div><div><b>강물이 깎아 만든 절벽이 노두</b><br>강이 골짜기를 파면서 지층이 드러났다. 노두 6곳에는 각 구역의 지층과 아래층 윗부분이 보인다. 노두 앞에서 E 또는 클릭으로 조사창을 연다.</div></div>
+      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 퀴즈</b><br>반짝이는 지점을 눌러 화석을 발굴하면 탐사 도감에 등록된다. 퀴즈를 풀면 화석의 시대·환경·분류와 지층의 정체가 해금된다. 여러 띠로 나뉜 노두는 변화를 시간 순서대로 보기 위해 아래층부터 조사한다.</div></div>
+      <div class="help-step"><div class="help-num">5</div><div><b>표준 화석과 시상 화석</b><br>표준 화석은 지층의 시대를, 시상 화석은 당시 환경을 알려준다. 서로 떨어진 지층을 이어 붙일 때는 표준 화석으로 시대를 맞춰 본다.</div></div>
+      <div class="help-step"><div class="help-num">6</div><div><b>최종 미션 · 흩어진 지층 기록을 완성하라</b><br>노두 6곳을 모두 조사하면 북쪽 전망대에서 최종 미션이 열린다. 조사한 노두 카드를 오래된 순서로 쌓아 층서 기둥을 완성하고, 이웃 마을의 이름표 없는 노두를 우리 공원 지층과 이어 본다.</div></div>
     </div>
     <div class="panel-card pixel-panel" id="helpMissionCard"></div>
     <div class="panel-card pixel-panel" id="helpNoteCard"></div>
@@ -71,7 +71,7 @@
       </div>
       <div class="hud-group">
         <button class="hud-btn" id="btnSound" title="소리 켜기/끄기"><i data-icon="sound"></i></button>
-        <button class="hud-btn wide" id="btnCollectionHud" title="화석도감 (M)"><i data-icon="book"></i><span>도감</span></button>
+        <button class="hud-btn wide" id="btnCollectionHud" title="탐사 도감 (M)"><i data-icon="book"></i><span>도감</span></button>
         <button class="hud-btn" id="btnHome" title="처음으로"><i data-icon="home"></i></button>
       </div>
     </div>
@@ -186,18 +186,13 @@
     </div>
   </div>
 
-  <!-- ============ 최종 미션 · 가설 타당성 평가 ============ -->
+  <!-- ============ 최종 미션 · 흩어진 지층 기록을 완성하라 ============ -->
   <div class="modal-backdrop" id="finalMissionModal">
-    <div class="modal-card pixel-panel hypo-card">
+    <div class="modal-card pixel-panel mission-card">
+      <button class="modal-close" data-close="finalMissionModal">✕</button>
       <h3 class="modal-title" id="finalTitle">최종 미션</h3>
-      <div class="quiz-question" id="finalQuestion"></div>
-      <p class="hypo-howto" id="finalHowto"></p>
-      <div class="hypo-tray" id="finalEvidence"></div>
-      <div class="hypo-grid" id="finalHypotheses"></div>
-      <div class="hypo-legend" id="finalLegend"></div>
-      <div class="quiz-feedback" id="finalFeedback"></div>
-      <div class="hypo-closing" id="finalClosing"></div>
-      <div class="modal-actions" id="finalActions"></div>
+      <div class="mission-steps" id="missionSteps"></div>
+      <div class="mission-body" id="missionBody"></div>
     </div>
   </div>
 
@@ -216,7 +211,7 @@
   <section id="collectionScreen" class="screen panel-screen">
     <div class="back-bar">
       <button class="btn ghost small" id="btnCollectionBack"><i data-icon="back"></i>돌아가기</button>
-      <h2 class="screen-title">화석도감</h2>
+      <h2 class="screen-title">탐사 도감</h2>
     </div>
     <div class="collect-stats" id="collectStats"></div>
     <div class="rate-bar"><div class="fill" id="collectRateFill"></div></div>
@@ -243,10 +238,9 @@
       <div id="conceptList"></div>
     </div>
     <div class="panel-card pixel-panel" id="resultStats"></div>
-    <div class="panel-card pixel-panel" id="diversityCard" style="display:none;">
-      <h3><i data-icon="fossil"></i> 발견한 화석 종류 수</h3>
-      <div id="diversityChart"></div>
-      <div id="diversityNotes"></div>
+    <div class="panel-card pixel-panel" id="columnCard">
+      <h3><i data-icon="map"></i> 완성한 지층 기록</h3>
+      <div class="result-column-wrap"><div id="resultColumn"></div><div id="resultColumnNote" class="modal-note"></div></div>
     </div>
     <div class="panel-card pixel-panel">
       <h3><i data-icon="medal"></i> 획득한 배지</h3>
@@ -254,9 +248,9 @@
     </div>
     <div class="panel-card pixel-panel center">
       <h3><i data-icon="report"></i> 제출용 탐사 보고서</h3>
-      <p class="modal-note">아래 보고서를 이미지로 저장해 선생님께 제출한다.</p>
+      <p class="modal-note">아래 보고서를 이미지로 저장해 선생님께 제출한다. 완성한 지층 기록도 함께 들어간다.</p>
       <div id="reportPreview">
-        <canvas id="reportCanvas" width="900" height="980"></canvas>
+        <canvas id="reportCanvas" width="900" height="1120"></canvas>
       </div>
       <button class="btn primary" id="btnSaveReport"><i data-icon="report"></i>보고서 이미지 저장</button>
       <p id="reportSavedMsg" class="saved-msg"></p>
@@ -277,6 +271,7 @@
 <script src="js/core/sprites.js"></script>
 <script src="js/core/dig.js"></script>
 <script src="js/core/quiz.js"></script>
+<script src="js/core/mission.js"></script>
 <script src="js/core/progress.js"></script>
 <script src="js/world/tiles.js"></script>
 <script src="js/world/map.js"></script>

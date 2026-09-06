@@ -3,67 +3,60 @@ function itemsOfLayer(layerId){
   return itemData.filter(i => safe(i.layer, null) === layerId);
 }
 
-/* ---------- 경계 노두(3단 스택) 모델 ----------
-   아래층: 같은 화석이 여러 지점에서 반복 산출 → "화석이 풍부하다"는 인상
-   경계층: 화석이 아니라 지층 자체가 남긴 증거 아이템
-   위층  : 발굴해도 아무것도 나오지 않는다 (이 노두의 핵심 경험)
-   아래 → 경계 → 위 순서로만 발굴할 수 있게 잠근다. */
-const BOUNDARY_LOWER_REPEAT = 3;   // 아래층 발굴 지점 수
-const BOUNDARY_UPPER_EMPTY  = 3;   // 위층 빈손 지점 수
-
+/* ---------- 여러 띠로 나뉜 노두 모델 ----------
+   layers.js 의 bands 배열(아래→위)로 띠를 정의한다. 지층 A(아래층·위층), F(아래층·위층),
+   경계 노두 D(아래층·경계층·위층)가 이 모델을 쓴다.
+   아래 띠를 모두 판 뒤에야 위 띠가 열린다 — 이것은 "변화를 시간 순서대로 보기 위한"
+   게임 진행 규칙이지, 지질 조사의 법칙이 아니다. (실제 조사는 어디부터든 한다) */
 function layerById(layerId){ return layerData.find(l => l.id === layerId) || null; }
-function isBoundaryLayer(layerId){
+function layerBands(layerId){
   const ly = layerById(layerId);
-  return !!(ly && ly.isBoundary);
-}
-/* 경계 노두의 3개 띠 구성 — 각 띠는 발굴 지점(slot) 목록을 갖는다.
-   slot.itemId 가 null 이면 "아무것도 나오지 않는" 지점이다. */
-function boundaryBands(layerId){
+  if(!ly || !Array.isArray(ly.bands) || !ly.bands.length) return null;
   const items = itemsOfLayer(layerId);
-  const evidence = items.filter(i => i.isEvidence);
-  const fossils  = items.filter(i => !i.isEvidence);
-  const lowerItem = fossils[0] || null;   // 아래층에서 반복 산출되는 화석 (암모나이트)
-  const lower = [];
-  for(let i = 0; i < BOUNDARY_LOWER_REPEAT; i++){
-    lower.push({ slot: layerId + "#low" + i, itemId: lowerItem ? lowerItem.id : null });
-  }
-  const boundary = evidence.map((it, i) => ({ slot: layerId + "#bnd" + i, itemId: it.id }));
-  const upper = [];
-  for(let i = 0; i < BOUNDARY_UPPER_EMPTY; i++){
-    upper.push({ slot: layerId + "#up" + i, itemId: null });
-  }
-  return [
-    { key: "lower",    name: "아래층",  slots: lower,
-      hint: "여기부터 파 보자.",
-      lockMsg: "" },
-    { key: "boundary", name: "경계층",  slots: boundary,
-      hint: "화석이 아닌 무언가가 있다.",
-      lockMsg: "아래층부터 조사해야 합니다. 지층은 아래에서 위로 쌓입니다." },
-    { key: "upper",    name: "위층",    slots: upper,
-      hint: "위층에는 무엇이 있을까?",
-      lockMsg: "경계층을 먼저 조사해야 합니다." }
-  ];
+  return ly.bands.map((b, bi) => {
+    const mine = items.filter(i => safe(i.band, "") === b.key);
+    const slots = [];
+    if(b.repeat){
+      const it = mine[0] || null;
+      for(let i = 0; i < b.repeat; i++) slots.push({ slot: layerId + "#" + b.key + i, itemId: it ? it.id : null });
+    }else{
+      mine.forEach((it, i) => slots.push({ slot: layerId + "#" + b.key + i, itemId: it.id }));
+    }
+    if(b.empty){ for(let i = 0; i < b.empty; i++) slots.push({ slot: layerId + "#" + b.key + "e" + i, itemId: null }); }
+    return { key: b.key, name: safe(b.name, "층"), slots: slots, hint: safe(b.hint, ""), lockMsg: safe(b.lockMsg, ""),
+             dark: !!b.dark, gapNote: safe(b.gapNote, ""), index: bi };
+  });
 }
-/* 화면에는 위→아래로 그리므로 위층이 먼저 온다.
-   같은 배열의 역순 뷰를 돌려주어야 인덱스(잠금 순서)를 그대로 쓸 수 있다. */
+function isBandedLayer(layerId){ return !!layerBands(layerId); }
+/* 예전 이름 (저장 데이터 이관·관문 안내에서 씀) */
+const boundaryBands = layerBands;
+const isBoundaryLayer = isBandedLayer;
+/* 화면에는 위→아래로 그리므로 역순 뷰 */
 function boundaryBandsTopDown(bands){ return bands.slice().reverse(); }
 
 function slotDug(slot){ return state.dugSlots.indexOf(slot) >= 0; }
 function bandAllDug(band){ return band.slots.length > 0 && band.slots.every(s => slotDug(s.slot)); }
-/* 아래 띠를 모두 파야 그 위 띠가 열린다 */
+/* 아래 띠를 모두 파야 그 위 띠가 열린다 (게임 진행 규칙) */
 function bandUnlocked(bands, idx){
   for(let i = 0; i < idx; i++){ if(!bandAllDug(bands[i])) return false; }
   return true;
 }
-/* 경계 노두의 모든 지점(빈손 포함)을 다 팠는가 */
+/* 모든 띠의 모든 지점(빈손 포함)을 다 팠는가 */
 function boundaryFullyDug(layerId){
-  return boundaryBands(layerId).every(bandAllDug);
+  const bands = layerBands(layerId);
+  return bands ? bands.every(bandAllDug) : true;
 }
-/* 경계층 증거 아이템 관련 */
+/* 경계층에 남은 사건의 흔적 아이템 */
 function evidenceItems(){ return itemData.filter(i => i.isEvidence); }
 function allEvidenceCollected(){
   const ev = evidenceItems();
   return ev.length > 0 && ev.every(i => state.completed.includes(i.id));
+}
+/* 아이템 표시 이름: 퀴즈를 풀면 revealName 으로 바뀐다 (이리듐 점토층) */
+function itemDisplayName(item){
+  if(!item) return "";
+  if(item.revealName && state.completed.includes(item.id)) return item.revealName;
+  return safe(item.name, "단서");
 }
 
 /* 노두 조사 완료 판정 — 경계 노두는 빈손 지점까지 전부 파야 완료로 본다 */
@@ -71,9 +64,9 @@ function outcropDone(layerId){
   const items = itemsOfLayer(layerId);
   const collected = items.length > 0 && items.every(i => state.completed.includes(i.id));
   if(!collected) return false;
-  return isBoundaryLayer(layerId) ? boundaryFullyDug(layerId) : true;
+  return isBandedLayer(layerId) ? boundaryFullyDug(layerId) : true;
 }
-/* 노두를 '조사했는가'(발굴 기준) — 경계 노두는 빈손 지점 포함 */
+/* 노두를 '조사했는가'(발굴 기준) — 띠가 있는 노두는 빈손 지점 포함 */
 function outcropDug(layerId){
   const items = itemsOfLayer(layerId);
   const dug = items.length > 0 && items.every(i => state.discovered.includes(i.id));
@@ -95,7 +88,7 @@ function hexRGB(h){
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-/* --- 노두 조사창 (강가 절개면) ---
+/* --- 노두 조사창 (강물이 깎은 절벽) ---
    이 노두에는 그 구역의 지층(+아래층 일부)만 드러난다. 위에 쌓인 층은 북쪽 구역의
    노두에서 본다. 오른쪽 층서 기둥에 조사한 층이 차곡차곡 채워져 전체 층서가 완성된다. */
 function openOutcropModal(layerId, quiet){
@@ -119,7 +112,7 @@ function openOutcropModal(layerId, quiet){
   /* 이 노두의 층 */
   const row = document.createElement("div");
   const c = safe(ly.color1, "#c8a060");
-  if(!ly.isBoundary){
+  if(!isBandedLayer(layerId)){
     row.className = "xsec-row here" + (unlocked ? " unlocked" : "");
     row.style.background =
       "repeating-linear-gradient(0deg, rgba(70,40,20,.16) 0 4px, transparent 4px 18px), " +
@@ -134,8 +127,8 @@ function openOutcropModal(layerId, quiet){
     tag.textContent = outcropDug(layerId) ? "조사 완료" : "여기!";
     row.appendChild(tag);
   }else{
-    row.className = "xsec-row here boundary-row" + (unlocked ? " unlocked" : "");
-    renderBoundaryBands(row, ly);
+    row.className = "xsec-row here banded-row" + (unlocked ? " unlocked" : "");
+    renderBands(row, ly);
   }
   xsec.appendChild(row);
   /* 부정합 물결선 */
@@ -163,7 +156,7 @@ function openOutcropModal(layerId, quiet){
   /* 층서 기둥 (지층 대비) */
   renderStratColumn(layerId);
   $("outcropNote").textContent = outcropNoteText(layerId) +
-    (above ? " 이 층 위에 쌓인 " + safe(above.label, "층") + "은(는) 북쪽 구역의 노두에서 본다." : " 이 층이 공원에서 가장 젊은 지층이다.");
+    (above ? " 이 층 위에 쌓인 " + safe(above.label, "층") + "은(는) 북쪽 구역의 노두에서 볼 수 있다." : " 이 층이 공원에서 가장 젊은 지층이다.");
   if(!quiet){
     openModal("outcropModal");
     playSound("place");
@@ -190,13 +183,13 @@ function renderStratColumn(currentId){
 
 /* 조사창 하단 안내 문구 */
 function outcropNoteText(layerId){
-  if(isBoundaryLayer(layerId)){
-    const bands = boundaryBands(layerId);
+  const bands = layerBands(layerId);
+  if(bands){
     const next = bands.find(b => !bandAllDug(b));
-    if(!next) return "이 노두의 아래층·경계층·위층을 모두 조사했다.";
-    if(next.key === "lower")    return "아래층부터 조사한다. 지층은 아래에서 위로 쌓인다.";
-    if(next.key === "boundary") return "이제 그 위의 얇고 검은 띠를 조사한다.";
-    return "마지막으로 위층을 조사한다. 무엇이 나올까?";
+    if(!next) return "이 노두의 모든 띠를 조사했다.";
+    const label = next.name + (next.hint ? "(" + next.hint + ")" : "");
+    if(next.index === 0) return label + "부터 조사해 보자. 변화를 시간 순서대로 확인하기 위한 게임 진행 규칙이다.";
+    return "이제 그 위의 " + label + "을(를) 조사한다.";
   }
   const left = itemsOfLayer(layerId).filter(i => !state.completed.includes(i.id)).length;
   return left > 0
@@ -204,26 +197,21 @@ function outcropNoteText(layerId){
     : "이 지층의 화석을 모두 찾았다.";
 }
 
-/* 경계 노두: 위층 / 경계층 / 아래층 3단 렌더링 (위→아래) */
-function renderBoundaryBands(row, lr){
-  const bands = boundaryBands(lr.id);
+/* 여러 띠로 나뉜 노두 렌더링 (위→아래). 검은 경계층·긴 시간 간격 표시 포함 */
+function renderBands(row, lr){
+  const bands = layerBands(lr.id);
   const c1 = safe(lr.color1, "#a8845e"), c2 = safe(lr.color2, "#7c583c");
   const cb1 = safe(lr.colorBoundary1, "#2b2118"), cb2 = safe(lr.colorBoundary2, "#171009");
-  const look = {
-    upper:    { a: c1, b: c1 },
-    boundary: { a: cb1, b: cb2 },
-    lower:    { a: c2, b: c2 }
-  };
   boundaryBandsTopDown(bands).forEach((band, i) => {
     const idx = bands.length - 1 - i;   // 화면 위→아래 = 배열 뒤→앞
     const open = bandUnlocked(bands, idx);
     const done = bandAllDug(band);
     const el = document.createElement("div");
-    el.className = "xsec-band" + (band.key === "boundary" ? " is-boundary" : "") + (open ? "" : " locked");
-    const lk = look[band.key];
+    el.className = "xsec-band" + (band.dark ? " is-boundary" : "") + (open ? "" : " locked");
+    const a = band.dark ? cb1 : (idx % 2 ? c1 : c2), b = band.dark ? cb2 : (idx % 2 ? c1 : c2);
     el.style.background =
       "repeating-linear-gradient(0deg, rgba(70,40,20,.16) 0 4px, transparent 4px 18px), " +
-      "linear-gradient(" + lk.a + ", " + lk.b + ")";
+      "linear-gradient(" + a + ", " + b + ")";
     const name = document.createElement("div");
     name.className = "band-name";
     name.textContent = band.name;
@@ -237,11 +225,18 @@ function renderBoundaryBands(row, lr){
     }else{
       const lock = document.createElement("div");
       lock.className = "band-lock";
-      lock.textContent = band.lockMsg;
-      lock.addEventListener("click", () => { playSound("wrong"); toast(band.lockMsg); });
+      lock.textContent = band.lockMsg || "아래 띠를 먼저 조사해 보자.";
+      lock.addEventListener("click", () => { playSound("wrong"); toast(band.lockMsg || "아래 띠를 먼저 조사해 보자."); });
       el.appendChild(lock);
     }
     row.appendChild(el);
+    /* 이 띠와 아래 띠 사이의 긴 시간 간격 */
+    if(band.gapNote){
+      const gap = document.createElement("div");
+      gap.className = "xsec-gap";
+      gap.innerHTML = "<span>" + escapeHTML(band.gapNote) + "</span>";
+      row.appendChild(gap);
+    }
   });
 }
 
@@ -389,7 +384,7 @@ function completeDigging(siteId){
   }
   if(!firstTime){
     /* 같은 화석이 또 나온 경우: 도감 등록은 1회지만 '풍부하다'는 인상은 남긴다 */
-    setTimeout(() => toast("또 「" + safe(item.name,"화석") + "」이(가) 나왔다. 이 층에는 화석이 많다."), 250);
+    setTimeout(() => toast("또 「" + itemDisplayName(item) + "」이(가) 나왔다. 이 층에는 화석이 많다."), 250);
     return;
   }
   setTimeout(() => openDiscoveryPopup(s.itemId), 350);
@@ -400,8 +395,8 @@ function refreshOutcropModal(){
   const m = $("outcropModal");
   if(!m || !m.classList.contains("on") || !game.currentOutcrop) return;
   const layerId = game.currentOutcrop;
-  /* 열린 채로 다시 그리면 발굴 애니메이션 중 깜빡이므로, 경계 노두일 때만 갱신 */
-  if(isBoundaryLayer(layerId)){
+  /* 열린 채로 다시 그리면 발굴 애니메이션 중 깜빡이므로, 띠가 있는 노두일 때만 갱신 */
+  if(isBandedLayer(layerId)){
     const card = m.querySelector(".modal-card");
     const scroll = card ? card.scrollTop : 0;
     openOutcropModal(layerId, true);   // 소리·팝업 없이 내용만 다시 그림
@@ -415,17 +410,16 @@ function refreshOutcropModal(){
 /* 위층 빈손 결과 */
 function showEmptyDigResult(slot, isNew){
   const layerId = String(slot).split("#")[0];
-  const bands = boundaryBands(layerId);
-  const upper = bands[bands.length - 1];
-  const dugCount = upper.slots.filter(s => slotDug(s.slot)).length;
-  const total = upper.slots.length;
-  const allEmpty = dugCount >= total;
+  const bands = layerBands(layerId) || [];
+  const band = bands.find(b => b.slots.some(x => x.slot === slot)) || bands[bands.length - 1];
+  const dugCount = band ? band.slots.filter(s => slotDug(s.slot)).length : 0;
+  const total = band ? band.slots.length : 0;
+  const allEmpty = total > 0 && dugCount >= total;
   const KEY_Q = "이 층에서는 화석이 거의 발견되지 않는다. 아래층과 무엇이 달라진 걸까?";
-  /* 위층을 모두 파고 나서야 핵심 질문을 던진다.
-     토스트는 잠시 뒤 사라지므로 결과창에도 같은 문장을 남긴다. */
+  /* 위층을 모두 파고 나서야 핵심 질문을 던진다. 토스트는 사라지므로 결과창에도 같은 문장을 남긴다. */
   $("emptyDigNote").textContent = allEmpty
     ? KEY_Q
-    : "이 지점에서는 화석이 나오지 않았다. (위층 " + dugCount + "/" + total + " 지점 조사)";
+    : "이 지점에서는 화석이 나오지 않았다. (" + (band ? band.name : "위층") + " " + dugCount + "/" + total + " 지점 조사)";
   openModal("emptyDigModal");
   if(isNew && allEmpty){
     setTimeout(() => toast(KEY_Q), 900);
@@ -436,7 +430,7 @@ function showEmptyDigResult(slot, isNew){
 function showEvidenceCinematic(itemId){
   const item = itemData.find(i => i.id === itemId);
   $("cinematicTitle").textContent = "화석이 아니다.";
-  $("cinematicSub").textContent = "지층 자체가 무언가를 말하고 있다.";
+  $("cinematicSub").textContent = "경계층에는 화석 대신 지층이 쌓일 당시의 사건이 남긴 흔적이 있다.";
   const btn = $("btnCinematicGo");
   const prevText = btn.textContent;
   btn.textContent = "증거를 살펴본다";
@@ -458,7 +452,7 @@ function openDiscoveryPopup(itemId){
   if(!item) return;
   currentItemId = itemId;
   renderAssetImage($("discoveryVisual"), item, "normal");
-  $("discoveryName").textContent = safe(item.name, "새로운 단서");
+  $("discoveryName").textContent = itemDisplayName(item);
   $("discoveryHint").textContent = safe(item.visualHint, "");
   openModal("discoveryModal");
   spawnConfetti();
@@ -487,11 +481,11 @@ function openItemModal(itemId, fromCollection){
   currentItemId = itemId;
   const done = state.completed.includes(itemId);
   const found = state.discovered.includes(itemId) || done;
-  $("itemModalTitle").textContent = found ? (safe(item.name,"화석") + " 관찰") : "미발견 화석";
+  $("itemModalTitle").textContent = found ? (itemDisplayName(item) + " 관찰") : "미발견 단서";
   renderAssetImage($("itemModalVisual"), item, found ? "normal" : "silhouette");
   const layer = layerData.find(l => l.id === item.layer);
   const rows = [];
-  rows.push(row("발견 지층", found ? (safe(layer && layer.label, "?") ) : "???", !found));
+  rows.push(row("발견 지층", found ? (safe(layer && layer.label, "?") + (item.band ? " · " + bandNameOf(item) : "")) : "???", !found));
   rows.push(row("관찰 포인트", found ? safe(item.visualHint,"-") : "발굴하면 관찰할 수 있어요.", !found));
   rows.push(row("분류", done ? safe(item.group,"-") : "퀴즈를 풀면 해금", !done));
   rows.push(row("시대", done ? safe(item.hiddenInfo1,"-") : "???", !done));
@@ -505,7 +499,7 @@ function openItemModal(itemId, fromCollection){
     const hasQuiz = Array.isArray(item.quiz) && item.quiz.length > 0;
     const b = document.createElement("button");
     b.className = "btn";
-    b.innerHTML = hasQuiz ? iconSVG("brain") + " 화석 해석 퀴즈" : iconSVG("book") + " 화석도감에 등록";
+    b.innerHTML = hasQuiz ? iconSVG("brain") + " 단서 해석 퀴즈" : iconSVG("book") + " 탐사 도감에 등록";
     b.addEventListener("click", () => {
       playSound("click");
       closeModal("itemModal");
@@ -531,3 +525,10 @@ function openItemModal(itemId, fromCollection){
    quiz.list / quiz.heading / quiz.finishLabel / quiz.onFinish 로 구분한다. */
 const quiz = { itemId: null, index: 0, attempts: 0, solvedInModal: 0,
                list: null, heading: "", finishLabel: "", onFinish: null };
+
+/* 아이템이 속한 띠 이름 */
+function bandNameOf(item){
+  const ly = layerById(item && item.layer);
+  const b = ly && Array.isArray(ly.bands) ? ly.bands.find(x => x.key === item.band) : null;
+  return b ? safe(b.name, "") : "";
+}

@@ -155,26 +155,14 @@ function toast(msg, kind){
 
 /* ---------- 시작 화면 ---------- */
 function renderStartProgress(){
-  const row = $("startProgressRow");
-  if(!row) return;
   const total = itemData.length;
-  const done = state.completed.length;
-  const allDone = total > 0 && done >= total;
-  const layersDone = state.unlockedLayers.length, layersTotal = layerData.length;
-  const badgesDone = state.badges.length, badgesTotal = badgeData.length;
-  const chip = (icon, label, a, b) =>
-    '<span class="chip' + (b > 0 && a >= b ? ' done' : '') + '"><i data-icon="' + icon + '"></i><span class="lbl">' + label + '</span>' + a + ' / ' + b + '</span>';
-  row.innerHTML =
-    chip("bone", "단서", done, total) +
-    chip("map", "지층", layersDone, layersTotal) +
-    chip("medal", "배지", badgesDone, badgesTotal);
-  applyIcons(row);
+  const allDone = total > 0 && state.completed.length >= total;
   /* 처음부터 다시 시작: 지울 진행 상황이 있을 때만 활성 */
   const restart = $("btnRestart");
   if(restart) restart.disabled = !(state.startedAt || state.discovered.length > 0 || state.completed.length > 0);
   const hero = $("startHero");
   if(hero){
-    hero.innerHTML = playerFallbackSVG({ crown: allDone });
+    hero.innerHTML = heroSVG({ crown: allDone });
     hero.classList.toggle("crown", allDone);
   }
   const nick = $("nickInput");

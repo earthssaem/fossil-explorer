@@ -1,5 +1,5 @@
 /* ==========================================================================
-   화석 탐정 · 도트 RPG UI
+   지층 탐사대 · 도트 RPG UI
    원칙: 각진 모서리 · 4px 윤곽선 · 하드 그림자 · 그라데이션 없음 · 제한된 팔레트
    ========================================================================== */
 @font-face {
@@ -127,9 +127,9 @@ p{ margin:0; }
 .start-sound:active{ transform:translateY(3px); box-shadow:0 0 0 2px rgba(255,255,255,.35) inset, 0 0 0 var(--line); }
 .start-sound [data-icon]{ margin:0; }
 .start-sound .ico-svg{ width:1.35em; height:1.35em; }
-.hero-wrap{ position:relative; width:64px; margin:0 auto; padding-top:30px; }
-.start-hero{ width:64px; height:82px; image-rendering:pixelated; animation:heroIdle 1.6s steps(2, end) infinite; }
-.start-hero.crown{ height:96px; }
+.hero-wrap{ position:relative; width:88px; margin:0 auto; padding-top:30px; }
+.start-hero{ width:88px; height:104px; image-rendering:pixelated; animation:heroIdle 1.6s steps(2, end) infinite; }
+.start-hero.crown{ height:116px; }
 .start-hero.hop{ animation:heroHop .45s steps(4, end); }
 .start-hero svg{ width:100%; height:100%; }
 @keyframes heroIdle{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(3px);} }
@@ -144,7 +144,8 @@ p{ margin:0; }
 .hero-bubble.on{ opacity:1; transform:translate(-50%, 0); }
 .start-title{ font-size:var(--fs-xl); line-height:1.25; letter-spacing:1px; text-shadow:3px 3px 0 var(--gold); }
 .start-title .accent{ display:block; color:var(--teal-d); font-size:.72em; margin-top:6px; letter-spacing:0; text-shadow:2px 2px 0 rgba(43,29,21,.18); }
-.start-sub{ color:#4a3a2e; margin:10px 0 18px; font-size:1em; line-height:1.5; }
+.start-sub{ color:#4a3a2e; margin:10px 0 20px; font-size:1em; line-height:1.5; }
+.start-sub span{ display:inline-block; white-space:nowrap; }   /* 두 줄이 될 때는 쉼표 뒤에서만 나뉜다 */
 .start-nick label{ display:block; font-weight:700; margin-bottom:6px; }
 .start-nick input{
   width:min(320px, 100%); padding:8px 12px; font-size:1.05em; text-align:center;
@@ -152,13 +153,7 @@ p{ margin:0; }
 }
 .start-nick input:focus{ border-color:var(--teal-d); }
 /* 실명 금지 안내: 경고 빨강 대신 짙은 주황빛 갈색 (묻히지 않을 만큼만 강조) */
-.start-nick .nick-hint{ color:#a0522d; font-size:.88em; margin-top:6px; }
-/* 진행 현황: 라벨 + 숫자 */
-.start-progress{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:18px 0 20px; }
-.start-progress .chip{ padding:5px 12px; font-size:.9em; }
-.start-progress .chip .lbl{ color:var(--muted); }
-.start-progress .chip .lbl::after{ content:""; display:inline-block; width:6px; }
-.start-progress .chip.done .lbl{ color:#e8fff9; }
+.start-nick .nick-hint{ color:#a0522d; font-size:.88em; margin:6px 0 22px; }
 .start-buttons{ display:flex; flex-direction:column; gap:10px; }
 .start-buttons .btn{ padding:11px 18px; }
 .start-buttons .btn-row{ gap:10px; }

@@ -64,11 +64,12 @@ const TITLE_QMARK = ["WWW.", "...W", "..W.", ".W..", ".W..", "....", ".W.."];
 /* ---------- 배치 계산 (월드 px, 위에서 아래로) ---------- */
 function titleLayout(){
   const H = TITLE.H;
-  const fgH = clamp(Math.round(H * 0.22), 28, 72);
+  /* 하늘은 화면의 1/3 정도만 — 지층·강·탐사로가 더 많이 보이게 */
+  const fgH = clamp(Math.round(H * 0.3), 32, 96);
   const sandH = 4, riverH = 14, ridgeH = 8;
-  const cliffH = clamp(Math.round(H * 0.2), 36, 60);
+  const cliffH = clamp(Math.round(H * 0.24), 36, 72);
   const yFg = H - fgH, ySand = yFg - sandH, yRiver = ySand - riverH, yCliff = yRiver - cliffH, yRidge = yCliff - ridgeH;
-  TITLE.lay = { fgH, sandH, riverH, ridgeH, cliffH, yFg, ySand, yRiver, yCliff, yRidge, pathY: yFg + 8, pathH: 12 };
+  TITLE.lay = { fgH, sandH, riverH, ridgeH, cliffH, yFg, ySand, yRiver, yCliff, yRidge, pathY: yFg + 10, pathH: 18 };
 }
 
 /* ---------- 띠(스트립) 생성 ---------- */
@@ -161,20 +162,28 @@ function titleBuildCliff(P, H){
   g.fillRect(0, H - 1, P, 1);
   return { canvas: c, sections: sections };
 }
-/* 절벽에 박힌 화석 — 자기 층 자리에 놓는다 */
+/* 절벽에 박힌 화석 — 자기 층 자리에 놓는다.
+   시작 화면은 산만하지 않게 "여기서 뭔가 찾을 수 있다" 정도만: 이미 밝혀낸 화석은 모두 본색으로,
+   아직 못 찾은 것은 주기(P)마다 3곳만 물음표로 보여 준다. */
+const TITLE_HINT_SPOTS = 3;
 function titlePlaceFossils(P, sections){
-  const items = itemData.filter(it => FOSSIL_SPRITES[it.id] || FOSSIL_SPRITES[it.shape]);
+  const all = itemData.filter(it => FOSSIL_SPRITES[it.id] || FOSSIL_SPRITES[it.shape]);
+  const found = all.filter(it => state.completed.includes(it.id));
+  const hidden = all.filter(it => !state.completed.includes(it.id));
+  const step = Math.max(1, Math.floor(hidden.length / TITLE_HINT_SPOTS));
+  const hints = hidden.filter((it, i) => i % step === 0).slice(0, TITLE_HINT_SPOTS);
+  const items = all.filter(it => found.includes(it) || hints.includes(it));
   const m = items.length || 1;
   const H = TITLE.lay.cliffH;
   return items.map((it, i) => {
     const rows = FOSSIL_SPRITES[it.id] || FOSSIL_SPRITES[it.shape];
-    const found = state.completed.includes(it.id);
+    const ok = found.includes(it);
     const sec = sections.find(s => s.ly.id === it.layer) || sections[sections.length - 1];
     const cy = Math.round((sec.y0 + sec.y1) / 2);
     return {
-      item: it, found: found,
-      img: mapCanvas(rows, found ? FOSSIL_PAL : FOSSIL_PAL_SILHOUETTE),
-      x: Math.floor((i + 0.5) * P / m + (hash2(i, 1, 41) - 0.5) * 28),
+      item: it, found: ok,
+      img: mapCanvas(rows, ok ? FOSSIL_PAL : FOSSIL_PAL_SILHOUETTE),
+      x: Math.floor((i + 0.5) * P / m + (hash2(i, 1, 41) - 0.5) * 40),
       y: clamp(cy - 8, 1, Math.max(1, H - 17))
     };
   });
@@ -220,6 +229,13 @@ function titleBuildGround(P, frame){
     x += 36 + Math.floor(hash2(i, 8, 78) * 60);
     i++;
   }
+  /* 탐사로 입구 팻말: 길가에 두 개 (한 주기 안에서 좌우로 나뉘어 보이도록) */
+  const sign = PROPS.sign;
+  if(sign){
+    [Math.floor(P * 0.12), Math.floor(P * 0.62)].forEach(sx => {
+      g.drawImage(sign.img, sx - sign.ax, pathTop + L.pathH + 12 - sign.ay);
+    });
+  }
   return c;
 }
 
@@ -258,7 +274,7 @@ function titleResize(force){
   cv.width = w; cv.height = h;
   TITLE.zoom = zoom; TITLE.W = W; TITLE.H = H;
   titleBuild();
-  if(TITLE.player.x > W + 16) TITLE.player.x = -16;
+  if(TITLE.player.x > W + 32) TITLE.player.x = -32;
   titleDraw();
 }
 
@@ -282,7 +298,7 @@ function titleUpdatePlayer(dt){
   const p = TITLE.player;
   p.x += (TITLE_PLAYER_SPEED - TITLE_SPEED.ground) * dt;
   p.walkT += dt;
-  if(p.x > TITLE.W + 16) p.x = -16;
+  if(p.x > TITLE.W + 32) p.x = -32;
 }
 
 /* ---------- 그리기 ---------- */
@@ -327,13 +343,17 @@ function titleDraw(){
   });
   const frame = game.reducedMotion ? 0 : Math.floor(TITLE.t / 0.45) % 2;
   titleDrawStrip(ctx, TITLE.strips["ground" + frame], L.yRiver, TITLE_SPEED.ground);
-  /* 걷는 탐사대원 (길 위) */
+  /* 걷는 탐사대원 (길 위, 카메라에 가까운 앞쪽 층이라 2배 크기로) */
   const p = TITLE.player;
-  const footY = L.pathY + L.pathH - 2;
+  const footY = L.pathY + L.pathH - 3;
   const wf = game.reducedMotion ? 0 : Math.floor(p.walkT * 3) % 2;
+  const spr = S.walk[wf];
   ctx.fillStyle = "rgba(20,10,0,.3)";
-  ctx.fillRect(Math.round(p.x - 5), footY - 2, 10, 3);
-  ctx.drawImage(S.walk[wf], Math.round(p.x - 7), footY - 17);
+  ctx.fillRect(Math.round(p.x - 10), footY - 3, 20, 4);
+  ctx.drawImage(spr, Math.round(p.x - 14), footY - 34, spr.width * 2, spr.height * 2);
+  /* 아주 약한 어두운 오버레이: 중앙 패널이 더 떠 보이게 (블러 없음) */
+  ctx.fillStyle = "rgba(20,14,10,.12)";
+  ctx.fillRect(0, 0, TITLE.W, TITLE.H);
 }
 function titleFrame(t){
   if(!TITLE.on) return;

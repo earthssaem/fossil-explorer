@@ -160,23 +160,18 @@ function renderStartProgress(){
   const total = itemData.length;
   const done = state.completed.length;
   const allDone = total > 0 && done >= total;
+  const layersDone = state.unlockedLayers.length, layersTotal = layerData.length;
+  const badgesDone = state.badges.length, badgesTotal = badgeData.length;
+  const chip = (icon, label, a, b) =>
+    '<span class="chip' + (b > 0 && a >= b ? ' done' : '') + '"><i data-icon="' + icon + '"></i><span class="lbl">' + label + '</span>' + a + ' / ' + b + '</span>';
   row.innerHTML =
-    '<span class="chip' + (allDone ? ' done' : '') + '"><i data-icon="bone"></i>' + done + '/' + total + '</span>' +
-    '<span class="chip"><i data-icon="star"></i>' + safe(state.score, 0) + '</span>' +
-    '<span class="chip"><i data-icon="medal"></i>' + state.badges.length + '/' + badgeData.length + '</span>';
+    chip("bone", "단서", done, total) +
+    chip("map", "지층", layersDone, layersTotal) +
+    chip("medal", "배지", badgesDone, badgesTotal);
   applyIcons(row);
-  /* 도감 미리보기: 빈칸이 보여야 채우고 싶어진다 */
-  const dex = $("startDex");
-  if(dex){
-    dex.innerHTML = itemData.map(it => {
-      const ok = state.completed.includes(it.id);
-      const rows = FOSSIL_SPRITES[it.id] || FOSSIL_SPRITES[it.shape];
-      const pic = rows ? fossilSpriteSVG(rows, !ok) : fallbackShapeSVG(safe(it.shape, "unknown"), itemColor(it), !ok);
-      return '<span class="dex-mini' + (ok ? ' done' : '') + '" title="' + escapeHTML(ok ? safe(it.name, "") : "아직 못 찾은 단서") + '">' + pic + '</span>';
-    }).join("");
-  }
-  const sub = $("startSub");
-  if(sub) sub.innerHTML = '노두 <b>' + layerData.length + '곳</b>에 흩어진 단서 <b>' + total + '개</b>. 지층의 시간을 되찾아라!';
+  /* 처음부터 다시 시작: 지울 진행 상황이 있을 때만 활성 */
+  const restart = $("btnRestart");
+  if(restart) restart.disabled = !(state.startedAt || state.discovered.length > 0 || state.completed.length > 0);
   const hero = $("startHero");
   if(hero){
     hero.innerHTML = playerFallbackSVG({ crown: allDone });
@@ -320,8 +315,6 @@ function bindUI(){
       }
     });
   });
-  const dex = $("startDex");
-  if(dex) dex.addEventListener("click", () => $("btnCollectionFromStart").click());
   const sndT = $("btnSoundTitle");
   if(sndT) sndT.addEventListener("click", () => { ensureAudioOnce(); setSoundOn(!game.soundOn); });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });

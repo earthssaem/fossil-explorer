@@ -1,7 +1,7 @@
 /* ==========================================================================
    시작 화면 도트 배경 (타이틀 씬)
    - 게임의 타일·소품·화석 스프라이트를 그대로 재사용해 캔버스에 그린다.
-   - 층: 하늘·해 → 구름(2겹 패럴랙스) → 새 → 능선 나무 → 지층 절벽(화석 박힘) → 강·모래·잔디·길 → 걷는 탐사대원
+   - 층: 하늘·해 → 구름(2겹 패럴랙스) → 새 → 능선 나무 → 지층 절벽(화석 박힘) → 강·모래·잔디·탐사로
    - 절벽의 화석은 도감과 같은 규칙: 퀴즈까지 끝낸 것은 본색, 아직인 것은 회색 실루엣 + 반짝임.
      클릭하면 이름(또는 어느 노두를 조사해야 하는지)을 토스트로 알려 준다.
    ========================================================================== */
@@ -14,13 +14,11 @@ const TITLE = {
   lay: null, strips: {}, fossils: [], sprites: null,
   t: 0, last: 0, raf: 0, on: false,
   birds: [], nextBird: 4,
-  player: { x: 40, walkT: 0 },
   resizeTimer: null
 };
 /* 층별 스크롤 속도 (월드 px/s) — 멀수록 느리게 */
 const TITLE_SPEED = { cloudFar: 2.5, cloudNear: 5, ridge: 6, ground: 12 };
 const TITLE_RIDGE_TREE_H = 22;          // 능선 위 나무가 차지하는 높이
-const TITLE_PLAYER_SPEED = 36;          // 땅 기준 걷는 속도 (게임 속도의 절반 정도)
 
 /* ---------- 도트 맵 ---------- */
 const TITLE_CLOUD_BIG = [
@@ -253,7 +251,6 @@ function titleBuild(){
   TITLE.strips.ground1 = titleBuildGround(P, 1);
   if(!TITLE.sprites){
     TITLE.sprites = {
-      walk: [spriteFromMap(PLAYER_FRONT_MAP, PLAYER_PAL, 1), spriteFromMap(walkFrameOf(PLAYER_FRONT_MAP), PLAYER_PAL, 1)],
       sun: mapCanvas(TITLE_SUN, { Y: "#ffd166", y: "#ffe58a" }),
       bird: TITLE_BIRD.map(r => mapCanvas(r, { o: "#3a3350" })),
       qDark: mapCanvas(TITLE_QMARK, { W: "#2b1d15" }),
@@ -274,7 +271,6 @@ function titleResize(force){
   cv.width = w; cv.height = h;
   TITLE.zoom = zoom; TITLE.W = W; TITLE.H = H;
   titleBuild();
-  if(TITLE.player.x > W + 32) TITLE.player.x = -32;
   titleDraw();
 }
 
@@ -293,12 +289,6 @@ function titleUpdateBirds(dt){
   }
   TITLE.birds.forEach(b => { b.x += b.dir * 28 * dt; b.t += dt; });
   TITLE.birds = TITLE.birds.filter(b => b.x > -20 && b.x < TITLE.W + 20);
-}
-function titleUpdatePlayer(dt){
-  const p = TITLE.player;
-  p.x += (TITLE_PLAYER_SPEED - TITLE_SPEED.ground) * dt;
-  p.walkT += dt;
-  if(p.x > TITLE.W + 32) p.x = -32;
 }
 
 /* ---------- 그리기 ---------- */
@@ -343,14 +333,6 @@ function titleDraw(){
   });
   const frame = game.reducedMotion ? 0 : Math.floor(TITLE.t / 0.45) % 2;
   titleDrawStrip(ctx, TITLE.strips["ground" + frame], L.yRiver, TITLE_SPEED.ground);
-  /* 걷는 탐사대원 (길 위, 카메라에 가까운 앞쪽 층이라 2배 크기로) */
-  const p = TITLE.player;
-  const footY = L.pathY + L.pathH - 3;
-  const wf = game.reducedMotion ? 0 : Math.floor(p.walkT * 3) % 2;
-  const spr = S.walk[wf];
-  ctx.fillStyle = "rgba(20,10,0,.3)";
-  ctx.fillRect(Math.round(p.x - 10), footY - 3, 20, 4);
-  ctx.drawImage(spr, Math.round(p.x - 14), footY - 34, spr.width * 2, spr.height * 2);
   /* 아주 약한 어두운 오버레이: 중앙 패널이 더 떠 보이게 (블러 없음) */
   ctx.fillStyle = "rgba(20,14,10,.12)";
   ctx.fillRect(0, 0, TITLE.W, TITLE.H);
@@ -364,7 +346,6 @@ function titleFrame(t){
   if(!game.reducedMotion){
     TITLE.t += dt;
     titleUpdateBirds(dt);
-    titleUpdatePlayer(dt);
   }
   titleDraw();
 }

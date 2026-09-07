@@ -710,8 +710,47 @@ const PLAYER_PAL = {
   K:"#8a5a3c", k:"#c9a468",   /* 배낭 / 배낭 주머니 */
   a:"#7a5236",                /* 뒷머리 */
   g:"#9fb2c4", L:"#55a8d6",   /* 망치 / 루페 */
-  Q:"#c48f1a", X:"#c94c3d"    /* 왕관 / 왕관 보석 (모든 단서를 모은 대원) */
+  Q:"#c48f1a", X:"#c94c3d",   /* 왕관 / 왕관 보석 (모든 단서를 모은 대원) */
+  S:"#fff0b8", N:"#8fd6ff"    /* 안전모 하이라이트 / 헤드램프 */
 };
+/* 시작 화면 전용 꼬마 탐사대원 (22x26, 2.5등신): 큰 머리·동그란 눈·볼터치·헤드램프 달린 안전모.
+   게임 속 14x18 스프라이트와 같은 옷차림(노란 안전모·주황 조끼·망치·루페)이라 같은 인물로 읽힌다. */
+const HERO_ROWS = [
+  "........HHHHHH........",
+  "......HHHHHHHHHH......",
+  ".....HHSSHHHHHHHH.....",
+  "....HHSHHHWNHHHHHH....",
+  "....HHHHHHNNHHHHHH....",
+  "...HHHHHHHHHHHHHHHH...",
+  "..hhhhhhhhhhhhhhhhhh..",
+  "...aaffffffffffffaa...",
+  "..ffffffffffffffffff..",
+  "..ffffffffffffffffff..",
+  "..ffffDDDffffDDDffff..",
+  "..ffffWWDffffWWDffff..",
+  "..ffffDDDffffDDDffff..",
+  ".RRfffDDDffffDDDffRR..",
+  ".RRfffffffffffffffRR..",
+  "..ffffffMffffffMffff..",
+  "...ffffffMMMMMMfffff..",
+  "....ffffffffffffff....",
+  "......VVVVVVVVVV......",
+  "...ffVVVCCkkCCVVVff...",
+  "..gffVVVCCCCCCVVVffL..",
+  "..ggf.VVVVVVVVVV.fLL..",
+  "..g...PPPPPPPPPP...L..",
+  "......PPPP..PPPP......",
+  ".....ooooo..ooooo.....",
+  ".....ooooo..ooooo....."
+];
+const HERO_CROWN_ROWS = [
+  ".......X...X...X......",
+  ".......Q.Q.Q.Q.Q......",
+  ".......QQQQQQQQQ......"
+];
+function heroSVG(opt){
+  return pixelSVG(opt && opt.crown ? HERO_CROWN_ROWS.concat(HERO_ROWS) : HERO_ROWS, PLAYER_PAL, "player-svg");
+}
 /* 모든 단서를 모은 탐사대원의 왕관 (안전모 위에 얹는다) */
 const PLAYER_CROWN_ROWS = [
   "...X...X...X..",

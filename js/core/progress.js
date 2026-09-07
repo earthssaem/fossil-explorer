@@ -186,7 +186,7 @@ function drawReport(){
   g.font = "900 42px " + REPORT_FONT; g.textBaseline = "middle";
   g.fillText("탐사 보고서", 70, 92);
   g.font = "800 20px " + REPORT_FONT;
-  g.fillText("화석 탐정 · 지층의 시간을 찾아라", 74, 122);
+  g.fillText("지층 탐사대 · 사라진 시간을 이어라", 74, 122);
   g.fillStyle = "#3b2a20";
   g.font = "900 28px " + REPORT_FONT;
   g.fillText("탐사대원: " + safe(state.nickname, "익명"), 60, 190);

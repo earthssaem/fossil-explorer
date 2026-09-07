@@ -147,7 +147,7 @@ function validateContentData(){
     (c.evidence || []).forEach(id => { if(!itemData.some(i => i.id === id)) warns.push("최종 미션 카드 " + c.id + ": 근거 화석 " + id + " 이(가) 없습니다."); });
   });
   if(warns.length && window.console && console.warn){
-    console.warn("[화석 탐정] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));
+    console.warn("[지층 탐사대] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));
   }
   return warns;
 }

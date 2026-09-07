@@ -714,40 +714,42 @@ const PLAYER_PAL = {
   S:"#fff0b8", N:"#8fd6ff",   /* 안전모 하이라이트 / 헤드램프 */
   T:"#ff7fa8"                 /* 머리끈 */
 };
-/* 시작 화면 전용 꼬마 탐사대원 (22x26, 2.5등신, 여자아이): 안전모 아래 양갈래 머리와 분홍 머리끈,
-   속눈썹 있는 동그란 눈·볼터치·헤드램프. 옷차림(노란 안전모·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
+/* 시작 화면 전용 탐사대원 (22x28, 2등신, 여자아이): 안전모 아래 단발머리, 동그란 눈·볼터치·헤드램프.
+   얼굴·눈·입은 가운데 축(10.5열)에 좌우 대칭. 옷차림(노란 안전모·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
 const HERO_ROWS = [
   "........HHHHHH........",
   "......HHHHHHHHHH......",
-  ".....HHSSHHHHHHHH.....",
-  "....HHSHHHWNHHHHHH....",
+  ".....HHSHHWNHHHHH.....",
   "....HHHHHHNNHHHHHH....",
-  "...HHHHHHHHHHHHHHHH...",
-  "..hhhhhhhhhhhhhhhhhh..",
-  ".aaaaaafffffffaaaaaa..",
-  ".aaffffffffffffffffaa.",
-  "aaaffDffffffffffDffaaa",
-  "aaafffDDDffffDDDfffaaa",
-  "aaafffWWDffffWWDfffaaa",
-  "aaafffDDDffffDDDfffaaa",
-  ".TTfffDDDffffDDDfffTT.",
-  "aaaRRffffffffffffRRaaa",
-  "aaafffffMffffffMfffaaa",
-  "aaaffffffMMMMMMffffaaa",
-  "aa..ffffffffffffff..aa",
-  "aa....VVVVVVVVVV....aa",
-  ".a.ffVVVCCkkCCVVVff.a.",
+  "...hhhhhhhhhhhhhhhh...",
+  "...aaaaaaaaaaaaaaaa...",
+  "..aaaffffffffffffaaa..",
+  "..aaffffffffffffffaa..",
+  "..aaffDDDffffDDDffaa..",
+  "..aaffWWDffffDWWffaa..",
+  "..aaffDDDffffDDDffaa..",
+  "..aRRffffffffffffRRa..",
+  "..aaffffMffffMffffaa..",
+  "..aafffffMMMMfffffaa..",
+  "...aaffffffffffffaa...",
+  "....aa..ffffff..aa....",
+  "......VVVVVVVVVV......",
+  ".....VVVCCCCCCVVV.....",
+  "....fVVVCCCCCCVVVf....",
+  "...ffVVVCCkkCCVVVff...",
   "..gffVVVCCCCCCVVVffL..",
-  "..ggf.VVVVVVVVVV.fLL..",
-  "..g...PPPPPPPPPP...L..",
-  "......PPPP..PPPP......",
-  ".....ooooo..ooooo.....",
-  ".....ooooo..ooooo....."
+  "..gg.VVVVVVVVVVVV.LL..",
+  "..g..VVVVVVVVVVVV..L..",
+  ".....PPPPPPPPPPPP.....",
+  ".....PPPPP..PPPPP.....",
+  ".....PPPPP..PPPPP.....",
+  "....oooooo..oooooo....",
+  "....oooooo..oooooo...."
 ];
 const HERO_CROWN_ROWS = [
-  ".......X...X...X......",
-  ".......Q.Q.Q.Q.Q......",
-  ".......QQQQQQQQQ......"
+  "......X...X...X.......",
+  "......Q.Q.Q.Q.Q.......",
+  "......QQQQQQQQQ......."
 ];
 function heroSVG(opt){
   return pixelSVG(opt && opt.crown ? HERO_CROWN_ROWS.concat(HERO_ROWS) : HERO_ROWS, PLAYER_PAL, "player-svg");

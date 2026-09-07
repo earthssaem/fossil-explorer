@@ -128,8 +128,8 @@ p{ margin:0; }
 .start-sound [data-icon]{ margin:0; }
 .start-sound .ico-svg{ width:1.35em; height:1.35em; }
 .hero-wrap{ position:relative; width:96px; margin:0 auto; padding-top:30px; }
-.start-hero{ width:96px; height:128px; image-rendering:pixelated; animation:heroIdle 1.6s steps(2, end) infinite; }
-.start-hero.crown{ height:140px; }
+.start-hero{ width:96px; height:124px; image-rendering:pixelated; animation:heroIdle 1.6s steps(2, end) infinite; }
+.start-hero.crown{ height:136px; }
 .start-hero.hop{ animation:heroHop .45s steps(4, end); }
 .start-hero svg{ width:100%; height:100%; }
 @keyframes heroIdle{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(3px);} }

@@ -54,8 +54,49 @@ function renderScreen(name){
   const el = $(name);
   if(el) el.classList.add("active");
   game.running = (name === "gameScreen");
-  if(name === "startScreen") renderStartProgress();
+  if(name === "startScreen"){ renderStartProgress(); titleStart(); bgmStart(); }
+  else { titleStop(); bgmStop(); }
   if(name === "gameScreen"){ enterWorld(); }
+}
+/* 지층을 파고 내려가는 와이프 전환: 땅이 아래에서 올라와 화면을 덮고, 위로 빠져나간다 */
+function wipeTo(name, after){
+  const w = $("screenWipe");
+  if(!w || game.reducedMotion){ renderScreen(name); if(after) after(); return; }
+  w.classList.remove("exit");
+  void w.offsetWidth;
+  w.classList.add("rise");
+  setTimeout(() => {
+    renderScreen(name);
+    w.classList.remove("rise");
+    w.classList.add("exit");
+    setTimeout(() => { w.classList.remove("exit"); if(after) after(); }, 520);
+  }, 520);
+}
+/* 와이프 배경: 젊은 층(F)이 위, 오래된 층(A)이 아래 — 하드 스톱 띠 */
+function buildWipeBackground(){
+  const w = $("screenWipe");
+  if(!w) return;
+  const layers = layerData.slice().reverse();
+  const stops = ["#8cc063 0 5%", "#3a2a1c 5% 5.6%"];
+  const share = (100 - 5.6) / Math.max(1, layers.length);
+  layers.forEach((ly, i) => {
+    const a = 5.6 + i * share, b = a + share;
+    stops.push(safe(ly.color1, "#c8a060") + " " + a + "% " + (a + share * 0.55) + "%");
+    stops.push(safe(ly.color2, "#946746") + " " + (a + share * 0.55) + "% " + (b - 0.5) + "%");
+    stops.push("#3a2a1c " + (b - 0.5) + "% " + b + "%");
+  });
+  w.style.background = "linear-gradient(" + stops.join(", ") + ")";
+}
+/* 소리 켜기/끄기 (시작 화면·게임 HUD 버튼 공용) */
+function setSoundOn(v){
+  game.soundOn = !!v;
+  ["btnSound", "btnSoundTitle"].forEach(id => { const b = $(id); if(b) b.innerHTML = iconSVG(game.soundOn ? "sound" : "mute"); });
+  if(game.soundOn){
+    playSound("click");
+    if($("startScreen").classList.contains("active")) bgmStart();
+  }else{
+    bgmStop();
+  }
 }
 function closeModal(id){ const m = $(id); if(m) m.classList.remove("on"); }
 function openModal(id){ const m = $(id); if(m) m.classList.add("on"); applyIcons(m); }
@@ -118,18 +159,54 @@ function renderStartProgress(){
   if(!row) return;
   const total = itemData.length;
   const done = state.completed.length;
+  const allDone = total > 0 && done >= total;
   row.innerHTML =
-    '<span class="chip"><i data-icon="bone"></i>' + done + '/' + total + '</span>' +
+    '<span class="chip' + (allDone ? ' done' : '') + '"><i data-icon="bone"></i>' + done + '/' + total + '</span>' +
     '<span class="chip"><i data-icon="star"></i>' + safe(state.score, 0) + '</span>' +
-    '<span class="chip"><i data-icon="medal"></i>' + state.badges.length + '/' + badgeData.length + '</span>' +
-    (state.lastPlayed ? '<span class="chip muted"><i data-icon="clock"></i>' + escapeHTML(state.lastPlayed) + '</span>' : '');
+    '<span class="chip"><i data-icon="medal"></i>' + state.badges.length + '/' + badgeData.length + '</span>';
   applyIcons(row);
+  /* 도감 미리보기: 빈칸이 보여야 채우고 싶어진다 */
+  const dex = $("startDex");
+  if(dex){
+    dex.innerHTML = itemData.map(it => {
+      const ok = state.completed.includes(it.id);
+      const rows = FOSSIL_SPRITES[it.id] || FOSSIL_SPRITES[it.shape];
+      const pic = rows ? fossilSpriteSVG(rows, !ok) : fallbackShapeSVG(safe(it.shape, "unknown"), itemColor(it), !ok);
+      return '<span class="dex-mini' + (ok ? ' done' : '') + '" title="' + escapeHTML(ok ? safe(it.name, "") : "아직 못 찾은 단서") + '">' + pic + '</span>';
+    }).join("");
+  }
+  const sub = $("startSub");
+  if(sub) sub.innerHTML = '노두 <b>' + layerData.length + '곳</b>에 흩어진 단서 <b>' + total + '개</b>. 지층의 시간을 되찾아라!';
   const hero = $("startHero");
-  if(hero && !hero.hasChildNodes()) hero.innerHTML = playerFallbackSVG();
+  if(hero){
+    hero.innerHTML = playerFallbackSVG({ crown: allDone });
+    hero.classList.toggle("crown", allDone);
+  }
   const nick = $("nickInput");
   if(nick && document.activeElement !== nick) nick.value = safe(state.nickname, "");
   const cont = $("btnStart");
   if(cont) cont.textContent = (state.discovered.length > 0 || state.startedAt) ? "탐사 계속하기" : "탐사 시작";
+}
+/* 카드 위 탐사대원의 말풍선 (닉네임을 적으면 반응한다) */
+let heroTimer = null;
+function heroSay(msg, hop){
+  const b = $("heroBubble"), h = $("startHero");
+  if(b){
+    b.textContent = msg;
+    b.classList.add("on");
+    clearTimeout(heroTimer);
+    heroTimer = setTimeout(() => b.classList.remove("on"), 2600);
+  }
+  if(hop && h && !game.reducedMotion && !h.classList.contains("hop")){
+    h.classList.add("hop");
+    setTimeout(() => h.classList.remove("hop"), 480);
+  }
+}
+function heroGreeting(){
+  const nm = (state.nickname || "").trim();
+  if(!nm) return "탐사대원, 이름을 알려줘!";
+  if(itemData.length && state.completed.length >= itemData.length) return nm + " 대원, 전설의 탐정이군!";
+  return nm + " 대원, 준비됐어?";
 }
 function renderHelpMissions(){
   const card = $("helpMissionCard");
@@ -193,9 +270,10 @@ function bindInputs(){
 }
 let audioReady = false;
 function ensureAudioOnce(){
-  if(audioReady){ ensureAudio(); return; }
-  audioReady = true;
-  ensureAudio();
+  if(audioReady){ ensureAudio(); }
+  else { audioReady = true; ensureAudio(); }
+  /* 브라우저는 첫 입력 뒤에야 소리를 허용한다 — 시작 화면이면 이때 배경음을 튼다 */
+  if($("startScreen").classList.contains("active")) bgmStart();
 }
 function bindHold(el, setter){
   if(!el) return;
@@ -215,13 +293,16 @@ function bindUI(){
     nickEl.addEventListener("input", () => {
       state.nickname = nickEl.value.replace(/\s+/g, " ").slice(0, 12);
       saveState();
+      heroSay(heroGreeting(), true);
     });
+    nickEl.addEventListener("focus", () => heroSay(heroGreeting(), false));
     nickEl.addEventListener("keydown", e => { if(e.key === "Enter") $("btnStart").click(); });
   }
   $("btnStart").addEventListener("click", () => {
     const nm = (nickEl ? nickEl.value : state.nickname || "").trim();
     if(!nm){
       toast("먼저 탐사대원 닉네임을 입력하세요. (실명은 쓰지 않습니다)");
+      heroSay("이름이 없으면 출발할 수 없어!", true);
       if(nickEl){ nickEl.focus(); nickEl.classList.add("shake-x"); setTimeout(() => nickEl.classList.remove("shake-x"), 600); }
       return;
     }
@@ -229,15 +310,20 @@ function bindUI(){
     const firstRun = !state.startedAt;
     if(!state.startedAt) state.startedAt = new Date().toLocaleString();
     saveState();
-    playSound("click");
-    renderScreen("gameScreen");
-    if(firstRun){
-      setTimeout(() => openDialog("탐사 시작", [
-        state.nickname + " 탐사대원, 지질공원에 도착했다.",
-        "먼저 입구의 해설사에게 말을 걸어 보자. (가까이 가서 E 또는 클릭)"
-      ]), 500);
-    }
+    playSound("dig");
+    wipeTo("gameScreen", () => {
+      if(firstRun){
+        setTimeout(() => openDialog("탐사 시작", [
+          state.nickname + " 탐사대원, 지질공원에 도착했다.",
+          "먼저 입구의 해설사에게 말을 걸어 보자. (가까이 가서 E 또는 클릭)"
+        ]), 300);
+      }
+    });
   });
+  const dex = $("startDex");
+  if(dex) dex.addEventListener("click", () => $("btnCollectionFromStart").click());
+  const sndT = $("btnSoundTitle");
+  if(sndT) sndT.addEventListener("click", () => { ensureAudioOnce(); setSoundOn(!game.soundOn); });
   $("btnHelp").addEventListener("click", () => { playSound("click"); renderHelpMissions(); renderScreen("helpScreen"); });
   $("btnCollectionFromStart").addEventListener("click", () => {
     playSound("click"); collectionReturnTo = "startScreen"; renderCollection(); renderScreen("collectionScreen");
@@ -247,11 +333,7 @@ function bindUI(){
   });
   $("btnCollectionBack").addEventListener("click", () => { playSound("click"); renderScreen(collectionReturnTo); });
   $("btnHome").addEventListener("click", () => { playSound("click"); saveState(); renderScreen("startScreen"); });
-  $("btnSound").addEventListener("click", () => {
-    game.soundOn = !game.soundOn;
-    $("btnSound").innerHTML = iconSVG(game.soundOn ? "sound" : "mute");
-    if(game.soundOn) playSound("click");
-  });
+  $("btnSound").addEventListener("click", () => setSoundOn(!game.soundOn));
   $("btnCinematicGo").onclick = defaultCinematicGo;
   $("btnOutcropLayerInfo").addEventListener("click", () => {
     playSound("click");
@@ -313,6 +395,7 @@ function initGame(){
   loadState();
   validateContentData();
   applyIcons(document);
+  buildWipeBackground();
   bindUI();
   bindInputs();
   renderStartProgress();

@@ -246,4 +246,55 @@ function playSound(type){
   }
 }
 
+/* ---------- 8비트 배경음 (시작 화면 전용, 외부 음원 없음) ----------
+   8분음표 단위 시퀀스. 리드는 사각파, 베이스는 삼각파. 화면을 벗어나면 멈춘다. */
+const BGM = { on: false, step: 0, nextT: 0, timer: null };
+const BGM_STEP = 0.15;   // 8분음표 길이(초) ≈ 100bpm
+const BGM_NOTES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+function noteHz(n){
+  if(!n) return 0;
+  const m = /^([A-G])(#?)(\d)$/.exec(n);
+  if(!m) return 0;
+  const semi = BGM_NOTES[m[1]] + (m[2] ? 1 : 0) + (parseInt(m[3], 10) - 4) * 12;
+  return 440 * Math.pow(2, (semi - 9) / 12);
+}
+/* 4마디씩 두 악구 (C · G · Am · F) — 모험 시작 느낌의 밝은 5음 음계 */
+const BGM_LEAD = [
+  "E5","G5","A5","G5", "E5","D5","C5","D5",  "E5","G5","A5","C6", "A5","G5","E5",null,
+  "D5","E5","G5","E5", "D5","C5","A4","C5",  "D5","E5","G5","A5", "G5","E5","D5",null,
+  "E5","G5","A5","G5", "E5","D5","C5","D5",  "E5","G5","A5","C6", "D6","C6","A5",null,
+  "G5","A5","G5","E5", "D5","E5","C5",null,  "A4","C5","D5","E5", "D5",null,"C5",null
+];
+const BGM_BASS = [
+  "C3",null,"G3",null, "C3",null,"G3",null,  "G2",null,"D3",null, "G2",null,"D3",null,
+  "A2",null,"E3",null, "A2",null,"E3",null,  "F2",null,"C3",null, "F2",null,"C3",null,
+  "C3",null,"G3",null, "C3",null,"G3",null,  "G2",null,"D3",null, "G2",null,"D3",null,
+  "A2",null,"E3",null, "A2",null,"E3",null,  "F2",null,"C3",null, "G2",null,"G2",null
+];
+function bgmTick(){
+  if(!BGM.on || !audioCtx) return;
+  while(BGM.nextT < audioCtx.currentTime + 0.3){
+    const delay = Math.max(0, BGM.nextT - audioCtx.currentTime);
+    const lead = noteHz(BGM_LEAD[BGM.step]), bass = noteHz(BGM_BASS[BGM.step]);
+    if(lead) tone(lead, BGM_STEP * 0.8, "square", 0.03, delay);
+    if(bass) tone(bass, BGM_STEP * 1.6, "triangle", 0.05, delay);
+    BGM.nextT += BGM_STEP;
+    BGM.step = (BGM.step + 1) % BGM_LEAD.length;
+  }
+  BGM.timer = setTimeout(bgmTick, 90);
+}
+function bgmStart(){
+  if(BGM.on || !game.soundOn) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  BGM.on = true;
+  BGM.step = 0;
+  BGM.nextT = audioCtx.currentTime + 0.1;
+  bgmTick();
+}
+function bgmStop(){
+  BGM.on = false;
+  clearTimeout(BGM.timer);
+}
+
 /* ---------- 에셋 사전 로드 ---------- */

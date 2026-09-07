@@ -26,7 +26,7 @@ css/style.css         도트 RPG UI 스타일
 js/data/items.js      ★ 화석·증거 아이템과 퀴즈 (교사 수정 영역)
 js/data/layers.js     ★ 지층·배지·미션·탐사 노트·개념 태그 (교사 수정 영역)
 js/data/world.js      ★ 지질공원 맵: 구역·절벽·관문·노두·길·소품·NPC 대사 (교사 수정 영역)
-js/core/state.js      진행 상태 저장, 개념별 성취 집계, 다양성 집계, 데이터 점검, 효과음
+js/core/state.js      진행 상태 저장, 개념별 성취 집계, 다양성 집계, 데이터 점검, 효과음·시작 화면 배경음
 js/core/sprites.js    화석·캐릭터 도트 스프라이트
 js/core/dig.js        노두 조사창, 경계층 3단 잠금, 발굴, 발견·관찰
 js/core/quiz.js       퀴즈, 도감 등록, 층 정보
@@ -34,6 +34,7 @@ js/core/mission.js    최종 미션(층서 기둥 완성 · 이웃 노두 대비
 js/core/progress.js   HUD, 배지, 도감, 결과 화면, 제출용 보고서 PNG
 js/world/tiles.js     타일셋·소품 스프라이트 생성 (코드로 그림, 외부 이미지 없음)
 js/world/map.js       월드 생성, 충돌, 길찾기, 카메라, 렌더링, 지질도, 상호작용
+js/world/title.js     시작 화면 도트 배경 (구름·새·지층 절벽에 박힌 화석·걷는 탐사대원, 게임 타일 재사용)
 js/ui.js              도트 아이콘, 대화창, 구역 배너, 화면 전환, 입력, 초기화
 ```
 

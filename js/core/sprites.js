@@ -712,44 +712,51 @@ const PLAYER_PAL = {
   g:"#9fb2c4", L:"#55a8d6",   /* 망치 / 루페 */
   Q:"#c48f1a", X:"#c94c3d",   /* 왕관 / 왕관 보석 (모든 단서를 모은 대원) */
   S:"#fff0b8", N:"#8fd6ff",   /* 안전모 하이라이트 / 헤드램프 */
-  T:"#ff7fa8"                 /* 머리끈 */
+  T:"#ff7fa8",                /* 머리끈 */
+  A:"#9d7048"                 /* 머리카락 하이라이트 */
 };
-/* 시작 화면 전용 탐사대원 (22x28, 2등신, 여자아이): 안전모 아래 단발머리, 동그란 눈·볼터치·헤드램프.
-   얼굴·눈·입은 가운데 축(10.5열)에 좌우 대칭. 옷차림(노란 안전모·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
+/* 시작 화면 전용 탐사대원 (24x32, 여자아이, 단발머리):
+   둥근 얼굴, 작은 눈, 작은 미소, 볼터치. 머리카락이 얼굴 양옆과 턱 아래까지 감싸 단발 실루엣이 드러나고,
+   안전모 챙은 양끝이 한 칸 내려와 머리에 자연스럽게 얹힌다. 좌우 대칭(축 11.5열).
+   옷차림(노란 안전모·헤드램프·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
 const HERO_ROWS = [
-  "........HHHHHH........",
-  "......HHHHHHHHHH......",
-  ".....HHSHHWNHHHHH.....",
-  "....HHHHHHNNHHHHHH....",
-  "...hhhhhhhhhhhhhhhh...",
-  "...aaaaaaaaaaaaaaaa...",
-  "..aaaffffffffffffaaa..",
-  "..aaffffffffffffffaa..",
-  "..aaffDDDffffDDDffaa..",
-  "..aaffWWDffffDWWffaa..",
-  "..aaffDDDffffDDDffaa..",
-  "..aRRffffffffffffRRa..",
-  "..aaffffMffffMffffaa..",
-  "..aafffffMMMMfffffaa..",
-  "...aaffffffffffffaa...",
-  "....aa..ffffff..aa....",
-  "......VVVVVVVVVV......",
-  ".....VVVCCCCCCVVV.....",
-  "....fVVVCCCCCCVVVf....",
-  "...ffVVVCCkkCCVVVff...",
-  "..gffVVVCCCCCCVVVffL..",
-  "..gg.VVVVVVVVVVVV.LL..",
-  "..g..VVVVVVVVVVVV..L..",
-  ".....PPPPPPPPPPPP.....",
-  ".....PPPPP..PPPPP.....",
-  ".....PPPPP..PPPPP.....",
-  "....oooooo..oooooo....",
-  "....oooooo..oooooo...."
+  "........HHHHHHHH........",
+  "......HHHHHHHHHHHH......",
+  ".....HHSSHHHHHHSSHH.....",
+  "....HHSHHHHNNHHHHSHH....",
+  "....HHHHHHHNNHHHHHHH....",
+  "...HHHHHHHHHHHHHHHHHH...",
+  "..hhhhhhhhhhhhhhhhhhhh..",
+  ".hhaaaaaaaaaaaaaaaaaahh.",
+  "..aaAAaaaaaaaaaaaaAAaa..",
+  "..aaaaffffffffffffaaaa..",
+  ".aAAffffffffffffffffAAa.",
+  ".aAAffffffffffffffffAAa.",
+  ".aaaffDDffffffffDDffaaa.",
+  ".aaaffWDffffffffDWffaaa.",
+  ".aaaffDDffffffffDDffaaa.",
+  ".aaaRRffffffffffffRRaaa.",
+  ".aaaffffffMffMffffffaaa.",
+  ".aaafffffffMMfffffffaaa.",
+  ".aaaaffffffffffffffaaaa.",
+  "..aaaaffffffffffffaaaa..",
+  "...aaaaffffffffffaaaa...",
+  "....aaa..ffffff..aaa....",
+  ".......VVVVVVVVVV.......",
+  "......VVVCCCCCCVVV......",
+  ".....fVVVCCCCCCVVVf.....",
+  "....ffVVVCCkkCCVVVff....",
+  "...gffVVVCCCCCCVVVffL...",
+  "...gg.VVVVVVVVVVVV.LL...",
+  "......PPPPPPPPPPPP......",
+  "......PPPPP..PPPPP......",
+  ".....oooooo..oooooo.....",
+  ".....oooooo..oooooo....."
 ];
 const HERO_CROWN_ROWS = [
-  "......X...X...X.......",
-  "......Q.Q.Q.Q.Q.......",
-  "......QQQQQQQQQ......."
+  ".......X..X..X..X.......",
+  ".......Q..Q..Q..Q.......",
+  ".......QQQQQQQQQQ......."
 ];
 function heroSVG(opt){
   return pixelSVG(opt && opt.crown ? HERO_CROWN_ROWS.concat(HERO_ROWS) : HERO_ROWS, PLAYER_PAL, "player-svg");

@@ -716,53 +716,47 @@ const PLAYER_PAL = {
   A:"#8c6444",                /* 머리카락 하이라이트 */
   O:"#3b2a20"                 /* 캐릭터 윤곽선 (화석 스프라이트와 같은 색) */
 };
-/* 시작 화면 전용 탐사대원 (28x37, 중성적인 꼬마 탐사대원) — 윤곽선이 있는 도트 캐릭터.
-   둥근 얼굴, 안전모 아래로 짧고 단정한 머리(귀 높이에서 끝남), 하이라이트 두 점이 있는 큰 눈,
-   입을 살짝 벌린 밝은 미소, 옅은 볼터치. 안전모는 둥근 돔에 챙이 머리 곡선을 따른다.
-   좌우 대칭(축 13.5열). 옷차림(노란 안전모·헤드램프·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
+/* 시작 화면 전용 탐사대원 (24x31, 중성적인 플레이어 아바타) — 윤곽선이 있는 도트 캐릭터.
+   안전모와 탐사복이 주요 특징이 되도록 얼굴은 단순하게: 2x2 눈, 거의 일자에 가까운 약한 미소, 볼터치 없음.
+   머리카락은 안전모 아래 짧은 띠와 귀 옆 한두 칸만 보인다. 머리·몸 비율은 게임 속 스프라이트에 가깝다.
+   좌우 대칭(축 11.5열). 옷차림(노란 안전모·헤드램프·주황 조끼·망치·루페)은 게임 속 스프라이트와 같다. */
 const HERO_ROWS = [
-  "...........OOOOOO...........",
-  ".........OOHHHHHHOO.........",
-  "........OHHHHHHHHHHO........",
-  ".......OHHSSHHHHSSHHO.......",
-  "......OHHSHHHNNHHHSHHO......",
-  "......OHHHHHHNNHHHHHHO......",
-  ".....OHHHHHHHHHHHHHHHHO.....",
-  "....OhhhhhhhhhhhhhhhhhhO....",
-  "...OhhOOOOOOOOOOOOOOOOhhO...",
-  "....OaaaaaaaaaaaaaaaaaaO....",
-  "...OaaAAaaaaaaaaaaaaAAaaO...",
-  "..OaaAAaffaffffffaffaAAaaO..",
-  "..OaaAaffffffffffffffaAaaO..",
-  ".OaaaaaffffffffffffffaaaaaO.",
-  ".OaaaaffDDDffffffDDDffaaaaO.",
-  ".OaaaaffWWDffffffDWWffaaaaO.",
-  ".OaaafffDDDffffffDDDfffaaaO.",
-  ".OaaffffDDDffffffDDDffffaaO.",
-  ".OafffRRffffffffffffRRfffaO.",
-  ".OfffffffffMffffMfffffffffO.",
-  ".OffffffffffMWWMffffffffffO.",
-  "..OffffffffffMMffffffffffO..",
-  "..OffffffffffffffffffffffO..",
-  "...OffffffffffffffffffffO...",
-  "....OffffffffffffffffffO....",
-  "......OOffffffffffffOO......",
-  "........OOOOffffOOOO........",
-  "..........OVVVVVVO..........",
-  ".......OOOVVCCCCVVOOO.......",
-  "......OfffVVCCCCVVfffO......",
-  ".....OgffOVVCkkCVVOffLO.....",
-  ".....OggOOVVVVVVVVOOLLO.....",
-  ".....Og..OPPPPPPPPO..LO.....",
-  ".........OPPPPPPPPO.........",
-  ".........OPPPOOPPPO.........",
-  "........OooooOOooooO........",
-  "........OOOOOOOOOOOO........"
+  "........OOOOOOOO........",
+  "......OOHHHHHHHHOO......",
+  ".....OHHHHHHHHHHHHO.....",
+  "....OHHHSHHNNHHSHHHO....",
+  "....OHHHHHHNNHHHHHHO....",
+  "...OHHHHHHHHHHHHHHHHO...",
+  "..OhhhhhhhhhhhhhhhhhhO..",
+  "..OOOOOOOOOOOOOOOOOOOO..",
+  ".....OaaaaaaaaaaaaO.....",
+  "....OaaffffffffffaaO....",
+  "....OaffffffffffffaO....",
+  "....OffffffffffffffO....",
+  "....OfffDDffffDDfffO....",
+  "....OfffDDffffDDfffO....",
+  "....OffffffffffffffO....",
+  "....OfffffMffMfffffO....",
+  "....OffffffMMffffffO....",
+  ".....OffffffffffffO.....",
+  "......OOffffffffOO......",
+  "........OOffffOO........",
+  "........OVVVVVVO........",
+  ".....OOOVVVCCVVVOOO.....",
+  "....OfffVVCCCCVVfffO....",
+  "...OgffOVVCkkCVVOffLO...",
+  "...OggOOVVVVVVVVOOLLO...",
+  "...Og..OPPPPPPPPO..LO...",
+  ".......OPPPPPPPPO.......",
+  ".......OPPPOOPPPO.......",
+  ".......OPPPOOPPPO.......",
+  "......OooooOOooooO......",
+  "......OOOOOOOOOOOO......"
 ];
 const HERO_CROWN_ROWS = [
-  "..........X..XX..X..........",
-  "..........Q..QQ..Q..........",
-  "..........QQQQQQQQ.........."
+  "........X..XX..X........",
+  "........Q..QQ..Q........",
+  "........QQQQQQQQ........"
 ];
 function heroSVG(opt){
   return pixelSVG(opt && opt.crown ? HERO_CROWN_ROWS.concat(HERO_ROWS) : HERO_ROWS, PLAYER_PAL, "player-svg");

@@ -130,13 +130,6 @@ function openOutcropModal(layerId, quiet){
     renderBands(row, ly);
   }
   xsec.appendChild(row);
-  /* 부정합 물결선 */
-  if(ly.unconformityBelow){
-    const un = document.createElement("div");
-    un.className = "xsec-unconf";
-    un.innerHTML = '<span>부정합 · 기록이 빠진 시간</span>';
-    xsec.appendChild(un);
-  }
   /* 아래층 일부 (또는 기반암) */
   const sl = document.createElement("div");
   sl.className = "xsec-sliver";
@@ -174,7 +167,6 @@ function renderStratColumn(currentId){
       ' style="' + (dug || cur ? "background:" + c + ";" : "") + '" title="' + escapeHTML(safe(lr.label, "")) + '">' +
       '<b>' + escapeHTML(safe(lr.id, "?")) + '</b>' +
       '<span>' + (dug ? escapeHTML(safe(lr.era, "")) : "?") + '</span></div>';
-    if(lr.unconformityBelow) html += '<div class="col-unconf"></div>';
   });
   html += '<div class="col-base">기반암</div>';
   col.innerHTML = html;

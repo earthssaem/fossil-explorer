@@ -463,11 +463,6 @@ function buildOutcropProp(ly, below){
       g.fillStyle = safe(ly.colorBoundary1, "#1b140e");
       g.fillRect(1, y, W - 2, h + 1);
     }
-    /* 부정합(물결선): 아래층과의 경계 */
-    if(ly.unconformityBelow && y >= bedsTop && y < bedsTop + 3){
-      g.fillStyle = "#1b140e";
-      for(let x = 1; x < W - 1; x++) g.fillRect(x, y + (Math.floor(x / 3) % 2), 1, 1);
-    }
     y += h + 1; i++;
   }
   /* 점 무늬·윤곽 */

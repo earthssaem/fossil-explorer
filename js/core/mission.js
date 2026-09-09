@@ -58,16 +58,15 @@ function shuffledCards(){
 }
 
 /* ---------- 층서 기둥 HTML (미션·결과·완료 화면 공용) ----------
-   placed: 놓인 카드 id 목록 (아래→위). ratio: 실제 시간 비율. clickable: 층을 눌러 정보 보기 */
+   placed: 놓인 카드 id 목록 (아래→위). clickable: 층을 눌러 정보 보기 */
 function stratColumnHTML(placed, opts){
   const o = opts || {};
   const cards = missionCards();
-  const total = cards.reduce((s, c) => s + (c.timeShare || 1), 0);
-  let html = '<div class="m-column' + (o.ratio ? " ratio" : "") + (o.small ? " small" : "") + '">';
+  let html = '<div class="m-column' + (o.small ? " small" : "") + '">';
   cards.slice().reverse().forEach(card => {
     const on = placed.indexOf(card.id) >= 0;
     const ly = layerById(card.layer);
-    const share = o.ratio ? Math.max(2, (card.timeShare || 1) / total * 100) : (100 / cards.length);
+    const share = 100 / cards.length;
     const items = cardItems(card).map(i => safe(i.name, "")).join("·");
     html += '<div class="m-band' + (on ? " on" : " empty") + (ly && ly.isBoundary ? " bnd" : "") + (o.clickable && on ? " click" : "") + '"' +
       ' data-card="' + card.id + '" style="flex-basis:' + share + '%;' + (on ? "background:" + cardColor(card) + ";" : "") + '">' +
@@ -75,7 +74,6 @@ function stratColumnHTML(placed, opts){
             '<span>' + escapeHTML(o.small ? safe(ly && ly.era, "") : items) + '</span>'
           : '<span class="q">?</span>') +
       '</div>';
-    if(card.band === "upper" && card.layer === "A" && on) html += '<div class="m-gap">약 30억 년</div>';
   });
   html += '<div class="m-base">기반암</div></div>';
   return html;
@@ -92,7 +90,7 @@ function openFinalMission(){
 function renderMission(){
   const m = missionState();
   const steps = $("missionSteps");
-  const names = ["1단계 층서 기둥", "2단계 이웃 노두", "탐사 완료"];
+  const names = ["1단계 지층 기둥", "2단계 이웃 노두", "탐사 완료"];
   steps.innerHTML = names.map((n, i) => '<span class="' + (m.stage === i + 1 ? "now" : (m.stage > i + 1 ? "done" : "")) + '">' + n + '</span>').join("");
   if(m.stage === 1) renderStage1();
   else if(m.stage === 2) renderStage2();
@@ -103,7 +101,7 @@ function feedbackBox(text, kind){
 }
 
 /* ---------- 1단계 ---------- */
-let m1 = { phase: "pick", feedback: "", fbKind: "hint", ratio: false };
+let m1 = { phase: "pick", feedback: "", fbKind: "hint" };
 function renderStage1(){
   const fm = finalMissionData(), st = fm.stage1 || {};
   const m = missionState();
@@ -116,8 +114,6 @@ function renderStage1(){
   let right = "";
   if(done){
     right = '<div class="m-prompt done">' + escapeHTML(st.done || "") + '</div>' +
-      '<label class="m-toggle"><input type="checkbox" id="m1Ratio"' + (m1.ratio ? " checked" : "") + '> ' + escapeHTML(st.ratioLabel || "") + '</label>' +
-      (m1.ratio ? '<div class="m-note">' + escapeHTML(st.ratioNote || "") + '</div>' : "") +
       '<div class="modal-actions"><button class="btn primary" id="m1Next">2단계로</button></div>';
   }else if(m1.phase === "pick"){
     const remaining = shuffledCards().filter(c => m.placed.indexOf(c.id) < 0);
@@ -149,15 +145,13 @@ function renderStage1(){
   }
   body.innerHTML =
     '<div class="m-howto">' + escapeHTML(st.howto || "") + '</div>' +
-    '<div class="m-layout"><div class="m-left"><div class="m-col-title">우리 공원 층서 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
-    stratColumnHTML(m.placed, { ratio: done && m1.ratio }) + '</div><div class="m-right">' + right + '</div></div>';
+    '<div class="m-layout"><div class="m-left"><div class="m-col-title">우리 공원 지층 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
+    stratColumnHTML(m.placed, {}) + '</div><div class="m-right">' + right + '</div></div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
   /* 이벤트 */
   body.querySelectorAll(".m-card").forEach(b => b.addEventListener("click", () => pickCard(b.getAttribute("data-card"))));
   body.querySelectorAll("[data-env]").forEach(b => b.addEventListener("click", () => pickEnv(pending, b.getAttribute("data-env"))));
   body.querySelectorAll("[data-ev]").forEach(b => b.addEventListener("click", () => pickEvidence(pending, b.getAttribute("data-ev"))));
-  const tg = $("m1Ratio");
-  if(tg) tg.addEventListener("change", () => { m1.ratio = tg.checked; playSound("click"); renderStage1(); });
   const nx = $("m1Next");
   if(nx) nx.addEventListener("click", () => { playSound("click"); m.stage = 2; saveState(); renderMission(); });
 }
@@ -171,7 +165,7 @@ function pickCard(cardId){
     m.placed.push(cardId);
     missionRecord("m1_order_" + cardId, "ERA", true);
     playSound("found");
-    m1 = { phase: "env", feedback: fillTpl(st.placed, { title: next.title }), fbKind: "explain", ratio: false };
+    m1 = { phase: "env", feedback: fillTpl(st.placed, { title: next.title }), fbKind: "explain" };
   }else{
     missionRecord("m1_order_" + next.id, "ERA", false);
     playSound("wrong");
@@ -187,7 +181,7 @@ function pickEnv(cardId, env){
   if(env === card.env){
     missionRecord("m1_env_" + cardId, "ENV", true);
     playSound("correct");
-    m1 = { phase: "evidence", feedback: "", fbKind: "hint", ratio: false };
+    m1 = { phase: "evidence", feedback: "", fbKind: "hint" };
   }else{
     missionRecord("m1_env_" + cardId, "ENV", false);
     playSound("wrong");
@@ -206,7 +200,7 @@ function pickEvidence(cardId, itemId){
     playSound("correct");
     if(m.envDone.indexOf(cardId) < 0) m.envDone.push(cardId);
     saveState();
-    m1 = { phase: "pick", feedback: "", fbKind: "hint", ratio: false };
+    m1 = { phase: "pick", feedback: "", fbKind: "hint" };
   }else{
     missionRecord("m1_ev_" + cardId, "IDX", false);
     playSound("wrong");

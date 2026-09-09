@@ -142,8 +142,8 @@ function renderResultColumn(){
   const cardsN = missionCards().length;
   $("resultColumn").innerHTML = stratColumnHTML(m.placed, { small: true });
   $("resultColumnNote").textContent = state.finalMissionDone
-    ? "서로 떨어져 있던 노두 " + layerData.length + "곳의 기록을 하나의 층서 기둥으로 완성했다."
-    : (m.placed.length ? "층서 기둥 " + m.placed.length + " / " + cardsN + " 완성. 전망대의 최종 미션에서 마저 완성할 수 있다."
+    ? "서로 떨어져 있던 노두 " + layerData.length + "곳의 기록을 하나의 지층 기둥으로 완성했다."
+    : (m.placed.length ? "지층 기둥 " + m.placed.length + " / " + cardsN + " 완성. 전망대의 최종 미션에서 마저 완성할 수 있다."
                        : "노두를 모두 조사한 뒤 북쪽 전망대에서 최종 미션을 하면 이 기둥이 채워진다.");
 }
 
@@ -260,7 +260,7 @@ function drawReport(){
   y += 20;
   drawColumnOnCanvas(g, 60, y, 230, 250, mst.placed);
   g.fillStyle = "#7a6048"; g.font = "700 13px " + REPORT_FONT;
-  g.fillText(state.finalMissionDone ? "최종 미션 완료" : "층서 기둥 " + mst.placed.length + " / " + missionCards().length, 60, y + 282);
+  g.fillText(state.finalMissionDone ? "최종 미션 완료" : "지층 기둥 " + mst.placed.length + " / " + missionCards().length, 60, y + 282);
   const perRow = 4, gridX = 330, boxW = (W - gridX - 60 - (perRow - 1) * 10) / perRow, boxH = 52;
   itemData.forEach((it, i) => {
     const bx = gridX + (i % perRow) * (boxW + 10);

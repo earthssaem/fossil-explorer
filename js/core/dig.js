@@ -158,7 +158,7 @@ function openOutcropModal(layerId, quiet){
 function renderStratColumn(currentId){
   const col = $("outcropColumn");
   if(!col) return;
-  let html = '<div class="col-title">층서 기둥</div>';
+  let html = '<div class="col-title">지층 기둥</div>';
   layerData.slice().reverse().forEach(lr => {
     const dug = outcropDug(lr.id);
     const cur = lr.id === currentId;

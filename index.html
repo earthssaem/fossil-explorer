@@ -32,7 +32,7 @@
         <div class="cta-wrap"><button class="btn primary wide cta" id="btnStart">탐사 시작</button></div>
         <div class="btn-row">
           <button class="btn teal" id="btnHelp"><i data-icon="book"></i>게임 방법</button>
-          <button class="btn blue" id="btnCollectionFromStart"><i data-icon="bone"></i>탐사 도감</button>
+          <button class="btn blue" id="btnCollectionFromStart"><i data-icon="bone"></i>화석도감</button>
         </div>
         <button class="btn text small" id="btnRestart"><i data-icon="reset"></i>처음부터 다시 시작</button>
       </div>
@@ -50,7 +50,7 @@
       <div class="help-step"><div class="help-num">1</div><div><b>이동</b><br>W·A·S·D 또는 방향키로 걷는다. 노두나 팻말을 클릭하면 길을 따라 자동으로 걸어간다. 모바일은 화면의 방향 버튼을 쓴다.</div></div>
       <div class="help-step"><div class="help-num">2</div><div><b>구역과 계단</b><br>이 공원은 여러 구역으로 나뉘어 있고, 구역 사이 절벽은 계단으로만 오르내린다. 계단의 관문은 앞 구역의 노두를 다 조사해야 열린다.</div></div>
       <div class="help-step"><div class="help-num">3</div><div><b>노두 조사</b><br>암석이나 지층이 지표에 드러난 곳을 노두라고 한다. 이 공원의 노두 6곳은 강가에 있으며, 각 구역의 지층과 아래층 윗부분이 보인다. 노두 앞에서 E 또는 클릭으로 조사창을 연다.</div></div>
-      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 퀴즈</b><br>반짝이는 지점을 눌러 화석을 발굴하면 탐사 도감에 등록된다. 퀴즈를 풀면 화석의 시대·환경·분류와 지층의 정체가 해금된다. 여러 띠로 나뉜 노두는 변화를 차례로 살펴보기 위해 아래층부터 조사한다.</div></div>
+      <div class="help-step"><div class="help-num">4</div><div><b>발굴 → 관찰 → 퀴즈</b><br>반짝이는 지점을 조사해 화석과 지층 단서를 발견하면 화석도감에 기록된다. 퀴즈를 풀면 화석의 시대·환경·분류와 지층의 정체가 해금된다. 여러 띠로 나뉜 노두는 변화를 차례로 살펴보기 위해 아래층부터 조사한다.</div></div>
       <div class="help-step"><div class="help-num">5</div><div><b>표준 화석과 시상 화석</b><br>표준 화석은 지층의 시대를, 시상 화석은 당시 환경을 알려준다. 서로 떨어진 지층을 이어 붙일 때는 표준 화석으로 시대를 맞춰 본다.</div></div>
       <div class="help-step"><div class="help-num">6</div><div><b>최종 미션 · 흩어진 지층 기록을 완성하라</b><br>노두 6곳을 모두 조사하면 북쪽 전망대에서 최종 미션이 열린다. 조사한 노두 카드를 오래된 순서로 쌓아 지층 기둥을 완성하고, 이웃 마을의 이름표 없는 노두를 우리 공원 지층과 이어 본다.</div></div>
     </div>
@@ -73,7 +73,7 @@
       </div>
       <div class="hud-group">
         <button class="hud-btn" id="btnSound" title="소리 켜기/끄기"><i data-icon="sound"></i></button>
-        <button class="hud-btn wide" id="btnCollectionHud" title="탐사 도감 (M)"><i data-icon="book"></i><span>도감</span></button>
+        <button class="hud-btn wide" id="btnCollectionHud" title="화석도감 (M)"><i data-icon="book"></i><span>도감</span></button>
         <button class="hud-btn" id="btnHome" title="처음으로"><i data-icon="home"></i></button>
       </div>
     </div>
@@ -213,7 +213,7 @@
   <section id="collectionScreen" class="screen panel-screen">
     <div class="back-bar">
       <button class="btn ghost small" id="btnCollectionBack"><i data-icon="back"></i>돌아가기</button>
-      <h2 class="screen-title">탐사 도감</h2>
+      <h2 class="screen-title">화석도감</h2>
     </div>
     <div class="collect-stats" id="collectStats"></div>
     <div class="rate-bar"><div class="fill" id="collectRateFill"></div></div>

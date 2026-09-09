@@ -21,7 +21,7 @@
      group        분류 표시 문구 (표준 화석 / 시상 화석 / 대표 화석 …)
      hiddenInfo1  시대, hiddenInfo2 환경 (퀴즈 완료 후 도감에서 해금)
      revealName   퀴즈를 풀면 바뀌는 이름 (발굴 직후에는 name 으로 보임)
-     isEvidence   true 이면 화석이 아니라 지층이 남긴 사건의 흔적
+     isEvidence   true 이면 화석이 아니라 지층 단서(지층에 남은 사건의 흔적). 도감 카드·상세 화면에 "지층 단서" 라벨이 붙는다
      era          지층의 시대와 다를 때만 씁니다 (암모나이트: 경계 노두 아래층 → 중생대)
      img          images 폴더에 같은 이름의 PNG를 넣으면 그림이 교체됩니다.
 
@@ -348,7 +348,7 @@ const DEFAULT_ITEM_DATA = [
     layer: "D",
     band: "boundary",
     isEvidence: true,
-    group: "지층에 남은 사건의 흔적 (화석 아님)",
+    group: "지층에 남은 사건의 흔적",
     hiddenInfo1: "중생대 말~신생대 초 경계",
     hiddenInfo2: "지층에 남은 사건의 흔적",
     description: "경계층에 남은 아주 얇은 점토층으로, 지구의 지각에서는 보기 드문 원소(이리듐)가 유난히 많이 들어 있다. 세계 여러 지역의 같은 시기 지층에서 함께 발견된다.",
@@ -379,7 +379,7 @@ const DEFAULT_ITEM_DATA = [
     layer: "D",
     band: "boundary",
     isEvidence: true,
-    group: "지층에 남은 사건의 흔적 (화석 아님)",
+    group: "지층에 남은 사건의 흔적",
     hiddenInfo1: "중생대 말~신생대 초 경계",
     hiddenInfo2: "지층에 남은 사건의 흔적",
     description: "알갱이 안에 여러 방향으로 금이 간 석영으로, 순간적으로 매우 강한 충격을 받아야 만들어진다. 경계층에는 화석 대신 이런 사건의 흔적이 남기도 한다.",

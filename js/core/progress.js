@@ -78,6 +78,7 @@ function renderCollection(){
       '<div class="card-no">No.' + String(idx + 1).padStart(2, "0") + '</div>' +
       (completed ? '<div class="card-get">GET</div>' : '') +
       (isNew ? '<div class="card-new">NEW</div>' : '') +
+      (item.isEvidence && discovered ? '<div class="card-type">지층 단서</div>' : '') +
       '<div class="card-ring"><div class="card-visual item-visual-slot"></div></div>' +
       '<div class="card-name">' + (discovered ? escapeHTML(itemDisplayName(item)) : "???") + '</div>' +
       '<div class="card-sub">' + (discovered ? escapeHTML(safe(layer && layer.label, "?")) : "미발견") +
@@ -124,7 +125,7 @@ function openResultScreen(){
     stat("pick", "조사한 노두", exploredOutcropCount() + " / " + layerData.length) +
     stat("bone", "발견한 단서", state.completed.length + " / " + total) +
     stat("map", "완성한 지층", m.placed.length + " / " + cardsN) +
-    stat("book", "탐사 도감 완성도", Math.round(state.completed.length / total * 100) + "%") +
+    stat("book", "화석도감 완성도", Math.round(state.completed.length / total * 100) + "%") +
     stat("brain", "퀴즈 정답률 (첫 시도)", acc + "%") +
     stat("star", "총 점수", safe(state.score, 0) + "점") +
     stat("medal", "획득 배지", state.badges.length + " / " + badgeData.length);
@@ -256,7 +257,7 @@ function drawReport(){
   y += 40;
   g.fillStyle = "#3b2a20"; g.font = "900 22px " + REPORT_FONT;
   g.fillText("완성한 지층 기록", 60, y);
-  g.fillText("탐사 도감 수집 현황", 330, y);
+  g.fillText("화석도감 수집 현황", 330, y);
   y += 20;
   drawColumnOnCanvas(g, 60, y, 230, 250, mst.placed);
   g.fillStyle = "#7a6048"; g.font = "700 13px " + REPORT_FONT;

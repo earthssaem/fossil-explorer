@@ -478,6 +478,7 @@ function openItemModal(itemId, fromCollection){
   const rows = [];
   rows.push(row("발견 지층", found ? (safe(layer && layer.label, "?") + (item.band ? " · " + bandNameOf(item) : "")) : "???", !found));
   rows.push(row("관찰 포인트", found ? safe(item.visualHint,"-") : "발굴하면 관찰할 수 있어요.", !found));
+  if(item.isEvidence) rows.push(row("유형", found ? "지층 단서 (화석 아님)" : "???", !found));
   rows.push(row("분류", done ? safe(item.group,"-") : "퀴즈를 풀면 해금", !done));
   rows.push(row("시대", done ? safe(item.hiddenInfo1,"-") : "???", !done));
   rows.push(row("환경", done ? safe(item.hiddenInfo2,"-") : "???", !done));
@@ -490,7 +491,7 @@ function openItemModal(itemId, fromCollection){
     const hasQuiz = Array.isArray(item.quiz) && item.quiz.length > 0;
     const b = document.createElement("button");
     b.className = "btn";
-    b.innerHTML = hasQuiz ? iconSVG("brain") + " 단서 해석 퀴즈" : iconSVG("book") + " 탐사 도감에 등록";
+    b.innerHTML = hasQuiz ? iconSVG("brain") + " 단서 해석 퀴즈" : iconSVG("book") + " 화석도감에 등록";
     b.addEventListener("click", () => {
       playSound("click");
       closeModal("itemModal");

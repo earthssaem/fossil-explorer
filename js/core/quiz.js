@@ -131,7 +131,7 @@ function completeItem(itemId){
   }
   saveState();
   playSound("register");
-  toast("탐사 도감에 등록: 「" + itemDisplayName(item) + "」");
+  toast(item.isEvidence ? "화석도감에 지층 단서 등록: 「" + itemDisplayName(item) + "」" : "화석도감에 등록: 「" + itemDisplayName(item) + "」");
   spawnConfetti();
   /* 확대 조사창 안의 조사 지점 상태 갱신
      (경계 노두 아래층처럼 한 화석이 여러 지점에서 나오는 경우가 있어 전부 갱신) */

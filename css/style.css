@@ -491,6 +491,7 @@ p{ margin:0; }
 .collect-card.locked .card-ring{ background:#d2c8b2; }
 .card-no{ position:absolute; left:6px; top:6px; font-family:var(--font-num); font-size:9px; color:var(--muted); }
 .card-get{ position:absolute; right:6px; top:6px; font-family:var(--font-num); font-size:9px; background:var(--teal); color:#fff; padding:2px 4px; }
+.card-type{ position:absolute; left:6px; top:20px; font-size:9px; font-weight:700; background:#5a4634; color:#f6ead0; padding:2px 4px; }
 .card-new{ position:absolute; right:6px; top:24px; font-family:var(--font-num); font-size:9px; background:var(--red); color:#fff; padding:2px 4px; animation:blink 1s infinite; }
 .card-ring{ width:96px; height:96px; margin:14px auto 8px; border:3px solid var(--line); padding:10px; }
 .card-name{ font-weight:700; }

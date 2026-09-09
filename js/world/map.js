@@ -549,7 +549,7 @@ function tryAction(){
       "이 계단은 " + (z ? z.name : "앞 구역") + "의 노두 조사를 마쳐야 열립니다.",
       safe(ly && ly.label, "노두") + " 진행: 단서 " + doneN + " / " + items.length + " 도감 등록" +
         (isBandedLayer(n.o.needs) ? (boundaryFullyDug(n.o.needs) ? " · 모든 띠 조사 완료" : " · 노두의 모든 띠를 아래층부터 차례로 조사해야 합니다") : "") + ".",
-      "앞 구역의 변화를 시간 순서대로 확인한 뒤 다음 구역으로 가는 게임 진행 규칙입니다."
+      "앞 구역의 변화를 차례로 살펴본 뒤 다음 구역으로 가는 탐사 규칙입니다."
     ];
     openDialog("관문 안내", lines);
     return;
@@ -558,7 +558,7 @@ function tryAction(){
     if(finalMissionReady()){ openFinalMission(); return; }
     const left = layerData.length - exploredOutcropCount();
     openDialog("전망대", [
-      "여기서는 공원 전체의 지층이 한눈에 보입니다. 남쪽 입구가 가장 오래된 층, 이곳이 가장 젊은 층이에요.",
+      "여기서는 공원 전체가 한눈에 보입니다. 노두마다 확인한 정보를 이곳에서 하나로 연결하게 됩니다.",
       left > 0 ? "아직 조사하지 않은 노두가 " + left + "곳 남았습니다. 노두를 모두 조사하면 여기서 흩어진 기록을 하나로 잇는 최종 미션이 열립니다."
                : "경계층에 남은 흔적을 모두 도감에 등록하면 여기서 최종 미션이 열립니다."
     ]);

@@ -14,14 +14,14 @@
    isBoundary   중생대 말~신생대 초 경계 노두 (절벽·노두 그림에 검은 띠)
    unconformityBelow  바로 아래 지층과의 사이가 부정합(기록이 빠진 시간)
    hiddenName / hiddenInfo  그 지층 화석의 퀴즈를 완료하면 해금 --- */
-const LOCK_LOWER_FIRST = "변화를 시간 순서대로 확인하기 위해 아래층부터 조사해 보자. (게임 진행 규칙)";
+const LOCK_LOWER_FIRST = "변화를 차례로 살펴보기 위해 아래층부터 조사해 보자. (탐사 규칙)";
 const DEFAULT_LAYER_DATA = [
   { id: "A", label: "지층 A", era: "선캄브리아 시대", env: "바다", color1: "#e0c084", color2: "#c8a060",
     hiddenName: "선캄브리아 시대의 바다",
     hiddenInfo: "아래층에서는 스트로마톨라이트가, 그보다 훨씬 뒤에 쌓인 위층에서는 에디아카라 생물군이 발견됩니다. 선캄브리아 시대는 지구 역사의 약 88%를 차지할 만큼 길어, 한 노두 안에서도 아주 긴 시간이 흘렀습니다.",
     bands: [
-      { key: "lower", name: "아래층", hint: "이 노두에서 가장 오래된 기록" },
-      { key: "upper", name: "위층",  hint: "아주 긴 시간이 흐른 뒤의 기록",
+      { key: "lower", name: "아래층", hint: "노두 아래쪽의 기록" },
+      { key: "upper", name: "위층",  hint: "노두 위쪽의 기록",
         gapNote: "아래층과 위층 사이에는 약 30억 년의 시간이 흘렀다.",
         lockMsg: LOCK_LOWER_FIRST }
     ] },
@@ -41,7 +41,7 @@ const DEFAULT_LAYER_DATA = [
     bands: [
       { key: "lower",    name: "아래층", repeat: 3, hint: "검은 띠 아래의 지층" },
       { key: "boundary", name: "경계층", dark: true, hint: "얇고 검은 띠", lockMsg: LOCK_LOWER_FIRST },
-      { key: "upper",    name: "위층",   empty: 3, hint: "경계층 위의 지층", lockMsg: "변화를 시간 순서대로 확인하기 위해 경계층을 먼저 조사해 보자. (게임 진행 규칙)" }
+      { key: "upper",    name: "위층",   empty: 3, hint: "경계층 위의 지층", lockMsg: "변화를 차례로 살펴보기 위해 경계층을 먼저 조사해 보자. (탐사 규칙)" }
     ] },
   { id: "E", label: "지층 E", era: "신생대", env: "바다", color1: "#7c5c40", color2: "#644830",
     hiddenName: "신생대의 바다",
@@ -50,8 +50,8 @@ const DEFAULT_LAYER_DATA = [
     hiddenName: "신생대의 육지",
     hiddenInfo: "아래층에서는 참나무 잎이, 위층에서는 매머드가 발견됩니다. 신생대는 처음에는 온난했지만 후기에는 빙하기와 간빙기가 반복되었습니다. 아래층의 참나무 잎과 위층의 매머드가 그 변화를 보여 줍니다.",
     bands: [
-      { key: "lower", name: "아래층", hint: "먼저 쌓인 기록" },
-      { key: "upper", name: "위층",  hint: "나중에 쌓인 기록", lockMsg: LOCK_LOWER_FIRST }
+      { key: "lower", name: "아래층", hint: "노두 아래쪽의 기록" },
+      { key: "upper", name: "위층",  hint: "노두 위쪽의 기록", lockMsg: LOCK_LOWER_FIRST }
     ] }
 ];
 

@@ -95,7 +95,8 @@ function normalizeConceptStats(cs){
 function recordConcept(tag, firstTry){
   state.conceptStats = normalizeConceptStats(state.conceptStats);
   const t = String(safe(tag, "")).trim().toUpperCase();
-  if(!t || CONCEPT_KEYS.indexOf(t) < 0){
+  if(!t) return;   /* tag 없음(noTally 문항) → 조용히 제외 */
+  if(CONCEPT_KEYS.indexOf(t) < 0){
     if(window.console && console.warn) console.warn("[개념 태그] 알 수 없는 tag: " + JSON.stringify(safe(tag,"(없음)")) + " — 개념별 성취에서 제외됩니다.");
     return;
   }
@@ -122,6 +123,7 @@ function validateContentData(){
     else seen[it.id] = true;
     if(!layerData.some(l => l.id === it.layer)) warns.push(where + ": layer \"" + safe(it.layer,"") + "\" 에 해당하는 지층이 없습니다.");
     (Array.isArray(it.quiz) ? it.quiz : []).forEach((q, qi) => {
+      if(q.noTally) return;   /* 의도적으로 집계에서 제외한 문항 */
       const t = String(safe(q.tag, "")).trim().toUpperCase();
       if(!t) warns.push(where + " 문항 " + (qi+1) + ": tag가 없습니다 → 개념별 성취에서 빠집니다.");
       else if(CONCEPT_KEYS.indexOf(t) < 0) warns.push(where + " 문항 " + (qi+1) + ": tag \"" + safe(q.tag,"") + "\" 는 " + CONCEPT_KEYS.join("/") + " 중 하나여야 합니다.");

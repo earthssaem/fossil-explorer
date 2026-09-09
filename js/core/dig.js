@@ -98,7 +98,6 @@ function openOutcropModal(layerId, quiet){
   game.sites = [];
   const idx = layerData.findIndex(l => l.id === layerId);
   const below = idx > 0 ? layerData[idx - 1] : null;
-  const above = idx < layerData.length - 1 ? layerData[idx + 1] : null;
   const unlocked = state.unlockedLayers.includes(layerId);
   $("outcropModalTitle").textContent = safe(ly.label, "지층 " + ly.id) + " 노두" + (unlocked ? " · " + safe(ly.hiddenName, "") : "");
   const xsec = $("outcropXsec");
@@ -156,7 +155,7 @@ function openOutcropModal(layerId, quiet){
   /* 층서 기둥 (지층 대비) */
   renderStratColumn(layerId);
   $("outcropNote").textContent = outcropNoteText(layerId) +
-    (above ? " 이 층 위에 쌓인 " + safe(above.label, "층") + "은(는) 북쪽 구역의 노두에서 볼 수 있다." : " 이 층이 공원에서 가장 젊은 지층이다.");
+    " 다른 구역의 노두도 조사해 이 층과 어떻게 이어지는지 비교해 보자.";
   if(!quiet){
     openModal("outcropModal");
     playSound("place");
@@ -188,7 +187,7 @@ function outcropNoteText(layerId){
     const next = bands.find(b => !bandAllDug(b));
     if(!next) return "이 노두의 모든 띠를 조사했다.";
     const label = next.name + (next.hint ? "(" + next.hint + ")" : "");
-    if(next.index === 0) return label + "부터 조사해 보자. 변화를 시간 순서대로 확인하기 위한 게임 진행 규칙이다.";
+    if(next.index === 0) return label + "부터 조사해 보자. 변화를 차례로 살펴보기 위한 탐사 규칙이다.";
     return "이제 그 위의 " + label + "을(를) 조사한다.";
   }
   const left = itemsOfLayer(layerId).filter(i => !state.completed.includes(i.id)).length;

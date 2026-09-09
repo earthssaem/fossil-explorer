@@ -438,7 +438,7 @@ function buildProps(){
   defProp("ranger", PLAYER_FRONT_MAP, RANGER_PAL, { ax: 7, ay: 17, solid: { x: -5, y: -4, w: 10, h: 4 } });
 }
 
-/* ---------- 노두(강물이 깎은 절벽) 스프라이트: 층 색으로 생성 ---------- */
+/* ---------- 노두(강가 절벽) 스프라이트: 층 색으로 생성 ---------- */
 function buildOutcropProp(ly, below){
   const W = 48, H = 26;
   const c = makeCanvas(W, H);

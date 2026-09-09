@@ -432,11 +432,12 @@ function positionHint(){
   hint.style.top = clamp(sy, 70, WORLD.canvas.height - 120) + "px";
 }
 
-/* ---------- 지질도 미니맵 ---------- */
-const GEO_COLORS = { "선캄브리아 시대": "#c98bb8", "고생대": "#79b3d8", "중생대": "#8fcf8a", "중생대 말~신생대 초": "#3a3230", "신생대": "#f0d46a" };
+/* ---------- 지질도 미니맵 ----------
+   지층 기호(A~F)별 색만 쓴다. 시대 이름은 학생이 화석으로 추리해야 하므로 지질도·범례에 쓰지 않는다. */
+const GEO_COLORS = { "A": "#c98bb8", "B": "#79b3d8", "C": "#8fcf8a", "D": "#3a3230", "E": "#f0d46a", "F": "#f0a05a" };
 function eraColorOfZone(zid){
   const z = zoneById(zid); const ly = z ? layerById(z.layer) : null;
-  return ly ? (GEO_COLORS[ly.era] || "#bbb") : "#bbb";
+  return ly ? (GEO_COLORS[ly.id] || "#bbb") : "#bbb";
 }
 function buildGeoMap(){
   const m = makeCanvas(MINI.w, MINI.h);

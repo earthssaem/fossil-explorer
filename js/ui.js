@@ -353,11 +353,11 @@ function bindUI(){
   ["itemModal", "layerModal", "badgeModal", "outcropModal", "emptyDigModal"].forEach(id => {
     $(id).addEventListener("click", e => { if(e.target === $(id)) closeModal(id); });
   });
-  /* 지질도 범례 */
+  /* 지질도 범례 (지층 기호만 표시 — 시대는 추리 대상이므로 쓰지 않는다) */
   const lg = $("miniLegend");
   if(lg){
     lg.innerHTML = Object.keys(GEO_COLORS).map(k =>
-      '<span><i style="background:' + GEO_COLORS[k] + '"></i>' + escapeHTML(k === "중생대 말~신생대 초" ? "경계층" : k) + '</span>').join("");
+      '<span><i style="background:' + GEO_COLORS[k] + '"></i>' + escapeHTML("지층 " + k) + '</span>').join("");
   }
 }
 

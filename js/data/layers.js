@@ -20,8 +20,8 @@ const DEFAULT_LAYER_DATA = [
     hiddenName: "선캄브리아 시대의 바다",
     hiddenInfo: "아래층에서는 스트로마톨라이트가, 그보다 훨씬 뒤에 쌓인 위층에서는 에디아카라 생물군이 발견됩니다. 선캄브리아 시대는 지구 역사의 약 88%를 차지할 만큼 길어, 한 노두 안에서도 아주 긴 시간이 흘렀습니다.",
     bands: [
-      { key: "lower", name: "아래층", hint: "오래된 선캄브리아 시대 기록" },
-      { key: "upper", name: "위층",  hint: "선캄브리아 시대 말 기록",
+      { key: "lower", name: "아래층", hint: "이 노두에서 가장 오래된 기록" },
+      { key: "upper", name: "위층",  hint: "아주 긴 시간이 흐른 뒤의 기록",
         gapNote: "아래층과 위층 사이에는 약 30억 년의 시간이 흘렀다.",
         lockMsg: LOCK_LOWER_FIRST }
     ] },
@@ -39,7 +39,7 @@ const DEFAULT_LAYER_DATA = [
     hiddenName: "중생대 말~신생대 초 경계",
     hiddenInfo: "아래층에는 암모나이트가 풍부하지만, 얇고 검은 경계층 위에서는 화석이 거의 나오지 않습니다. 경계층 위에서 다시 나온 화석 중 이전에도 있던 종류는 없습니다. 이렇게 생물의 종류가 크게 달라지는 곳이 지질 시대의 경계가 됩니다.",
     bands: [
-      { key: "lower",    name: "아래층", repeat: 3, hint: "암모나이트가 나오는 중생대 말 바다" },
+      { key: "lower",    name: "아래층", repeat: 3, hint: "검은 띠 아래의 지층" },
       { key: "boundary", name: "경계층", dark: true, hint: "얇고 검은 띠", lockMsg: LOCK_LOWER_FIRST },
       { key: "upper",    name: "위층",   empty: 3, hint: "경계층 위의 지층", lockMsg: "변화를 시간 순서대로 확인하기 위해 경계층을 먼저 조사해 보자. (게임 진행 규칙)" }
     ] },
@@ -50,8 +50,8 @@ const DEFAULT_LAYER_DATA = [
     hiddenName: "신생대의 육지",
     hiddenInfo: "아래층에서는 참나무 잎이, 위층에서는 매머드가 발견됩니다. 신생대는 처음에는 온난했지만 후기에는 빙하기와 간빙기가 반복되었습니다. 아래층의 참나무 잎과 위층의 매머드가 그 변화를 보여 줍니다.",
     bands: [
-      { key: "lower", name: "아래층", hint: "신생대의 온난한 육지" },
-      { key: "upper", name: "위층",  hint: "신생대 후기의 추운 육지", lockMsg: LOCK_LOWER_FIRST }
+      { key: "lower", name: "아래층", hint: "먼저 쌓인 기록" },
+      { key: "upper", name: "위층",  hint: "나중에 쌓인 기록", lockMsg: LOCK_LOWER_FIRST }
     ] }
 ];
 

@@ -493,7 +493,7 @@ function updateNear(){
     if(d < 64 && !state.foundOutcrops.includes(o.layerId)){
       state.foundOutcrops.push(o.layerId);
       saveState();
-      toast("새 노두 발견: " + safe((layerById(o.layerId) || {}).label, "지층 " + o.layerId) + ". 지질도에 표시했다.");
+      toast("새 노두 발견: " + safe((layerById(o.layerId) || {}).label, "지층 " + o.layerId) + ". 탐사 지도에 표시했다.");
       playSound("place");
     }
     consider("outcrop", o, o.x, o.y, 34);

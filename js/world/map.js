@@ -152,7 +152,7 @@ function buildWorld(){
       WORLD.props.push({ key: "track", x: (pz.col + 1 + k * 1.3) * T + 4, y: (pz.row + 1 + (k % 2)) * T + 8, flat: true });
     }
   }
-  /* 8. 노두 (강물이 깎아 만든 절벽) */
+  /* 8. 노두 (이 공원에서는 강가 절벽에 드러남) */
   const reserved = [];   // 소품 배치 금지 셀 (c,r)
   const reserve = (c, r, w, h) => { for(let rr = r; rr < r + h; rr++) for(let cc = c; cc < c + w; cc++) reserved.push(cellIdx(cc, rr)); };
   (worldData.outcrops || []).forEach(o => {

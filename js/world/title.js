@@ -109,7 +109,7 @@ function titleBuildRidge(P){
   }
   return c;
 }
-/* 지층 절벽: 젊은 층(F)이 위, 오래된 층(A)이 아래. 경계층의 검은 띠·부정합 물결선도 그린다 */
+/* 지층 절벽: 젊은 층(F)이 위, 오래된 층(A)이 아래. 경계층의 검은 띠도 그린다 */
 function titleBuildCliff(P, H){
   const c = makeCanvas(P, H);
   const g = c.getContext("2d");
@@ -135,10 +135,6 @@ function titleBuildCliff(P, H){
     if(s.ly.isBoundary){
       g.fillStyle = safe(s.ly.colorBoundary1, "#1b140e");
       g.fillRect(0, s.y0 + 1, P, 2);
-    }
-    if(s.ly.unconformityBelow && si < n - 1){
-      g.fillStyle = "#1b140e";
-      for(let x = 0; x < P; x++) g.fillRect(x, s.y1 - 2 + (Math.floor(x / 3) % 2), 1, 1);
     }
     g.fillStyle = "#3a2a1c";
     g.fillRect(0, s.y1 - 1, P, 1);

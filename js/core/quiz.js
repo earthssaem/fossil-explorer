@@ -192,9 +192,6 @@ function openLayerModal(layerId){
   html += '<div class="info-row"><div class="info-label">숨겨진 정보</div><div class="info-value' + (unlocked?"":" locked") + '">' +
           (unlocked ? escapeHTML(safe(ly.hiddenInfo,"-")) : "???") + "</div></div>";
   html += '<div class="info-row"><div class="info-label">단서 수집</div><div class="info-value">' + foundCnt + " / " + items.length + "</div></div>";
-  if(ly.unconformityBelow){
-    html += '<div class="info-row"><div class="info-label">부정합</div><div class="info-value">이 층과 바로 아래 지층 사이에는 쌓이지 않았거나 깎여 나간 시간이 있다. 노두 단면의 물결선이 그 경계다.</div></div>';
-  }
   $("layerModalInfo").innerHTML = html;
   openModal("layerModal");
 }

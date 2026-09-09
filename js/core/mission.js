@@ -75,7 +75,6 @@ function stratColumnHTML(placed, opts){
             '<span>' + escapeHTML(o.small ? safe(ly && ly.era, "") : items) + '</span>'
           : '<span class="q">?</span>') +
       '</div>';
-    if(ly && ly.unconformityBelow && !card.band) html += '<div class="m-unconf"></div>';
     if(card.band === "upper" && card.layer === "A" && on) html += '<div class="m-gap">약 30억 년</div>';
   });
   html += '<div class="m-base">기반암</div></div>';

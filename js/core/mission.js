@@ -205,7 +205,8 @@ function pickEvidence(cardId, itemId){
     missionRecord("m1_ev_" + cardId, "IDX", false);
     playSound("wrong");
     const own = cardItems(card).some(i => i.id === itemId);
-    m1.feedback = fillTpl(own ? st.wrongEvidenceIndex : st.wrongEvidenceOther, { fossil: safe(it && it.name, "") });
+    const per = (card.wrongEvidence || {})[itemId];
+    m1.feedback = per ? per : fillTpl(own ? st.wrongEvidenceIndex : st.wrongEvidenceOther, { fossil: safe(it && it.name, "") });
     m1.fbKind = "hint";
   }
   renderStage1();
@@ -244,7 +245,7 @@ function renderStage2(){
       let tag = "";
       if(done){
         const ans = m.matched[L.n];
-        tag = ans === "none" ? "시대 판정 불가 · 고생대와 중생대 사이" : (ans === "D" ? "경계층" : "지층 " + ans);
+        tag = L.doneTag ? L.doneTag : (ans === "none" ? safe(s2.noneTag, "시대 판정 불가") : (ans === "D" ? "경계층" : "지층 " + ans));
       }
       return '<div class="n-layer' + (L.band ? " band" : "") + (isCur ? " cur" : "") + (done ? " done" : "") + '">' +
         '<b>' + L.n + '층</b>' +
@@ -271,10 +272,22 @@ function renderStage2(){
     right = '<div class="m-current">' + cur.n + '층 · ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
       '<div class="quiz-feedback explain">' + escapeHTML(m2.explain) + '</div>' +
       '<div class="modal-actions"><button class="btn teal" id="m2Next">' + (layers.indexOf(cur) === layers.length - 1 ? "마무리 문항" : "다음 층") + '</button></div>';
-  }else if(m2.phase === "match"){
+  }else if(cur.era && !m2.eraDone && m2.phase === "match"){
+    /* 시대 먼저 묻기 (era 단계) */
     right = '<div class="m-current">' + cur.n + '층 · 발견된 것: ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
-      '<div class="m-prompt">' + escapeHTML(s2.askMatch || "") + '</div><div class="m-choices">' +
-      matchChoices().map(c => '<button class="m-choice" data-match="' + c.key + '">' + escapeHTML(c.label) + '</button>').join("") + '</div>' +
+      '<div class="m-prompt">' + escapeHTML(cur.era.ask || "") + '</div><div class="m-choices">' +
+      (cur.era.choices || []).map(c => '<button class="m-choice" data-era="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>').join("") + '</div>' +
+      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
+  }else if(cur.era && !m2.eraDone && m2.phase === "eraKey"){
+    right = '<div class="m-current">' + cur.n + '층 → <b>' + escapeHTML(cur.era.answer || "") + '</b></div>' +
+      '<div class="m-prompt">' + escapeHTML(cur.era.askKey || s2.askKey || "") + '</div><div class="m-choices icons">' +
+      cur.fossils.map(id => '<button class="m-choice" data-era-key="' + id + '"><i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id)) + '</button>').join("") + '</div>' +
+      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
+  }else if(m2.phase === "match"){
+    const choices = Array.isArray(cur.matchChoices) ? cur.matchChoices : matchChoices();
+    right = '<div class="m-current">' + cur.n + '층 · 발견된 것: ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
+      '<div class="m-prompt">' + escapeHTML(cur.askMatch || s2.askMatch || "") + '</div><div class="m-choices">' +
+      choices.map(c => '<button class="m-choice" data-match="' + c.key + '">' + escapeHTML(c.label) + '</button>').join("") + '</div>' +
       (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
   }else{
     const picked = matchChoices().find(c => c.key === m2.pick);
@@ -298,6 +311,8 @@ function renderStage2(){
     '<div class="m-layout"><div class="m-left">' + left + '</div><div class="m-right">' + right + '</div></div>';
   const body = $("missionBody");
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
+  body.querySelectorAll("[data-era]").forEach(b => b.addEventListener("click", () => pickEra(cur, b.getAttribute("data-era"))));
+  body.querySelectorAll("[data-era-key]").forEach(b => b.addEventListener("click", () => pickEraKey(cur, b.getAttribute("data-era-key"))));
   body.querySelectorAll("[data-match]").forEach(b => b.addEventListener("click", () => pickMatch(cur, b.getAttribute("data-match"))));
   body.querySelectorAll("[data-key]").forEach(b => b.addEventListener("click", () => pickKey(cur, b.getAttribute("data-key"))));
   body.querySelectorAll("[data-close-ans]").forEach(b => b.addEventListener("click", () => answerClosing(Number(b.getAttribute("data-close-ans")), b)));
@@ -305,11 +320,63 @@ function renderStage2(){
   const nx = $("m2Next"); if(nx) nx.addEventListener("click", () => { playSound("click"); m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: "" }; renderStage2(); });
   const fin = $("m2Finish"); if(fin) fin.addEventListener("click", finishMission);
 }
+/* era 단계: 대비 전에 먼저 시대를 판단한다 (공룡 → 중생대) */
+function pickEra(L, choice){
+  const era = L.era || {};
+  if(choice === era.answer){
+    missionRecord("m2_era_" + L.n, "ERA", true);
+    playSound("correct");
+    m2.phase = "eraKey"; m2.feedback = "";
+  }else{
+    missionRecord("m2_era_" + L.n, "ERA", false);
+    playSound("wrong");
+    m2.feedback = safe(era.wrong, "다시 생각해 보자."); m2.fbKind = "hint";
+  }
+  renderStage2();
+}
+function pickEraKey(L, key){
+  const s2 = finalMissionData().stage2 || {};
+  const era = L.era || {};
+  const trap = (era.trap || {})[key];
+  if(trap){
+    missionRecord("m2_erakey_" + L.n, "IDX", false);
+    playSound("wrong");
+    m2.feedback = trap; m2.fbKind = "hint";
+  }else if((era.key || []).indexOf(key) >= 0){
+    missionRecord("m2_erakey_" + L.n, "IDX", true);
+    playSound("correct");
+    m2.eraDone = true; m2.phase = "match"; m2.pick = null;
+    m2.feedback = safe(era.feedback, ""); m2.fbKind = "explain";
+  }else{
+    missionRecord("m2_erakey_" + L.n, "IDX", false);
+    playSound("wrong");
+    m2.feedback = safe(s2.wrongMatch, ""); m2.fbKind = "hint";
+  }
+  renderStage2();
+}
 function pickMatch(L, key){
   const s2 = finalMissionData().stage2 || {};
   const m = missionState();
   playSound("click");
   m2.pick = key;
+  if(L.skipKey){
+    /* 근거를 따로 묻지 않는 층 (위치 관계를 질문에 담은 경우) */
+    const answerKey = L.answer === "boundary" ? "D" : L.answer;
+    if(key === answerKey){
+      missionRecord("m2_match_" + L.n, "ERA", true);
+      playSound("correct");
+      m.matched[L.n] = answerKey; saveState();
+      m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: L.explain || "" };
+    }else{
+      missionRecord("m2_match_" + L.n, "ERA", false);
+      playSound("wrong");
+      const per = (L.wrongMatch && typeof L.wrongMatch === "object") ? L.wrongMatch[key] : null;
+      m2.feedback = per || safe(s2.wrongMatch, ""); m2.fbKind = "hint";
+      m2.eraDone = true; m2.phase = "match"; m2.pick = null;
+    }
+    renderStage2();
+    return;
+  }
   if(L.answer === "none"){
     if(key === "none"){
       missionRecord("m2_match_" + L.n, "ERA", true);
@@ -347,12 +414,12 @@ function pickKey(L, key){
     playSound("correct");
     m.matched[L.n] = answerKey; saveState();
     m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint",
-           explain: (L.explain || "") + (key === "band" && L.explainBand ? " " + L.explainBand : "") };
+           explain: L.explain || "" };
   }else if(!keyOk){
     missionRecord("m2_key_" + L.n, "IDX", false);
     playSound("wrong");
     m2.feedback = key === "order"
-      ? safe(s2.wrongOrderKey, "아래위 층의 순서로는 범위만 좁힐 수 있다. 이 층에는 시대를 정해 주는 표준 화석이 있다.")
+      ? (L.band ? safe(s2.wrongOrderBand, "순서만으로는 경계층인지 알 수 없다.") : safe(s2.wrongOrderKey, "아래위 층의 순서로는 범위만 좁힐 수 있다. 이 층에는 시대를 정해 주는 표준 화석이 있다."))
       : safe(s2.wrongMatch, "");
     m2.fbKind = "hint";
   }else{

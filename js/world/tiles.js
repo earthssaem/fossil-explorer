@@ -444,10 +444,10 @@ function buildOutcropProp(ly, below){
   const c = makeCanvas(W, H);
   const g = c.getContext("2d");
   const c1 = safe(ly.color1, "#c8a060"), c2 = safe(ly.color2, "#946746");
-  const cb = below ? safe(below.color1, "#8a7050") : "#6e6672";     // 아래층 or 기반암
+  const cb = below ? safe(below.color1, "#8a7050") : "#6e6672";     // 아래층 (없으면 기본색)
   /* 위: 잔디 능선 */
   g.fillStyle = "#3a2a1c"; g.fillRect(0, 2, W, 1);
-  /* 층리 (위 70%: 이 층, 아래 30%: 아래층/기반암) */
+  /* 층리 (위 70%: 이 층, 아래 30%: 아래층) */
   let y = 3;
   const bedsTop = Math.floor(H * 0.7);
   let i = 0;

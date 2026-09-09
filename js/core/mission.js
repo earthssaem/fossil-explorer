@@ -75,7 +75,7 @@ function stratColumnHTML(placed, opts){
           : '<span class="q">?</span>') +
       '</div>';
   });
-  html += '<div class="m-base">기반암</div></div>';
+  html += '</div>';
   return html;
 }
 
@@ -508,8 +508,4 @@ function drawColumnOnCanvas(g, x, y, w, h, placed){
     const label = on ? (safe(ly && ly.label, "") + (card.band ? (card.band === "upper" ? " 위" : " 아래") : "") + " · " + safe(ly && ly.era, "")) : "?";
     g.fillText(fitText(g, label, w - 12), x + 6, by + bh / 2);
   });
-  g.fillStyle = "#6e6672"; g.fillRect(x, y + n * bh, w, 16);
-  g.strokeStyle = "#3b2a20"; g.strokeRect(x, y + n * bh, w, 16);
-  g.fillStyle = "#fff8e6"; g.font = "700 11px " + REPORT_FONT;
-  g.fillText("기반암", x + 6, y + n * bh + 8);
 }

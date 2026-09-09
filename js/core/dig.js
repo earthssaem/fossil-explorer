@@ -130,21 +130,18 @@ function openOutcropModal(layerId, quiet){
     renderBands(row, ly);
   }
   xsec.appendChild(row);
-  /* 아래층 일부 (또는 기반암) */
-  const sl = document.createElement("div");
-  sl.className = "xsec-sliver";
+  /* 아래층 일부 (가장 아래 지층에는 표시하지 않는다) */
   if(below){
+    const sl = document.createElement("div");
+    sl.className = "xsec-sliver";
     const bc = safe(below.color2, "#946746");
     sl.style.background =
       "repeating-linear-gradient(0deg, rgba(70,40,20,.2) 0 4px, transparent 4px 14px), linear-gradient(" + bc + ", " + bc + ")";
     const bDug = outcropDug(below.id);
     sl.innerHTML = '<span>' + escapeHTML(safe(below.label, "아래층")) + ' 윗부분 · ' +
       (bDug ? '남쪽 구역에서 조사함' : '남쪽 구역의 노두에서 조사') + '</span>';
-  }else{
-    sl.style.background = "repeating-linear-gradient(45deg, #6e6672 0 6px, #5d5661 6px 12px)";
-    sl.innerHTML = '<span>기반암 · 지층이 아닌 변성암</span>';
+    xsec.appendChild(sl);
   }
-  xsec.appendChild(sl);
   /* 층서 기둥 (지층 대비) */
   renderStratColumn(layerId);
   $("outcropNote").textContent = outcropNoteText(layerId) +
@@ -168,7 +165,6 @@ function renderStratColumn(currentId){
       '<b>' + escapeHTML(safe(lr.id, "?")) + '</b>' +
       '<span>' + (dug ? escapeHTML(safe(lr.era, "")) : "?") + '</span></div>';
   });
-  html += '<div class="col-base">기반암</div>';
   col.innerHTML = html;
 }
 

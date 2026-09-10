@@ -25,7 +25,7 @@ function defaultState(){
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
     finalMissionDone: false, // 최종 미션(층서 복원) 완료 여부
-    mission: {},             // 최종 미션 진행 { stage, placed:[], envDone:[], matched:{}, closingDone }
+    mission: {},             // 최종 미션 진행 { stage, order:[], placed:[], matched:{}, closingDone }
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -146,7 +146,6 @@ function validateContentData(){
   const fm = DEFAULT_MISSION_DATA.finalMission || {};
   (fm.cards || []).forEach(c => {
     if(!layerData.some(l => l.id === c.layer)) warns.push("최종 미션 카드 " + c.id + ": 지층 " + c.layer + " 이(가) 없습니다.");
-    (c.evidence || []).forEach(id => { if(!itemData.some(i => i.id === id)) warns.push("최종 미션 카드 " + c.id + ": 근거 화석 " + id + " 이(가) 없습니다."); });
   });
   if(warns.length && window.console && console.warn){
     console.warn("[지층 탐사대] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));

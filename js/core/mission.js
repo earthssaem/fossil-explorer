@@ -117,7 +117,9 @@ function renderStage1(){
       '<div class="modal-actions"><button class="btn primary" id="m1Next">2단계로</button></div>';
   }else if(m1.phase === "pick"){
     const remaining = shuffledCards().filter(c => m.placed.indexOf(c.id) < 0);
-    right = '<div class="m-prompt">' + escapeHTML(st.askNext || "") + '</div><div class="m-cards">' +
+    /* 첫 카드를 고를 때와 그 뒤를 구분한다 */
+    const ask = m.placed.length ? (st.askNext || "") : (st.askFirst || st.askNext || "");
+    right = '<div class="m-prompt">' + escapeHTML(ask) + '</div><div class="m-cards">' +
       remaining.map(c => {
         const its = cardItems(c);
         return '<button class="m-card" data-card="' + c.id + '">' +

@@ -23,8 +23,12 @@ function layerBands(layerId){
       mine.forEach((it, i) => slots.push({ slot: layerId + "#" + b.key + i, itemId: it.id }));
     }
     if(b.empty){ for(let i = 0; i < b.empty; i++) slots.push({ slot: layerId + "#" + b.key + "e" + i, itemId: null }); }
+    /* spots: 지점별 지정. null = 빈손, {name, shape, note} = 관찰만 하는 드문 화석 (아이템·퀴즈 없음) */
+    if(Array.isArray(b.spots)){
+      b.spots.forEach((sp, i) => slots.push({ slot: layerId + "#" + b.key + "e" + i, itemId: null, find: sp || null }));
+    }
     return { key: b.key, name: safe(b.name, "층"), slots: slots, hint: safe(b.hint, ""), lockMsg: safe(b.lockMsg, ""),
-             dark: !!b.dark, gapNote: safe(b.gapNote, ""), index: bi };
+             dark: !!b.dark, gapNote: safe(b.gapNote, ""), doneNote: safe(b.doneNote, ""), index: bi };
   });
 }
 function isBandedLayer(layerId){ return !!layerBands(layerId); }
@@ -241,6 +245,7 @@ function renderDigSites(container, slots){
        지점이 잠겨 버리면 위 띠가 영영 열리지 않는다. */
     let status;
     if(!slotDug(sl.slot))      status = "undiscovered";
+    else if(sl.find)           status = "observed";
     else if(!sl.itemId)        status = "empty";
     else if(state.completed.includes(sl.itemId)) status = "collected";
     else                       status = "discovered";
@@ -259,19 +264,20 @@ function renderDigSites(container, slots){
       '<div class="check-mark"></div>' +
       '<div class="empty-mark"></div>' +
       '<div class="dig-progress"><div class="fill"></div></div>';
-    if(item){
+    if(item || sl.find){
       const slotEl = site.querySelector(".site-item");
-      renderAssetImage(slotEl, item, status === "undiscovered" ? "silhouette" : "normal");
+      renderAssetImage(slotEl, item || findAsset(sl.find), status === "undiscovered" ? "silhouette" : "normal");
     }
     site.addEventListener("click", () => {
       if(game.digging) return;
       if(site.classList.contains("collected")) openItemModal(sl.itemId, false);
       else if(site.classList.contains("discovered")) openDiscoveryPopup(sl.itemId);
+      else if(site.classList.contains("observed")) showRareFindResult(sl.slot, false);
       else if(site.classList.contains("empty")) showEmptyDigResult(sl.slot, false);
       else if(site.classList.contains("undiscovered")) startDigging(sl.slot);
     });
     container.appendChild(site);
-    game.sites.push({ slot: sl.slot, itemId: sl.itemId || null, x: 0, el: site, status: status });
+    game.sites.push({ slot: sl.slot, itemId: sl.itemId || null, find: sl.find || null, x: 0, el: site, status: status });
   });
 }
 
@@ -334,6 +340,18 @@ function completeDigging(siteId){
   }
   s.el.classList.remove("digging");
 
+  /* --- 관찰만 하는 드문 화석 (경계 노두 위층) — 도감 등록·퀴즈 없이 짧은 관찰 결과만 보여 준다 --- */
+  if(s.find){
+    s.status = "observed";
+    s.el.classList.add("observed");
+    renderAssetImage(s.el.querySelector(".site-item"), findAsset(s.find), "normal");
+    playSound("found");
+    updateHud();
+    refreshOutcropModal();
+    setTimeout(() => showRareFindResult(siteId, true), 300);
+    return;
+  }
+
   /* --- 아무것도 나오지 않는 지점 (경계 노두 위층) --- */
   if(!s.itemId){
     s.status = "empty";
@@ -394,22 +412,52 @@ function refreshOutcropModal(){
   }
 }
 
-/* 위층 빈손 결과 */
-function showEmptyDigResult(slot, isNew){
+/* 관찰만 하는 드문 화석을 그림 함수에 넘길 수 있는 꼴로 바꾼다 (아이템이 아니므로 도감에는 오르지 않는다) */
+function findAsset(find){
+  return { id: "find_" + safe(find && find.shape, "unknown"), name: safe(find && find.name, "작은 화석"),
+           shape: safe(find && find.shape, "unknown"), img: find && find.img };
+}
+/* 어느 띠의 지점인지와 그 띠의 조사 진행 상황 */
+function bandProgressOf(slot){
   const layerId = String(slot).split("#")[0];
   const bands = layerBands(layerId) || [];
-  const band = bands.find(b => b.slots.some(x => x.slot === slot)) || bands[bands.length - 1];
+  const band = bands.find(b => b.slots.some(x => x.slot === slot)) || bands[bands.length - 1] || null;
   const dugCount = band ? band.slots.filter(s => slotDug(s.slot)).length : 0;
   const total = band ? band.slots.length : 0;
-  const allEmpty = total > 0 && dugCount >= total;
-  const KEY_Q = "이 층에서는 화석이 거의 발견되지 않는다. 아래층과 무엇이 달라진 걸까?";
+  return { band: band, dugCount: dugCount, total: total, allDug: total > 0 && dugCount >= total };
+}
+const KEY_Q_DEFAULT = "이 층에서는 화석이 거의 발견되지 않는다. 아래층과 무엇이 달라진 걸까?";
+
+/* 위층 빈손 결과 */
+function showEmptyDigResult(slot, isNew){
+  const p = bandProgressOf(slot);
+  const keyQ = (p.band && p.band.doneNote) || KEY_Q_DEFAULT;
   /* 위층을 모두 파고 나서야 핵심 질문을 던진다. 토스트는 사라지므로 결과창에도 같은 문장을 남긴다. */
-  $("emptyDigNote").textContent = allEmpty
-    ? KEY_Q
-    : "이 지점에서는 화석이 나오지 않았다. (" + (band ? band.name : "위층") + " " + dugCount + "/" + total + " 지점 조사)";
+  $("emptyDigNote").textContent = p.allDug
+    ? keyQ
+    : "이 지점에서는 화석이 나오지 않았다. (" + (p.band ? p.band.name : "위층") + " " + p.dugCount + "/" + p.total + " 지점 조사)";
   openModal("emptyDigModal");
-  if(isNew && allEmpty){
-    setTimeout(() => toast(KEY_Q), 900);
+  if(isNew && p.allDug){
+    setTimeout(() => toast(keyQ), 900);
+  }
+}
+
+/* 위층의 드문 화석 관찰 결과 — 이름·특징을 외우게 하지 않고 관찰 문장만 보여 준다 */
+function showRareFindResult(slot, isNew){
+  const p = bandProgressOf(slot);
+  const sl = p.band ? p.band.slots.find(x => x.slot === slot) : null;
+  const find = sl && sl.find;
+  if(!find) return;
+  const keyQ = (p.band && p.band.doneNote) || KEY_Q_DEFAULT;
+  renderAssetImage($("rareFindVisual"), findAsset(find), "normal");
+  $("rareFindTitle").textContent = safe(find.name, "작은 화석") + "이(가) 나왔다.";
+  $("rareFindNote").textContent = safe(find.note, "") +
+    " (" + (p.band ? p.band.name : "위층") + " " + p.dugCount + "/" + p.total + " 지점 조사)";
+  $("rareFindKeyQ").textContent = p.allDug ? keyQ : "";
+  $("rareFindKeyQ").hidden = !p.allDug;
+  openModal("rareFindModal");
+  if(isNew && p.allDug){
+    setTimeout(() => toast(keyQ), 900);
   }
 }
 

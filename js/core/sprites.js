@@ -368,7 +368,8 @@ const FOSSIL_PAL = {
   I:"#14111a",                /* 이리듐이 많은 검은 점토 */
   Q:"#c6d5e3", q:"#5e7186",   /* 석영 알갱이 / 여러 방향으로 갈라진 금 */
   G:"#9d9d9d", g:"#6a6a6a",   /* 화산재 / 화산재 결 */
-  Y:"#ecd63f", y:"#9c8b1e"    /* 황으로 변색된 부분 / 짙은 황 */
+  Y:"#ecd63f", y:"#9c8b1e",   /* 황으로 변색된 부분 / 짙은 황 */
+  V:"#e9d8c0", v:"#a3865f"    /* 경계층 위 작은 해양 생물 화석의 껍데기 / 껍데기 줄무늬 */
 };
 
 /* 16x16 도트 스프라이트. 각 화석의 visualHint에 적힌 특징이 드러나도록 그린다.
@@ -642,6 +643,25 @@ const FOSSIL_SPRITES = {
     ".......ll......."
   ]
 };
+/* 경계층 위층의 작은 해양 생물 화석 — 모암 위에 아주 작은 껍데기 두 개 (암모나이트와 다르고, 작다는 인상) */
+FOSSIL_SPRITES.smallshell = [
+  "................",
+  "....oooooooo....",
+  "..ooRRRRRRRRoo..",
+  ".oRRRRoooRRRRRo.",
+  ".oRRRoVVVoRRRRo.",
+  "oRRRoVvVvVoRRRRo",
+  "oRRRoVVvVVoRRRRo",
+  "oRRRRoVvVoRRRRRo",
+  "oRRRRRoooRRoooRo",
+  "oRRrRRRRRRoVVVoo",
+  "oRRRRRRRRoVvVvVo",
+  ".oRRrRRRRoVVvVVo",
+  ".oRRRRRRRRoVvVo.",
+  "..ooRRrRRRRoooo.",
+  "....oooooooo....",
+  "................"
+];
 /* shape 별칭 — 교사가 새 아이템에 같은 shape를 써도 그림이 나오게 한다 */
 FOSSIL_SPRITES.dino = FOSSIL_SPRITES.dinosaur;
 FOSSIL_SPRITES.coin = FOSSIL_SPRITES.nummulites;

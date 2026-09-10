@@ -350,7 +350,7 @@ function bindUI(){
     game.player.placed = false;
     renderScreen("startScreen");
   });
-  ["itemModal", "layerModal", "badgeModal", "outcropModal", "emptyDigModal"].forEach(id => {
+  ["itemModal", "layerModal", "badgeModal", "outcropModal", "emptyDigModal", "rareFindModal"].forEach(id => {
     $(id).addEventListener("click", e => { if(e.target === $(id)) closeModal(id); });
   });
   /* 지질도 범례 (지층 기호만 표시 — 시대는 추리 대상이므로 쓰지 않는다) */

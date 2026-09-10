@@ -122,13 +122,10 @@ function completeItem(itemId){
     state.completed.push(itemId);
     state.score = safe(state.score,0) + 20;
   }
-  /* 층 정보 해금 */
+  /* 층 정보 해금 — 그 층의 화석을 모두 등록해야 (종합 문항이 있으면 그것까지) 열린다.
+     아직 조사하지 않은 띠의 정보를 미리 알려 주지 않기 위해서다 */
   const layerId = safe(item.layer, null);
-  let newLayer = false;
-  if(layerId && !state.unlockedLayers.includes(layerId) && layerData.some(l => l.id === layerId)){
-    state.unlockedLayers.push(layerId);
-    newLayer = true;
-  }
+  const newLayer = maybeUnlockLayer(layerId);
   saveState();
   playSound("register");
   toast(item.isEvidence ? "화석도감에 지층 단서 등록: 「" + itemDisplayName(item) + "」" : "화석도감에 등록: 「" + itemDisplayName(item) + "」");
@@ -144,20 +141,33 @@ function completeItem(itemId){
   if($("outcropModal").classList.contains("on") && game.currentOutcrop){
     openOutcropModal(game.currentOutcrop, true);
   }
-  if(newLayer){
-    setTimeout(() => {
-      const ly = layerData.find(l => l.id === layerId);
-      toast("지층 " + safe(ly && ly.id, "?") + "의 정체가 밝혀졌다: " + safe(ly && ly.hiddenName, "?"), "gold");
-      playSound("place");
-    }, 900);
-  }
+  if(newLayer) announceLayerUnlock(layerId);
   updateHud();
   checkBadges();
   maybeParkComplete(); /* 경계층의 흔적까지 모두 등록해야 최종 미션이 열리므로 여기서도 확인 */
+  if(layerId) maybeLayerSummaryQuiz(layerId);   /* 마지막 화석까지 등록했고 지점도 다 팠으면 종합 문항 */
   /* 전부 수집 시 축하 연출 */
   if(state.completed.length >= itemData.length){
     setTimeout(showAllCollected, 1400);
   }
+}
+/* 층 해금 조건: 그 층의 화석을 모두 등록 (+ 종합 문항이 있으면 완료). 새로 열렸으면 true */
+function maybeUnlockLayer(layerId){
+  const ly = layerData.find(l => l.id === layerId);
+  if(!ly || state.unlockedLayers.includes(layerId)) return false;
+  const items = itemData.filter(i => i.layer === layerId);
+  if(!items.length || !items.every(i => state.completed.includes(i.id))) return false;
+  if(ly.summaryQuiz && !(state.layerQuizDone || []).includes(layerId)) return false;
+  state.unlockedLayers.push(layerId);
+  saveState();
+  return true;
+}
+function announceLayerUnlock(layerId){
+  setTimeout(() => {
+    const ly = layerData.find(l => l.id === layerId);
+    toast("지층 " + safe(ly && ly.id, "?") + "의 정체가 밝혀졌다: " + safe(ly && ly.hiddenName, "?"), "gold");
+    playSound("place");
+  }, 900);
 }
 function showAllCollected(){
   /* 다른 창(퀴즈 등)이 열려 있으면 닫힐 때까지 기다린다 */
@@ -188,7 +198,7 @@ function openLayerModal(layerId){
   const foundCnt = items.filter(i => state.completed.includes(i.id)).length;
   let html = "";
   html += '<div class="info-row"><div class="info-label">정체</div><div class="info-value' + (unlocked?"":" locked") + '">' +
-          (unlocked ? escapeHTML(safe(ly.hiddenName,"-")) : "??? (이 층의 단서 퀴즈를 완료하면 해금)") + "</div></div>";
+          (unlocked ? escapeHTML(safe(ly.hiddenName,"-")) : "??? (이 층의 단서를 모두 등록하면 해금)") + "</div></div>";
   html += '<div class="info-row"><div class="info-label">숨겨진 정보</div><div class="info-value' + (unlocked?"":" locked") + '">' +
           (unlocked ? escapeHTML(safe(ly.hiddenInfo,"-")) : "???") + "</div></div>";
   html += '<div class="info-row"><div class="info-label">단서 수집</div><div class="info-value">' + foundCnt + " / " + items.length + "</div></div>";

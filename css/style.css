@@ -441,6 +441,7 @@ p{ margin:0; }
 .m-band{ display:flex; flex-direction:column; justify-content:center; padding:2px 8px; border-bottom:2px solid rgba(43,29,21,.6); min-height:26px; flex:1 1 0; overflow:hidden; position:relative; }
 .m-band.empty{ background:repeating-linear-gradient(45deg, #d8cbb0 0 6px, #cdbfa2 6px 12px); color:#8a7a5d; align-items:center; }
 .m-band.on{ color:#1b140e; }
+.m-band.on.dark, .cmp-band.dark{ color:#f6ead0; }
 .m-band b{ font-size:.85em; }
 .m-band span{ font-size:.72em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-band.bnd.on::before{ content:""; position:absolute; left:0; right:0; top:3px; height:4px; background:#1b140e; }
@@ -480,6 +481,36 @@ p{ margin:0; }
 .n-fossils{ font-size:.82em; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
 .n-tag{ font-size:.72em; background:var(--teal); color:#fff; padding:1px 6px; align-self:flex-start; }
 .n-tag.now{ background:var(--gold); color:var(--ink); }
+.m-panel{ margin-top:10px; }
+.m-compare{ position:relative; display:flex; gap:64px; align-items:stretch; margin:6px 0; }
+.cmp-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.cmp-column{ display:flex; flex-direction:column; border:4px solid var(--line); background:var(--panel-2); height:460px; }
+.cmp-band{ flex:1 1 0; min-height:0; display:flex; flex-direction:column; justify-content:center; padding:2px 8px; border-bottom:2px solid rgba(43,29,21,.6); overflow:hidden; position:relative; color:#1b140e; user-select:none; -webkit-user-select:none; }
+.cmp-band.ours.bnd{ flex:0 0 30px; color:#f6ead0; }
+.cmp-band.nb{ background:#e8d7a3; }
+.cmp-band.nb:nth-child(even){ background:#d9c48f; }
+.cmp-band.nb.bnd{ background:#3a3230; color:#f6ead0; flex:0 0 44px; }
+.cmp-band b{ font-size:.8em; line-height:1.15; }
+.cmp-band > span{ font-size:.72em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cmp-band .n-fossils{ white-space:normal; gap:3px; font-size:.76em; }
+.cmp-band .n-fossils i{ width:20px; height:20px; }
+.cmp-band .n-fossils em{ font-style:normal; }
+.m-compare.live .cmp-band{ cursor:grab; touch-action:none; }
+.m-compare.live .cmp-band.nb.linked{ cursor:default; }
+.cmp-band.linked{ outline:3px solid var(--teal-d); outline-offset:-3px; }
+.cmp-band.dragging, .cmp-band.over{ outline:3px solid var(--gold); outline-offset:-3px; }
+.cmp-band.click{ cursor:pointer; }
+.cmp-band.click:hover, .cmp-band.sel{ outline:3px solid var(--gold); outline-offset:-3px; }
+.cmp-tag{ font-size:.66em; padding:0 5px; align-self:flex-start; margin-top:2px; background:var(--teal); color:#fff; }
+.cmp-tag.gold{ background:var(--gold); color:var(--ink); }
+.cmp-lines{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1; }
+.cmp-lines line.done{ stroke:var(--teal-d); stroke-width:4; stroke-linecap:round; }
+.cmp-lines circle.done{ fill:var(--teal-d); stroke:#fff; stroke-width:2; }
+.cmp-lines line.drag{ stroke:var(--gold-d); stroke-width:4; stroke-dasharray:7 5; stroke-linecap:round; }
+.cmp-lines circle.drag{ fill:var(--gold); stroke:var(--line); stroke-width:2; }
+.rel-parts{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0 4px; line-height:1.6; }
+.rel-choice{ padding:4px 10px; background:#fff; border:3px solid var(--line); box-shadow:var(--shadow-sm); }
+.rel-choice.on{ background:var(--gold); }
 .m-complete{ text-align:center; margin-bottom:12px; }
 .m-complete-title{ font-size:var(--fs-xl); margin-bottom:6px; }
 .m-complete p{ margin:4px 0; }
@@ -564,6 +595,13 @@ p{ margin:0; }
   .m-layout{ flex-direction:column; }
   .m-left, .m-left.big{ flex:none; width:100%; }
   .m-column, .m-left.big .m-column{ min-height:220px; }
+  .m-compare{ gap:30px; }
+  .cmp-column{ height:400px; }
+  .cmp-band{ padding:2px 5px; }
+  .cmp-band b{ font-size:.7em; }
+  .cmp-band > span{ font-size:.64em; }
+  .cmp-band .n-fossils{ font-size:.68em; }
+  .cmp-band .n-fossils i{ width:16px; height:16px; }
   .xsec-column{ flex-direction:row; flex:0 0 auto; height:64px; }
   .col-title{ display:none; }
   .col-band{ flex-direction:column; justify-content:center; padding:0 2px; min-height:0; margin:0 -2px 0 0; }

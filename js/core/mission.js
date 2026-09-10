@@ -139,8 +139,8 @@ function renderStage1(){
   }else{
     const order = stage1Order();
     /* 화면은 위→아래로 그리므로 배열(아래→위)을 뒤집는다 */
-    right = '<div class="m-prompt">' + escapeHTML(st.howto || "") + '</div>' +
-      (st.hint ? '<div class="m-howto">' + escapeHTML(st.hint) + '</div>' : "") +
+    right = '<div class="m-prompt">' + escapeHTML(st.howto || "") +
+      (st.hint ? '<small>' + escapeHTML(st.hint) + '</small>' : "") + '</div>' +
       '<div class="m-sort-end top">' + escapeHTML(st.topLabel || "") + '</div>' +
       '<div class="m-sort" id="mSort">' +
         order.slice().reverse().map(id => sortCardHTML(cards.find(c => c.id === id))).join("") +
@@ -150,7 +150,7 @@ function renderStage1(){
       (m1.feedback ? feedbackBox(m1.feedback, m1.fbKind) : "");
   }
   body.innerHTML =
-    '<div class="m-layout"><div class="m-left"><div class="m-col-title">우리 공원 지층 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
+    '<div class="m-layout m-stage1"><div class="m-left"><div class="m-col-title">우리 공원 지층 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
     stratColumnHTML(m.placed, {}) + '</div><div class="m-right">' + right + '</div></div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
   /* 이벤트 */

@@ -87,8 +87,9 @@ function stratColumnHTML(placed, opts){
 function openFinalMission(){
   const fm = finalMissionData();
   $("finalTitle").textContent = "최종 미션 · " + safe(fm.title, "");
-  renderMission();
+  /* 연결선(SVG)은 화면 크기를 재서 그리므로 모달을 먼저 보이게 한 뒤 내용을 그린다 */
   openModal("finalMissionModal");
+  renderMission();
   playSound("place");
 }
 function renderMission(){
@@ -303,7 +304,13 @@ function drawLinks(links, temp, sameTime){
   const wrap = $("mCompare"), svg = $("cmpLines");
   if(!wrap || !svg) return;
   const wr = wrap.getBoundingClientRect();
-  svg.setAttribute("viewBox", "0 0 " + Math.max(1, wr.width) + " " + Math.max(1, wr.height));
+  if(wr.width < 2 || wr.height < 2){
+    /* 아직 화면에 보이지 않아 크기를 잴 수 없다 — 비워 두고 다음 프레임에 다시 그린다 */
+    svg.innerHTML = "";
+    requestAnimationFrame(() => { if($("cmpLines") === svg) drawLinks(links, temp, sameTime); });
+    return;
+  }
+  svg.setAttribute("viewBox", "0 0 " + wr.width + " " + wr.height);
   const anchor = el => {
     const r = el.getBoundingClientRect();
     const ours = el.getAttribute("data-side") === "ours";

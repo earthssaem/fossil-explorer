@@ -1,5 +1,5 @@
 /* ==========================================================================
-   맵 엔진: 월드 생성 · 충돌 · 길찾기 · 카메라 · 렌더링 · 지질도 미니맵 · 상호작용
+   맵 엔진: 월드 생성 · 충돌 · 길찾기 · 카메라 · 렌더링 · 탐사 구역 지도(미니맵) · 상호작용
    ========================================================================== */
 "use strict";
 
@@ -16,10 +16,10 @@ const WORLD = {
   npcs: [],        // {id, key, x, y, name, lines, again}
   signs: [],       // {id, x, y, text}
   lookout: null,   // {x, y}
-  geoMap: null,    // 지질도 미니맵 오프스크린
+  geoMap: null,    // 탐사 구역 지도(미니맵) 오프스크린
   canvas: null, ctx: null
 };
-const MINI = { w: 128, h: 128 };
+const MINI = { w: 256, h: 256 };   // 탐사 지도 해상도 (화면에는 160px로 줄여 그린다)
 let lastT = 0;
 
 /* ---------- 좌표 도우미 ---------- */
@@ -51,7 +51,7 @@ function buildWorld(){
   /* 1. 구역 잔디 */
   for(let r = 0; r < WORLD.rows; r++){
     const cf = cliffAtRow(r);
-    /* 절벽 행은 지질도상 아래 구역에 속한다 (절벽 면에 아래층이 드러남) */
+    /* 절벽 행은 지도상 아래 구역에 속한다 (절벽 면에 아래층이 드러남) */
     const z = cf ? zoneById(cf.below) : zoneByRow(r);
     for(let c = 0; c < WORLD.cols; c++){
       const i = cellIdx(c, r);
@@ -432,12 +432,15 @@ function positionHint(){
   hint.style.top = clamp(sy, 70, WORLD.canvas.height - 120) + "px";
 }
 
-/* ---------- 지질도 미니맵 ----------
-   지층 기호(A~F)별 색만 쓴다. 시대 이름은 학생이 화석으로 추리해야 하므로 지질도·범례에 쓰지 않는다. */
-const GEO_COLORS = { "A": "#c98bb8", "B": "#79b3d8", "C": "#8fcf8a", "D": "#3a3230", "E": "#f0d46a", "F": "#f0a05a" };
-function eraColorOfZone(zid){
-  const z = zoneById(zid); const ly = z ? layerById(z.layer) : null;
-  return ly ? (GEO_COLORS[ly.id] || "#bbb") : "#bbb";
+/* ---------- 탐사 지도 (미니맵) ----------
+   지층 분포도가 아니라 '공원 탐사 구역 지도'다. 구역은 그 구역의 지형(풀·물·절벽·길)으로 구분해 그리고,
+   지층 A~F는 구역 색이 아니라 각 구역의 노두 마커(글자)로만 표시한다.
+   → 구역 하나가 지층 하나인 것이 아니라, 구역 안의 노두에서 그 지층을 조사한다. */
+const MINI_COL = { water: "#3f7fb5", cliff: "#4a3526", stairs: "#e6d7b0", bridge: "#d9b97a", path: "#d8c9a0", slab: "#c9bda3" };
+function zoneGroundColor(zid, kind){
+  const z = zoneById(zid);
+  if(kind === "grass") return z ? safe(z.grass, "#7f9e62") : "#7f9e62";
+  return z ? safe(z.soil, "#b7a894") : "#b7a894";
 }
 function buildGeoMap(){
   const m = makeCanvas(MINI.w, MINI.h);
@@ -446,14 +449,25 @@ function buildGeoMap(){
   for(let r = 0; r < WORLD.rows; r++) for(let c = 0; c < WORLD.cols; c++){
     const i = cellIdx(c, r);
     const k = WORLD.kind[i];
-    let col = eraColorOfZone(WORLD.zone[i]);
-    if(k === "water" || k === "falls") col = "#3f7fb5";
-    else if(k === "cliff") col = shade(col, -60);
-    else if(k === "stairs" || k === "bridge") col = "#e6d7b0";
+    let col;
+    if(k === "water" || k === "falls") col = MINI_COL.water;
+    else if(MINI_COL[k]) col = MINI_COL[k];
+    else col = zoneGroundColor(WORLD.zone[i], k);
+    /* 풀밭에 옅은 결을 넣어 지형처럼 보이게 한다 */
+    if(k === "grass" && hash2(c, r, 77) < 0.18) col = shade(col, -10);
     g.fillStyle = col;
     g.fillRect(Math.floor(c * sx), Math.floor(r * sy), Math.ceil(sx), Math.ceil(sy));
   }
   WORLD.geoMap = m;
+}
+/* 구역의 세로 범위 (지도 픽셀). 절벽 행은 아래 구역에 속한다 */
+function zoneMiniBounds(zid){
+  const z = zoneById(zid);
+  if(!z) return null;
+  const sy = MINI.h / WORLD.rows;
+  const cf = worldData.cliffs.find(c => c.below === zid);
+  const r1 = cf ? cf.rows[1] : z.rows[1];
+  return { y: Math.round(z.rows[0] * sy), h: Math.round((r1 + 1) * sy) - Math.round(z.rows[0] * sy) };
 }
 function drawMiniMap(){
   const mm = $("miniMap");
@@ -462,21 +476,37 @@ function drawMiniMap(){
   g.imageSmoothingEnabled = false;
   g.drawImage(WORLD.geoMap, 0, 0);
   const sx = MINI.w / WORLD.W, sy = MINI.h / WORLD.H;
-  /* 발견한 노두 */
+  /* 현재 구역 */
+  const zb = game.zone ? zoneMiniBounds(game.zone) : null;
+  if(zb){
+    g.fillStyle = "rgba(255,255,255,.10)"; g.fillRect(0, zb.y, MINI.w, zb.h);
+    g.strokeStyle = "rgba(255,240,200,.85)"; g.lineWidth = 2;
+    g.strokeRect(1, zb.y + 1, MINI.w - 2, zb.h - 2);
+  }
+  /* 노두 마커: 구역 안의 노두에서 조사하는 지층 기호 (조사 완료 / 발견 / 미발견) */
+  g.font = "bold 11px 'DungGeunMo', 'Noto Sans KR', sans-serif";
+  g.textAlign = "center"; g.textBaseline = "middle";
   WORLD.outcrops.forEach(o => {
-    if(!state.foundOutcrops.includes(o.layerId)) return;
-    g.fillStyle = "#2b1d15"; g.fillRect(Math.round(o.x * sx) - 3, Math.round(o.y * sy) - 3, 6, 6);
-    g.fillStyle = outcropDug(o.layerId) ? "#3ec6b5" : "#ffe066";
-    g.fillRect(Math.round(o.x * sx) - 2, Math.round(o.y * sy) - 2, 4, 4);
+    const x = Math.round(o.x * sx), y = Math.round(o.y * sy);
+    const found = state.foundOutcrops.includes(o.layerId);
+    const done = found && outcropDug(o.layerId);
+    const S = 15;
+    g.fillStyle = "#2b1d15"; g.fillRect(x - S / 2 - 1, y - S / 2 - 1, S + 2, S + 2);
+    g.fillStyle = done ? "#3ec6b5" : (found ? "#ffe066" : "#d8cbb0");
+    g.fillRect(x - S / 2, y - S / 2, S, S);
+    g.fillStyle = "#2b1d15";
+    g.fillText(String(o.layerId), x, y + 1);
   });
   /* 카메라 범위 */
   const z = game.zoom;
   g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1;
   g.strokeRect(Math.round(game.camX * sx) + .5, Math.round(game.camY * sy) + .5, Math.round(WORLD.canvas.width / z * sx), Math.round(WORLD.canvas.height / z * sy));
-  /* 플레이어 */
+  /* 플레이어 (현재 위치) */
   if(Math.floor(performance.now() / 300) % 2 === 0){
-    g.fillStyle = "#2b1d15"; g.fillRect(Math.round(game.player.x * sx) - 3, Math.round(game.player.y * sy) - 3, 6, 6);
-    g.fillStyle = "#fff"; g.fillRect(Math.round(game.player.x * sx) - 2, Math.round(game.player.y * sy) - 2, 4, 4);
+    const px = Math.round(game.player.x * sx), py = Math.round(game.player.y * sy);
+    g.fillStyle = "#2b1d15"; g.fillRect(px - 6, py - 6, 12, 12);
+    g.fillStyle = "#ff6a3d"; g.fillRect(px - 4, py - 4, 8, 8);
+    g.fillStyle = "#fff"; g.fillRect(px - 2, py - 2, 4, 4);
   }
 }
 

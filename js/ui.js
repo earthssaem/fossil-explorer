@@ -135,7 +135,8 @@ function showZoneBanner(z){
   if(!el || !z) return;
   const ly = layerById(z.layer);
   $("zoneBannerName").textContent = z.name;
-  $("zoneBannerSub").textContent = (ly ? safe(ly.label, "") + " · " : "") + safe(z.sub, "");
+  /* 구역 = 지층이 아니라, 구역 안의 노두에서 그 지층을 조사한다 → "노두 A · …" 로 표기 */
+  $("zoneBannerSub").textContent = (ly ? "노두 " + safe(ly.id, "") + " · " : "") + safe(z.sub, "");
   el.classList.add("on");
   clearTimeout(zoneBannerTimer);
   zoneBannerTimer = setTimeout(() => el.classList.remove("on"), 2400);
@@ -353,11 +354,14 @@ function bindUI(){
   ["itemModal", "layerModal", "badgeModal", "outcropModal", "emptyDigModal", "rareFindModal"].forEach(id => {
     $(id).addEventListener("click", e => { if(e.target === $(id)) closeModal(id); });
   });
-  /* 지질도 범례 (지층 기호만 표시 — 시대는 추리 대상이므로 쓰지 않는다) */
+  /* 탐사 지도 범례 — 구역은 지형으로, 지층은 노두 마커(글자)로만 표시한다 */
   const lg = $("miniLegend");
   if(lg){
-    lg.innerHTML = Object.keys(GEO_COLORS).map(k =>
-      '<span><i style="background:' + GEO_COLORS[k] + '"></i>' + escapeHTML("지층 " + k) + '</span>').join("");
+    lg.innerHTML =
+      '<span><i style="background:#ff6a3d"></i>현재 위치</span>' +
+      '<span><i style="background:#3ec6b5"></i>조사 완료 노두</span>' +
+      '<span><i style="background:#ffe066"></i>발견한 노두</span>' +
+      '<span><i style="background:#d8cbb0"></i>미조사 노두</span>';
   }
 }
 

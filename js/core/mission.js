@@ -1,9 +1,8 @@
 /* ==========================================================================
    최종 미션 · 흩어진 지층 기록을 완성하라
    1단계: 탐사에서 확인한 지층 기록 카드를 끌어 옮겨 오래된 것부터 차례로 배치한다 (순서 확인만 한다).
-   2단계: 두 지역의 지층 기둥을 나란히 놓고 확실한 단서가 있는 층만 끌어서 선으로 잇는다 (지층 대비).
-          산호층은 위아래 관계로 상대적인 순서를, 경계층 바로 아래의 공룡층은 같은 시기·다른 환경으로 해석하고,
-          정리 문항 1개로 마무리한다. 모든 층을 1:1로 잇는 활동이 아니다.
+   2단계: 두 지역의 지층 기둥을 나란히 놓고 같은 시대의 층끼리 끌어서 선으로 잇는다 (지층 대비).
+          연결 대상 5개를 모두 이으면 바로 완료. 산호층은 직접 잇지 않은 채 남고, 추가 문항·체크 항목은 없다.
    완료 : 연결선이 남은 두 기둥을 그대로 보여 준다. 우리 공원 층을 누르면 시대·화석·환경을 다시 본다.
    진행 상태는 state.mission 에 저장되어 창을 닫았다 열어도 이어진다.
    ========================================================================== */
@@ -22,8 +21,10 @@ function missionState(){
   if(m.stage === 1 && m.placed.length && m.placed.length < missionCards().length) m.placed = [];
   if(!Array.isArray(m.order)) m.order = [];   // 1단계에서 학생이 배치한 카드 순서 (아래→위)
   if(!m.links || typeof m.links !== "object") m.links = {};   // 2단계 연결 {이웃 층 번호: 우리 공원 층 key}
-  /* 직접 잇지 않는 층(answer "none")이 예전 저장 데이터에 이어져 있으면 지운다 */
-  ((DEFAULT_MISSION_DATA.finalMission.stage2 || {}).layers || []).forEach(L => { if(L.answer === "none" && m.links[L.n]) delete m.links[L.n]; });
+  /* 예전 저장 데이터의 연결 중 지금 정답과 다른 것은 지운다 (직접 잇지 않는 층, 바뀐 대응 등) */
+  ((DEFAULT_MISSION_DATA.finalMission.stage2 || {}).layers || []).forEach(L => {
+    if(m.links[L.n] && (L.answer === "none" || m.links[L.n] !== L.answer)) delete m.links[L.n];
+  });
   if(!m.tries || typeof m.tries !== "object") m.tries = {};   // 문항별 시도 횟수 (첫 시도 정답 집계용)
   return m;
 }
@@ -246,8 +247,8 @@ function autoScroll(list, y){
    왼쪽: 1단계에서 완성한 우리 공원 지층 기둥 (경계 노두는 아래층·경계층으로 나뉨)
    오른쪽: 이웃 마을 노두 (아래→위). 같은 시대의 층끼리 끌어서 선으로 잇는다.
    바른 연결만 저장되어 선이 남고, 틀리면 짧은 안내만 보여 준 뒤 다시 이을 수 있다.
-   연결할 수 있는 층을 다 이으면 → 산호층의 상대적 순서 확인 → 정리 문항 1개 → 완료. */
-let m2 = { feedback: "", fbKind: "hint", relPick: {}, relFb: "", closingFb: "" };
+   연결 대상을 모두 이으면 바로 완료 문구를 보여 준다. 추가 문항이나 체크 항목은 없다. */
+let m2 = { feedback: "", fbKind: "hint" };
 function neighborLayers(){ return (finalMissionData().stage2 || {}).layers || []; }
 /* 우리 공원 기둥의 층 목록 (아래→위). 경계 노두 카드는 아래층과 경계층 두 칸으로 나뉜다. */
 function ourTargets(){
@@ -268,31 +269,27 @@ function linkableLayers(){ return neighborLayers().filter(L => L.answer !== "non
 function allLinked(){ const m = missionState(); return linkableLayers().every(L => !!m.links[L.n]); }
 
 /* 두 기둥 비교 화면 HTML. links: {이웃 층 n: 우리 층 key}
-   opts.live: 끌어서 잇기 가능 / opts.clickable: 우리 공원 층을 눌러 정보 보기 / opts.tags: {n: 문구} 이웃 층에 붙일 표시 */
+   opts.live: 끌어서 잇기 가능 / opts.clickable: 우리 공원 층을 눌러 정보 보기 */
 function compareHTML(links, opts){
   const o = opts || {};
   const s2 = finalMissionData().stage2 || {};
   const ours = ourTargets(), nbs = neighborLayers();
   const linkedKeys = Object.keys(links || {}).map(n => links[n]);
-  const st = o.sameTime || null;   // {ourKey, layerN} 같은 시기·다른 환경으로 해석한 두 층
   const grow = v => 'flex-grow:' + (Number(v) > 0 ? Number(v) : 1) + ';';
   const left = ours.slice().reverse().map(t =>
-    '<div class="cmp-band ours' + (t.band ? " bnd" : "") + (linkedKeys.indexOf(t.key) >= 0 ? " linked" : "") + (st && st.ourKey === t.key ? " same" : "") +
+    '<div class="cmp-band ours' + (t.band ? " bnd" : "") + (linkedKeys.indexOf(t.key) >= 0 ? " linked" : "") +
       (o.clickable ? " click" : "") + (darkColor(t.color) ? " dark" : "") + '"' +
       ' data-side="ours" data-key="' + t.key + '" data-card="' + t.card.id + '" style="background:' + t.color + ';' + (t.band ? "" : grow(t.thick)) + '">' +
       '<b>' + escapeHTML(t.era) + '</b>' +
       (t.items.length ? '<span>' + escapeHTML(t.items.map(i => safe(i.name, "")).join("·")) + '</span>' : "") +
     '</div>').join("");
-  const right = nbs.slice().reverse().map(L => {
-    const tag = (o.tags || {})[L.n];
-    return '<div class="cmp-band nb' + (L.band ? " bnd" : "") + (links && links[L.n] ? " linked" : "") + (st && st.layerN === L.n ? " same" : "") +
+  const right = nbs.slice().reverse().map(L =>
+    '<div class="cmp-band nb' + (L.band ? " bnd" : "") + (links && links[L.n] ? " linked" : "") +
       '" data-side="nb" data-n="' + L.n + '" style="' + (L.band ? "" : grow(L.thick)) + '">' +
       '<b>' + L.n + '층</b>' +
       '<span class="n-fossils">' + (L.band ? '<em>' + escapeHTML(safe(L.label, "검은 경계층")) + '</em>' :
         L.fossils.map(id => '<i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id))).join(" ")) + '</span>' +
-      (tag ? '<span class="cmp-tag gold">' + escapeHTML(tag) + '</span>' : "") +
-    '</div>';
-  }).join("") + (s2.hiddenBase ? '<div class="cmp-band nb base"><span>' + escapeHTML(s2.hiddenBase) + '</span></div>' : "");
+    '</div>').join("") + (s2.hiddenBase ? '<div class="cmp-band nb base"><span>' + escapeHTML(s2.hiddenBase) + '</span></div>' : "");
   return '<div class="m-compare' + (o.live ? " live" : "") + '" id="mCompare">' +
     '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.ourTitle, "우리 공원")) + '</div><div class="cmp-column">' + left + '</div></div>' +
     '<svg class="cmp-lines" id="cmpLines" aria-hidden="true"></svg>' +
@@ -300,14 +297,14 @@ function compareHTML(links, opts){
   '</div>';
 }
 /* 연결선 그리기. temp: 끌고 있는 임시 선 {x1,y1,x2,y2} (컨테이너 기준 좌표) */
-function drawLinks(links, temp, sameTime){
+function drawLinks(links, temp){
   const wrap = $("mCompare"), svg = $("cmpLines");
   if(!wrap || !svg) return;
   const wr = wrap.getBoundingClientRect();
   if(wr.width < 2 || wr.height < 2){
     /* 아직 화면에 보이지 않아 크기를 잴 수 없다 — 비워 두고 다음 프레임에 다시 그린다 */
     svg.innerHTML = "";
-    requestAnimationFrame(() => { if($("cmpLines") === svg) drawLinks(links, temp, sameTime); });
+    requestAnimationFrame(() => { if($("cmpLines") === svg) drawLinks(links, temp); });
     return;
   }
   svg.setAttribute("viewBox", "0 0 " + wr.width + " " + wr.height);
@@ -327,102 +324,34 @@ function drawLinks(links, temp, sameTime){
     if(a && b) out += seg(anchor(a), anchor(b), "done");
   });
   if(temp) out += seg({ x: temp.x1, y: temp.y1 }, { x: temp.x2, y: temp.y2 }, "drag");
-  /* 같은 시기·다른 환경: 직접 연결선과 구별되는 점선 + 표시 */
-  if(sameTime){
-    const a = wrap.querySelector('.cmp-band[data-side="ours"][data-key="' + sameTime.ourKey + '"]');
-    const b = wrap.querySelector('.cmp-band[data-side="nb"][data-n="' + sameTime.layerN + '"]');
-    if(a && b){
-      const pa = anchor(a), pb = anchor(b);
-      const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
-      out += '<line class="same" x1="' + pa.x + '" y1="' + pa.y + '" x2="' + pb.x + '" y2="' + pb.y + '"></line>' +
-        '<text class="same" x="' + mx + '" y="' + (my - 8) + '" text-anchor="middle">' + escapeHTML(safe(sameTime.label, "같은 시기")) + '</text>';
-    }
-  }
   svg.innerHTML = out;
 }
-function sameTimeShown(){
-  const m = missionState(), st = (finalMissionData().stage2 || {}).sameTime || null;
-  return (m.sameTimeSeen && st) ? st : null;
-}
-window.addEventListener("resize", () => { if($("cmpLines")) drawLinks(missionState().links, null, sameTimeShown()); });
-/* 완료 조건 표시: 직접 연결 / 상대 연령 판단 / 같은 시기·다른 환경 이해 */
-function checklistHTML(){
-  const s2 = finalMissionData().stage2 || {}, ck = s2.checklist || {};
-  const m = missionState();
-  const total = linkableLayers().length, done = linkableLayers().filter(L => !!m.links[L.n]).length;
-  const item = (label, ok) => '<span class="m-check-item' + (ok ? " ok" : "") + '">' + escapeHTML(label) + '</span>';
-  return '<div class="m-check">' +
-    item(String(ck.links || "직접 연결 {done} / {total}").replace("{done}", done).replace("{total}", total), done >= total) +
-    item(safe(ck.relative, "상대 연령 판단"), !!m.relDone) +
-    item(safe(ck.sameTime, "같은 시기 · 다른 환경 이해"), !!m.closingDone) + '</div>';
-}
+window.addEventListener("resize", () => { if($("cmpLines")) drawLinks(missionState().links); });
 
 function renderStage2(){
   const s2 = finalMissionData().stage2 || {};
   const m = missionState();
-  const rel = s2.relative || {}, st = s2.sameTime || {};
   const linked = allLinked();
-  const tags = {};
-  if(m.relDone && rel.layerN) tags[rel.layerN] = safe(rel.tag, "");
-  if(m.sameTimeSeen && st.layerN) tags[st.layerN] = safe(st.tag, "");
-  let panel = checklistHTML();
+  let panel = "";
   if(!linked){
-    /* ① 확실한 단서가 있는 층만 직접 잇는다 */
-    panel += '<div class="m-howto">' + escapeHTML(safe(s2.howto, "")) + '</div>' +
+    panel = '<div class="m-howto">' + escapeHTML(safe(s2.howto, "")) + '</div>' +
       (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
-  }else if(!m.relDone){
-    /* ② 산호층: 직접 대비는 못 하지만 위아래 관계로 상대적인 순서는 안다 */
-    panel += (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "") +
-      '<div class="m-prompt">' + escapeHTML(safe(rel.question, "")) + '</div>' +
-      '<div class="m-howto">' + escapeHTML(safe(rel.howto, "")) + '</div>' +
-      '<div class="rel-parts">' + (rel.parts || []).map((pt, i) =>
-        '<span>' + escapeHTML(pt.text) + '</span>' +
-        (pt.choices || []).map(c => '<button class="rel-choice' + (m2.relPick[i] === c ? " on" : "") + '" data-rel="' + i + '" data-val="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>').join("") +
-        (i < (rel.parts || []).length - 1 ? '<span>,</span>' : '<span>.</span>')).join("") + '</div>' +
-      '<div class="modal-actions"><button class="btn primary" id="m2RelCheck">' + escapeHTML(safe(rel.check, "확인")) + '</button></div>' +
-      (m2.relFb ? feedbackBox(m2.relFb, "hint") : "");
-  }else if(!m.relSeen){
-    panel += '<div class="m-prompt done">' + escapeHTML(safe(rel.result, "")) + '</div>' +
-      '<div class="quiz-feedback explain">' + escapeHTML(safe(rel.explain, "")) + '</div>' +
-      '<div class="modal-actions"><button class="btn teal" id="m2RelNext">' + escapeHTML(safe(rel.next, "다음")) + '</button></div>';
-  }else if(!m.sameTimeSeen){
-    /* ③ 경계층 바로 아래 층끼리 비교: 같은 시기·다른 환경 (선으로 잇지 않고 점선으로 표시) */
-    panel += '<div class="m-prompt">' + escapeHTML(safe(st.title, "")) + '</div>' +
-      '<div class="quiz-feedback explain">' + escapeHTML(safe(st.text, "")) + '</div>' +
-      (st.extra ? '<div class="m-note">' + escapeHTML(st.extra) + '</div>' : "") +
-      '<div class="modal-actions"><button class="btn teal" id="m2SameNext">' + escapeHTML(safe(st.next, "다음")) + '</button></div>';
   }else{
-    /* ④ 정리 문항 1개 → 완료 */
-    const cl = s2.closing || {};
-    if(m.closingDone){
-      const dn = s2.done || {};
-      panel += '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div>' +
-        '<div class="quiz-feedback explain">' + escapeHTML(cl.explanation || "") + '</div>' +
-        '<div class="m-complete"><div class="m-complete-title">' + escapeHTML(dn.title || "") + '</div><p>' + escapeHTML(dn.body || "") + '</p></div>' +
-        '<div class="modal-actions"><button class="btn primary" id="m2Finish">탐사 완료</button></div>';
-    }else{
-      panel += '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div><div class="quiz-choices">' +
-        (cl.choices || []).map((c, i) => '<button class="quiz-choice" data-close-ans="' + i + '"><span>' + ["①","②","③","④","⑤"][i] + '</span><span>' + escapeHTML(c) + '</span></button>').join("") +
-        '</div>' + (m2.closingFb ? feedbackBox(m2.closingFb, "hint") : "");
-    }
+    /* 연결을 모두 마치면 바로 완료 — 추가 문항 없음 */
+    const dn = s2.done || {};
+    panel = '<div class="m-prompt done">' + escapeHTML(dn.title || "") + '</div>' +
+      (dn.body ? '<div class="m-howto">' + escapeHTML(dn.body) + '</div>' : "") +
+      (dn.note ? '<div class="m-howto">' + escapeHTML(dn.note) + '</div>' : "") +
+      '<div class="modal-actions"><button class="btn primary" id="m2Finish">탐사 완료</button></div>';
   }
-  /* 같은 시기 표시는 ③을 본 뒤부터. ③ 화면에서는 미리 보여 주어 설명과 함께 읽게 한다 */
-  const showSame = (m.sameTimeSeen || (linked && m.relSeen)) && st.layerN ? st : null;
   const body = $("missionBody");
   body.innerHTML =
     '<div class="m-request"><b>의뢰</b> ' + escapeHTML(s2.request || "") + '</div>' +
-    compareHTML(m.links, { live: !linked, tags: tags, sameTime: showSame }) +
+    compareHTML(m.links, { live: !linked }) +
     '<div class="m-panel">' + panel + '</div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
-  drawLinks(m.links, null, showSame);
+  drawLinks(m.links);
   if(!linked) setupLinking($("mCompare"));
-  body.querySelectorAll("[data-rel]").forEach(b => b.addEventListener("click", () => {
-    playSound("click"); m2.relPick[Number(b.getAttribute("data-rel"))] = b.getAttribute("data-val"); m2.relFb = ""; renderStage2();
-  }));
-  const rc = $("m2RelCheck"); if(rc) rc.addEventListener("click", checkRelative);
-  const rn = $("m2RelNext"); if(rn) rn.addEventListener("click", () => { playSound("click"); m.relSeen = true; saveState(); renderStage2(); });
-  const sn = $("m2SameNext"); if(sn) sn.addEventListener("click", () => { playSound("click"); m.sameTimeSeen = true; saveState(); renderStage2(); });
-  body.querySelectorAll("[data-close-ans]").forEach(b => b.addEventListener("click", () => answerClosing(Number(b.getAttribute("data-close-ans")), b)));
   const fin = $("m2Finish"); if(fin) fin.addEventListener("click", finishMission);
 }
 /* 한 쌍을 이어 본다: 이웃 층 n ↔ 우리 공원 층 key */
@@ -432,7 +361,7 @@ function tryLink(n, key){
   const L = neighborLayers().find(x => x.n === n);
   if(!L || m.links[n]) return;
   if(L.answer === "none"){
-    /* 직접 잇지 않는 층: 오답이 아니라 해석 방법만 안내한다 */
+    /* 직접 잇지 않는 층: 오답이 아니라 짧게 안내만 한다 */
     playSound("click");
     m2.feedback = safe(L.skipNote, safe(s2.wrong, "")); m2.fbKind = "hint";
     renderStage2();
@@ -443,6 +372,7 @@ function tryLink(n, key){
     missionRecord("m2_link_" + n, "ERA", true);
     playSound("correct");
     m2.feedback = safe(s2.ok, "") + (L.note ? " " + L.note : ""); m2.fbKind = "explain";
+    if(allLinked()) spawnConfetti();
   }else{
     missionRecord("m2_link_" + n, "ERA", false);
     playSound("wrong");
@@ -472,7 +402,7 @@ function setupLinking(wrap){
     const p = rel(e), a = anchorOf(drag.el);
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const band = under && under.closest ? under.closest(".cmp-band") : null;
-    setOver(band && band.getAttribute("data-side") !== drag.side && wrap.contains(band) ? band : null);
+    setOver(band && band.getAttribute("data-side") && band.getAttribute("data-side") !== drag.side && wrap.contains(band) ? band : null);
     drawLinks(m.links, { x1: a.x, y1: a.y, x2: p.x, y2: p.y });
   };
   const finish = e => {
@@ -485,7 +415,6 @@ function setupLinking(wrap){
     document.removeEventListener("pointercancel", finish);
     const d = drag; drag = null; pid = null;
     if(!target || e.type === "pointercancel"){ drawLinks(m.links); return; }
-    if(target.classList.contains("base")) { drawLinks(m.links); return; }
     const n = Number(d.side === "nb" ? d.el.getAttribute("data-n") : target.getAttribute("data-n"));
     const key = d.side === "ours" ? d.el.getAttribute("data-key") : target.getAttribute("data-key");
     tryLink(n, key);
@@ -503,42 +432,6 @@ function setupLinking(wrap){
       e.preventDefault();
     });
   });
-}
-/* 산호층의 상대적 순서: 빈칸 두 개를 모두 맞게 골라야 한다 */
-function checkRelative(){
-  const rel = (finalMissionData().stage2 || {}).relative || {};
-  const m = missionState();
-  const parts = rel.parts || [];
-  const ok = parts.length > 0 && parts.every((pt, i) => m2.relPick[i] === pt.answer);
-  if(ok){
-    missionRecord("m2_relative", "ERA", true);
-    playSound("correct");
-    m.relDone = true; saveState();
-    m2.feedback = ""; m2.relFb = "";
-  }else{
-    missionRecord("m2_relative", "ERA", false);
-    playSound("wrong");
-    m2.feedback = "";
-    m2.relFb = safe(rel.wrong, "다시 골라 보세요.");
-  }
-  renderStage2();
-}
-function answerClosing(idx, btn){
-  const cl = (finalMissionData().stage2 || {}).closing || {};
-  const m = missionState();
-  const chosen = (cl.choices || [])[idx];
-  if(chosen === cl.answer){
-    missionRecord("m2_closing", "ENV", true);
-    playSound("correct");
-    m.closingDone = true; saveState();
-    spawnConfetti();
-  }else{
-    missionRecord("m2_closing", "ENV", false);
-    playSound("wrong");
-    if(btn) btn.classList.add("wrong");
-    m2.closingFb = safe(cl.hint, "다시 생각해 보자.");
-  }
-  renderStage2();
 }
 function finishMission(){
   const m = missionState();
@@ -559,19 +452,14 @@ function finishMission(){
 function renderMissionComplete(){
   const c = finalMissionData().complete || {};
   const m = missionState();
-  const s2 = finalMissionData().stage2 || {};
-  const rel = s2.relative || {}, st = s2.sameTime || null;
-  const tags = {};
-  if(rel.layerN && rel.tag) tags[rel.layerN] = rel.tag;
-  if(st && st.layerN && st.tag) tags[st.layerN] = st.tag;
   $("missionBody").innerHTML =
     '<div class="m-complete"><div class="m-complete-title">' + escapeHTML(c.title || "탐사 완료!") + '</div>' +
     '<p>' + escapeHTML(c.body || "") + '</p><p class="m-note">' + escapeHTML(c.note || "") + '</p></div>' +
-    compareHTML(m.links, { clickable: true, tags: tags, sameTime: st }) +
+    compareHTML(m.links, { clickable: true }) +
     '<div class="m-panel"><div class="m-howto">' + escapeHTML(c.columnHint || "") + '</div><div id="mLayerInfo" class="m-layer-info"></div>' +
     '<div class="modal-actions"><button class="btn primary" id="mToResult">탐사 결과 보기</button></div></div>';
   $("missionBody").querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
-  drawLinks(m.links, null, st);
+  drawLinks(m.links);
   $("missionBody").querySelectorAll(".cmp-band.click").forEach(el => el.addEventListener("click", () => showColumnInfo(el.getAttribute("data-card"))));
   $("mToResult").addEventListener("click", () => { playSound("click"); closeModal("finalMissionModal"); openResultScreen(); });
   if(m.placed.length) showColumnInfo(m.placed[m.placed.length - 1]);

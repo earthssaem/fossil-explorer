@@ -1,6 +1,6 @@
 /* ==========================================================================
    최종 미션 · 흩어진 지층 기록을 완성하라
-   1단계: 노두 카드를 오래된 것부터 쌓아 층서 기둥을 완성한다. 카드마다 환경·근거 화석 확인.
+   1단계: 탐사에서 확인한 지층 기록 카드를 끌어 옮겨 오래된 것부터 차례로 배치한다 (순서 확인만 한다).
    2단계: 이름표 없는 이웃 마을 노두를 우리 공원 지층과 대비한다 (표준 화석이 열쇠).
    완료 : 완성된 층서 기둥을 크게 보여 준다. 층을 누르면 시대·화석·환경을 다시 본다.
    진행 상태는 state.mission 에 저장되어 창을 닫았다 열어도 이어진다.
@@ -16,7 +16,9 @@ function missionState(){
   const m = state.mission;
   if(!m.stage) m.stage = 1;
   if(!Array.isArray(m.placed)) m.placed = [];
-  if(!Array.isArray(m.envDone)) m.envDone = [];
+  /* 예전 방식(카드를 하나씩 고르던 저장 데이터)에서 기둥이 덜 완성된 채 남아 있으면 비운다 */
+  if(m.stage === 1 && m.placed.length && m.placed.length < missionCards().length) m.placed = [];
+  if(!Array.isArray(m.order)) m.order = [];   // 1단계에서 학생이 배치한 카드 순서 (아래→위)
   if(!m.matched || typeof m.matched !== "object") m.matched = {};
   if(!m.tries || typeof m.tries !== "object") m.tries = {};   // 문항별 시도 횟수 (첫 시도 정답 집계용)
   return m;
@@ -36,16 +38,9 @@ function missionRecord(qid, tag, correct){
   saveState();
   updateHud();
 }
-function fillTpl(s, vars){ return String(s || "").replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] !== undefined) ? vars[k] : ""); }
 function itemById(id){ return itemData.find(i => i.id === id) || null; }
 function cardItems(card){
   return itemData.filter(i => i.layer === card.layer && (!card.band || i.band === card.band) && !i.isEvidence);
-}
-/* 카드의 대표 화석 이름 (힌트용): 표준 화석 우선 */
-function cardIndexFossil(card){
-  const items = cardItems(card);
-  const idx = items.find(i => /표준/.test(safe(i.group, ""))) || items[0];
-  return idx ? safe(idx.name, "") : "";
 }
 function cardColor(card){
   const ly = layerById(card.layer);
@@ -100,118 +95,141 @@ function feedbackBox(text, kind){
   return '<div class="quiz-feedback ' + (kind || "hint") + '" id="mFeedback">' + escapeHTML(text) + '</div>';
 }
 
-/* ---------- 1단계 ---------- */
-let m1 = { phase: "pick", feedback: "", fbKind: "hint" };
+/* ---------- 1단계 · 카드 끌어 놓기로 순서 맞추기 ----------
+   카드에는 탐사에서 이미 해금한 정보(시대·화석·환경)만 보여 준다. 학생은 시대나 환경을 새로 추측하지 않고,
+   따로 조사한 기록을 시간 순서(아래=오래됨 → 위=젊음)로 다시 연결한다. 「순서 확인」을 누르면 한 번에 판정한다. */
+let m1 = { feedback: "", fbKind: "hint" };
+/* 학생의 현재 배치 (아래→위). 처음이면 섞인 순서로 시작한다. */
+function stage1Order(){
+  const m = missionState();
+  const ids = missionCards().map(c => c.id);
+  const valid = m.order.length === ids.length && ids.every(id => m.order.indexOf(id) >= 0);
+  if(!valid){ m.order = shuffledCards().map(c => c.id); saveState(); }
+  return m.order;
+}
+/* 카드 한 장의 정보 줄: 시대 / 화석 / 환경 (모두 탐사에서 확인한 것) */
+function sortCardHTML(card){
+  const ly = layerById(card.layer);
+  const items = cardItems(card);
+  return '<div class="m-sort-card" data-card="' + card.id + '">' +
+    '<span class="m-sort-grip" aria-hidden="true">⋮⋮</span>' +
+    '<span class="m-card-icons">' + items.map(i => '<i class="item-visual-slot" data-item="' + i.id + '"></i>').join("") + '</span>' +
+    '<span class="m-sort-lines">' +
+      '<b>' + escapeHTML(safe(card.era, safe(ly && ly.era, ""))) + '</b>' +
+      '<span>' + escapeHTML(items.map(i => safe(i.name, "")).join("·")) + '</span>' +
+      '<span class="env">' + escapeHTML(safe(card.env, "")) + '</span>' +
+    '</span></div>';
+}
 function renderStage1(){
   const fm = finalMissionData(), st = fm.stage1 || {};
   const m = missionState();
   const cards = missionCards();
   const body = $("missionBody");
-  const done = m.placed.length >= cards.length && m.envDone.length >= cards.length;
-  /* 놓았지만 환경·근거 확인이 안 끝난 카드가 있으면 그 단계부터 */
-  const pending = m.placed.find(id => m.envDone.indexOf(id) < 0);
-  if(pending && m1.phase === "pick") m1.phase = "env";
+  const done = m.placed.length >= cards.length;
   let right = "";
   if(done){
     right = '<div class="m-prompt done">' + escapeHTML(st.done || "") + '</div>' +
       '<div class="modal-actions"><button class="btn primary" id="m1Next">2단계로</button></div>';
-  }else if(m1.phase === "pick"){
-    const remaining = shuffledCards().filter(c => m.placed.indexOf(c.id) < 0);
-    /* 첫 카드를 고를 때와 그 뒤를 구분한다 */
-    const ask = m.placed.length ? (st.askNext || "") : (st.askFirst || st.askNext || "");
-    right = '<div class="m-prompt">' + escapeHTML(ask) + '</div><div class="m-cards">' +
-      remaining.map(c => {
-        const its = cardItems(c);
-        return '<button class="m-card" data-card="' + c.id + '">' +
-          '<span class="m-card-icons">' + its.map(i => '<i class="item-visual-slot" data-item="' + i.id + '"></i>').join("") + '</span>' +
-          '<span class="m-card-title">' + escapeHTML(c.title) + '</span></button>';
-      }).join("") + '</div>' + (m1.feedback ? feedbackBox(m1.feedback, m1.fbKind) : "");
   }else{
-    const card = cards.find(c => c.id === pending);
-    const ly = layerById(card.layer);
-    const head = '<div class="m-current">방금 쌓은 층: <b>' + escapeHTML(card.title) + '</b></div>';
-    if(m1.phase === "env"){
-      right = head + '<div class="m-prompt">' + escapeHTML(st.askEnv || "") + '</div><div class="m-choices">' +
-        (fm.envOptions || []).map(e => '<button class="m-choice" data-env="' + escapeHTML(e) + '">' + escapeHTML(e) + '</button>').join("") + '</div>';
-    }else{
-      const own = cardItems(card);
-      const others = itemData.filter(i => !i.isEvidence && own.indexOf(i) < 0);
-      const d1 = others[(missionCards().indexOf(card) * 3) % others.length];
-      const d2 = others[(missionCards().indexOf(card) * 3 + 5) % others.length];
-      const choices = own.concat([d1, d2].filter((x, i, a) => x && a.indexOf(x) === i && own.indexOf(x) < 0));
-      right = head + '<div class="m-prompt">' + escapeHTML(st.askEvidence || "") + '</div><div class="m-choices icons">' +
-        choices.map(i => '<button class="m-choice" data-ev="' + i.id + '"><i class="item-visual-slot" data-item="' + i.id + '"></i>' + escapeHTML(safe(i.name, "")) + '</button>').join("") + '</div>';
-    }
-    right += (m1.feedback ? feedbackBox(m1.feedback, m1.fbKind) : "");
-    void ly;
+    const order = stage1Order();
+    /* 화면은 위→아래로 그리므로 배열(아래→위)을 뒤집는다 */
+    right = '<div class="m-prompt">' + escapeHTML(st.howto || "") + '</div>' +
+      (st.hint ? '<div class="m-howto">' + escapeHTML(st.hint) + '</div>' : "") +
+      '<div class="m-sort-end top">' + escapeHTML(st.topLabel || "") + '</div>' +
+      '<div class="m-sort" id="mSort">' +
+        order.slice().reverse().map(id => sortCardHTML(cards.find(c => c.id === id))).join("") +
+      '</div>' +
+      '<div class="m-sort-end bottom">' + escapeHTML(st.bottomLabel || "") + '</div>' +
+      '<div class="modal-actions"><button class="btn primary" id="m1Check">' + escapeHTML(st.check || "순서 확인") + '</button></div>' +
+      (m1.feedback ? feedbackBox(m1.feedback, m1.fbKind) : "");
   }
   body.innerHTML =
-    '<div class="m-howto">' + escapeHTML(st.howto || "") + '</div>' +
     '<div class="m-layout"><div class="m-left"><div class="m-col-title">우리 공원 지층 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
     stratColumnHTML(m.placed, {}) + '</div><div class="m-right">' + right + '</div></div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
   /* 이벤트 */
-  body.querySelectorAll(".m-card").forEach(b => b.addEventListener("click", () => pickCard(b.getAttribute("data-card"))));
-  body.querySelectorAll("[data-env]").forEach(b => b.addEventListener("click", () => pickEnv(pending, b.getAttribute("data-env"))));
-  body.querySelectorAll("[data-ev]").forEach(b => b.addEventListener("click", () => pickEvidence(pending, b.getAttribute("data-ev"))));
+  const sort = $("mSort");
+  if(sort) setupSortable(sort);
+  const ck = $("m1Check");
+  if(ck) ck.addEventListener("click", checkOrder);
   const nx = $("m1Next");
   if(nx) nx.addEventListener("click", () => { playSound("click"); m.stage = 2; saveState(); renderMission(); });
 }
-function pickCard(cardId){
+/* 화면의 카드 순서(위→아래)를 읽어 배열(아래→위)로 저장한다 */
+function readSortOrder(){
+  const sort = $("mSort");
+  if(!sort) return;
+  const m = missionState();
+  m.order = Array.from(sort.querySelectorAll(".m-sort-card")).map(el => el.getAttribute("data-card")).reverse();
+  saveState();
+}
+function checkOrder(){
   const st = finalMissionData().stage1 || {};
   const m = missionState();
-  const cards = missionCards();
-  const next = cards[m.placed.length];
-  if(!next) return;
-  if(cardId === next.id){
-    m.placed.push(cardId);
-    missionRecord("m1_order_" + cardId, "ERA", true);
+  readSortOrder();
+  const answer = missionCards().map(c => c.id);
+  const ok = m.order.length === answer.length && m.order.every((id, i) => id === answer[i]);
+  if(ok){
+    m.placed = answer.slice();
+    missionRecord("m1_order", "ERA", true);
     playSound("found");
-    m1 = { phase: "env", feedback: fillTpl(st.placed, { title: next.title }), fbKind: "explain" };
+    m1 = { feedback: "", fbKind: "hint" };
+    spawnConfetti();
   }else{
-    missionRecord("m1_order_" + next.id, "ERA", false);
+    missionRecord("m1_order", "ERA", false);
     playSound("wrong");
-    m1.feedback = fillTpl(st.wrongOrder, { fossil: cardIndexFossil(next) });
-    m1.fbKind = "hint";
+    m1 = { feedback: st.wrong || "", fbKind: "hint" };
   }
+  saveState();
   renderStage1();
 }
-function pickEnv(cardId, env){
-  const st = finalMissionData().stage1 || {};
-  const card = missionCards().find(c => c.id === cardId);
-  if(!card) return;
-  if(env === card.env){
-    missionRecord("m1_env_" + cardId, "ENV", true);
-    playSound("correct");
-    m1 = { phase: "evidence", feedback: "", fbKind: "hint" };
-  }else{
-    missionRecord("m1_env_" + cardId, "ENV", false);
-    playSound("wrong");
-    m1.feedback = st.wrongEnv || ""; m1.fbKind = "hint";
-  }
-  renderStage1();
+/* 카드 끌어 옮기기 (마우스·터치 공용 pointer 이벤트). 카드 전체가 손잡이다.
+   끌고 있는 카드를 포인터 위치의 다른 카드 앞·뒤로 옮겨 넣고, 놓으면 순서를 저장한다.
+   카드를 DOM에서 옮겨 넣으면 포인터 캡처가 풀리므로, 끄는 동안의 이동·놓기 이벤트는 document에서 받는다.
+   목록이 창보다 길면 가장자리에서 창을 자동으로 스크롤한다. */
+function setupSortable(list){
+  let drag = null, pid = null;
+  const move = e => {
+    if(!drag || e.pointerId !== pid) return;
+    e.preventDefault();
+    autoScroll(list, e.clientY);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const over = under && under.closest ? under.closest(".m-sort-card") : null;
+    if(!over || over === drag || over.parentNode !== list) return;
+    const r = over.getBoundingClientRect();
+    const ref = (e.clientY < r.top + r.height / 2) ? over : over.nextSibling;
+    if(ref === drag || ref === drag.nextSibling) return;   // 이미 그 자리
+    list.insertBefore(drag, ref);
+  };
+  const finish = e => {
+    if(!drag || e.pointerId !== pid) return;
+    drag.classList.remove("dragging");
+    drag = null; pid = null;
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", finish);
+    document.removeEventListener("pointercancel", finish);
+    readSortOrder();
+    playSound("place");
+  };
+  list.querySelectorAll(".m-sort-card").forEach(card => {
+    card.addEventListener("pointerdown", e => {
+      if(drag || (e.button !== undefined && e.button !== 0)) return;
+      drag = card; pid = e.pointerId;
+      card.classList.add("dragging");
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", finish);
+      document.addEventListener("pointercancel", finish);
+      e.preventDefault();
+    });
+  });
 }
-function pickEvidence(cardId, itemId){
-  const st = finalMissionData().stage1 || {};
-  const m = missionState();
-  const card = missionCards().find(c => c.id === cardId);
-  if(!card) return;
-  const it = itemById(itemId);
-  if((card.evidence || []).indexOf(itemId) >= 0){
-    missionRecord("m1_ev_" + cardId, "IDX", true);
-    playSound("correct");
-    if(m.envDone.indexOf(cardId) < 0) m.envDone.push(cardId);
-    saveState();
-    m1 = { phase: "pick", feedback: "", fbKind: "hint" };
-  }else{
-    missionRecord("m1_ev_" + cardId, "IDX", false);
-    playSound("wrong");
-    const own = cardItems(card).some(i => i.id === itemId);
-    const per = (card.wrongEvidence || {})[itemId];
-    m1.feedback = per ? per : fillTpl(own ? st.wrongEvidenceIndex : st.wrongEvidenceOther, { fossil: safe(it && it.name, "") });
-    m1.fbKind = "hint";
-  }
-  renderStage1();
+function autoScroll(list, y){
+  const box = list.closest(".modal-card");
+  if(!box) return;
+  const r = box.getBoundingClientRect();
+  const edge = 40;
+  if(y < r.top + edge) box.scrollTop -= 8;
+  else if(y > r.bottom - edge) box.scrollTop += 8;
 }
 
 /* ---------- 2단계 ---------- */

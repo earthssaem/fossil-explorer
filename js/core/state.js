@@ -26,7 +26,7 @@ function defaultState(){
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
     finalMissionDone: false, // 최종 미션(층서 복원) 완료 여부
-    mission: {},             // 최종 미션 진행 { stage, order:[], placed:[], links:{}, relDone, relSeen, sameTimeSeen, closingDone }
+    mission: {},             // 최종 미션 진행 { stage, order:[], placed:[], links:{} }
     score: 0,
     combo: 0,
     maxCombo: 0,

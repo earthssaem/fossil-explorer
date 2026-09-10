@@ -15,6 +15,7 @@ function defaultState(){
     discovered: [],      // 발굴한 아이템 id
     completed: [],       // 퀴즈까지 완료한 아이템 id
     unlockedLayers: [],  // 해금된 층 id
+    layerQuizDone: [],   // 노두 종합 문항(summaryQuiz)을 푼 층 id
     badges: [],          // 획득 배지 id
     seenInDex: [],       // 도감에서 확인한 아이템 id (NEW 스티커 표시용)
     foundOutcrops: [],   // 근접해서 '발견'한 노두(층 id) — 미니맵에 표시
@@ -170,7 +171,7 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","seenZones","talkedNpc"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","layerQuizDone","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","seenZones","talkedNpc"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);

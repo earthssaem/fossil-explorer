@@ -499,6 +499,9 @@ p{ margin:0; }
 .cmp-band.nb{ background:#e8d7a3; }
 .cmp-band.nb:nth-child(even){ background:#d9c48f; }
 .cmp-band.nb.bnd{ background:#3a3230; color:#f6ead0; flex:0 0 44px; }
+.cmp-band.nb.base{ flex:0 0 30px; background:repeating-linear-gradient(45deg, #d8cbb0 0 6px, #cdbfa2 6px 12px); color:#8a7a5d; align-items:center; cursor:default; }
+.cmp-band.nb.base > span{ font-size:.66em; }
+.cmp-band.same{ outline:3px dashed var(--gold-d); outline-offset:-3px; }
 .cmp-band b{ font-size:.8em; line-height:1.15; }
 .cmp-band > span{ font-size:.72em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cmp-band .n-fossils{ white-space:normal; gap:3px; font-size:.76em; }
@@ -517,6 +520,13 @@ p{ margin:0; }
 .cmp-lines circle.done{ fill:var(--teal-d); stroke:#fff; stroke-width:2; }
 .cmp-lines line.drag{ stroke:var(--gold-d); stroke-width:4; stroke-dasharray:7 5; stroke-linecap:round; }
 .cmp-lines circle.drag{ fill:var(--gold); stroke:var(--line); stroke-width:2; }
+.cmp-lines line.same{ stroke:var(--gold-d); stroke-width:3; stroke-dasharray:4 5; stroke-linecap:round; }
+.cmp-lines text.same{ font-family:var(--font); font-size:11px; font-weight:700; fill:var(--ink); paint-order:stroke; stroke:#fff8e6; stroke-width:4px; stroke-linejoin:round; }
+.m-check{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.m-check-item{ font-size:.8em; padding:3px 9px; border:3px solid var(--line); background:var(--panel-2); color:var(--muted); }
+.m-check-item::before{ content:"□ "; }
+.m-check-item.ok{ background:var(--teal); color:#fff; }
+.m-check-item.ok::before{ content:"✓ "; }
 .rel-parts{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0 4px; line-height:1.6; }
 .rel-choice{ padding:4px 10px; background:#fff; border:3px solid var(--line); box-shadow:var(--shadow-sm); }
 .rel-choice.on{ background:var(--gold); }

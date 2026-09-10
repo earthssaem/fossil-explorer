@@ -1,8 +1,9 @@
 /* ==========================================================================
    최종 미션 · 흩어진 지층 기록을 완성하라
    1단계: 탐사에서 확인한 지층 기록 카드를 끌어 옮겨 오래된 것부터 차례로 배치한다 (순서 확인만 한다).
-   2단계: 이름표 없는 이웃 마을 노두를 우리 공원 지층과 대비한다 (표준 화석이 열쇠).
-   완료 : 완성된 층서 기둥을 크게 보여 준다. 층을 누르면 시대·화석·환경을 다시 본다.
+   2단계: 두 지역의 지층 기둥을 나란히 놓고 같은 시대의 층끼리 끌어서 선으로 잇는다 (지층 대비).
+          직접 이어지지 않는 산호층은 위아래 관계로 상대적인 순서를 판단하고, 정리 문항 1개로 마무리한다.
+   완료 : 연결선이 남은 두 기둥을 그대로 보여 준다. 우리 공원 층을 누르면 시대·화석·환경을 다시 본다.
    진행 상태는 state.mission 에 저장되어 창을 닫았다 열어도 이어진다.
    ========================================================================== */
 "use strict";
@@ -19,7 +20,7 @@ function missionState(){
   /* 예전 방식(카드를 하나씩 고르던 저장 데이터)에서 기둥이 덜 완성된 채 남아 있으면 비운다 */
   if(m.stage === 1 && m.placed.length && m.placed.length < missionCards().length) m.placed = [];
   if(!Array.isArray(m.order)) m.order = [];   // 1단계에서 학생이 배치한 카드 순서 (아래→위)
-  if(!m.matched || typeof m.matched !== "object") m.matched = {};
+  if(!m.links || typeof m.links !== "object") m.links = {};   // 2단계 연결 {이웃 층 번호: 우리 공원 층 key}
   if(!m.tries || typeof m.tries !== "object") m.tries = {};   // 문항별 시도 횟수 (첫 시도 정답 집계용)
   return m;
 }
@@ -47,6 +48,11 @@ function cardColor(card){
   if(!ly) return "#c8a060";
   return card.band === "upper" ? safe(ly.color2, ly.color1) : safe(ly.color1, "#c8a060");
 }
+/* 어두운 층 색 위에는 밝은 글자를 쓴다 */
+function darkColor(hex){
+  const c = hexRGB(hex);
+  return !!c && (c[0] * 0.299 + c[1] * 0.587 + c[2] * 0.114) < 110;
+}
 function shuffledCards(){
   const cards = missionCards().slice();
   return cards.map((c, i) => ({ c: c, k: hash2(i + 1, 3, 91) })).sort((a, b) => a.k - b.k).map(x => x.c);
@@ -63,7 +69,7 @@ function stratColumnHTML(placed, opts){
     const ly = layerById(card.layer);
     const share = 100 / cards.length;
     const items = cardItems(card).map(i => safe(i.name, "")).join("·");
-    html += '<div class="m-band' + (on ? " on" : " empty") + (ly && ly.isBoundary ? " bnd" : "") + (o.clickable && on ? " click" : "") + '"' +
+    html += '<div class="m-band' + (on ? " on" : " empty") + (ly && ly.isBoundary ? " bnd" : "") + (o.clickable && on ? " click" : "") + (on && darkColor(cardColor(card)) ? " dark" : "") + '"' +
       ' data-card="' + card.id + '" style="flex-basis:' + share + '%;' + (on ? "background:" + cardColor(card) + ";" : "") + '">' +
       (on ? '<b>' + escapeHTML(safe(ly && ly.label, card.layer)) + (card.band ? " " + (card.band === "upper" ? "위층" : "아래층") : "") + '</b>' +
             '<span>' + escapeHTML(o.small ? safe(ly && ly.era, "") : items) + '</span>'
@@ -85,7 +91,7 @@ function openFinalMission(){
 function renderMission(){
   const m = missionState();
   const steps = $("missionSteps");
-  const names = ["1단계 지층 기둥", "2단계 이웃 노두", "탐사 완료"];
+  const names = ["1단계 지층 기둥", "2단계 지층 대비", "탐사 완료"];
   steps.innerHTML = names.map((n, i) => '<span class="' + (m.stage === i + 1 ? "now" : (m.stage > i + 1 ? "done" : "")) + '">' + n + '</span>').join("");
   if(m.stage === 1) renderStage1();
   else if(m.stage === 2) renderStage2();
@@ -232,221 +238,231 @@ function autoScroll(list, y){
   else if(y > r.bottom - edge) box.scrollTop += 8;
 }
 
-/* ---------- 2단계 ---------- */
-let m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: "", closingFb: "", closingKind: "hint" };
+/* ---------- 2단계 · 두 지역의 지층 대비 (선으로 잇기) ----------
+   왼쪽: 1단계에서 완성한 우리 공원 지층 기둥 (경계 노두는 아래층·경계층으로 나뉨)
+   오른쪽: 이웃 마을 노두 (아래→위). 같은 시대의 층끼리 끌어서 선으로 잇는다.
+   바른 연결만 저장되어 선이 남고, 틀리면 짧은 안내만 보여 준 뒤 다시 이을 수 있다.
+   연결할 수 있는 층을 다 이으면 → 산호층의 상대적 순서 확인 → 정리 문항 1개 → 완료. */
+let m2 = { feedback: "", fbKind: "hint", relPick: {}, relFb: "", closingFb: "" };
 function neighborLayers(){ return (finalMissionData().stage2 || {}).layers || []; }
-function neighborLayerLabel(n){
-  const s2 = finalMissionData().stage2 || {};
-  const L = neighborLayers().find(l => l.n === n);
-  if(!L) return "";
-  if(L.band) return "화석 없음 · 얇고 검은 띠";
-  return L.fossils.map(id => safe((itemById(id) || {}).name, id)).join(", ");
+/* 우리 공원 기둥의 층 목록 (아래→위). 경계 노두 카드는 아래층과 경계층 두 칸으로 나뉜다. */
+function ourTargets(){
+  const out = [];
+  missionCards().forEach(card => {
+    const ly = layerById(card.layer);
+    const items = cardItems(card);
+    if(ly && ly.isBoundary){
+      out.push({ key: card.id + "_lower", card: card, era: safe(card.lowerEra, safe(ly.era, "")), items: items, color: cardColor(card) });
+      out.push({ key: card.id + "_boundary", card: card, era: safe(card.boundaryEra, "경계층"), items: [], band: true, color: "#1b140e" });
+    }else{
+      out.push({ key: card.id, card: card, era: safe(card.era, safe(ly && ly.era, "")), items: items, color: cardColor(card) });
+    }
+  });
+  return out;
 }
-function matchChoices(){
+function linkableLayers(){ return neighborLayers().filter(L => L.answer !== "none"); }
+function allLinked(){ const m = missionState(); return linkableLayers().every(L => !!m.links[L.n]); }
+
+/* 두 기둥 비교 화면 HTML. links: {이웃 층 n: 우리 층 key}
+   opts.live: 끌어서 잇기 가능 / opts.clickable: 우리 공원 층을 눌러 정보 보기 / opts.tags: {n: 문구} 이웃 층에 붙일 표시 */
+function compareHTML(links, opts){
+  const o = opts || {};
   const s2 = finalMissionData().stage2 || {};
-  const list = layerData.map(ly => ({
-    key: ly.id,
-    label: ly.isBoundary ? "지층 " + ly.id + " · " + safe(s2.boundaryLabel, "경계층") : safe(ly.label, ly.id) + " · " + safe(ly.era, "")
-  }));
-  list.push({ key: "none", label: safe(s2.noneLabel, "시대를 정할 수 없음") });
-  return list;
+  const ours = ourTargets(), nbs = neighborLayers();
+  const linkedKeys = Object.keys(links || {}).map(n => links[n]);
+  const left = ours.slice().reverse().map(t =>
+    '<div class="cmp-band ours' + (t.band ? " bnd" : "") + (linkedKeys.indexOf(t.key) >= 0 ? " linked" : "") + (o.clickable ? " click" : "") + (darkColor(t.color) ? " dark" : "") + '"' +
+      ' data-side="ours" data-key="' + t.key + '" data-card="' + t.card.id + '" style="background:' + t.color + '">' +
+      '<b>' + escapeHTML(t.era) + '</b>' +
+      (t.items.length ? '<span>' + escapeHTML(t.items.map(i => safe(i.name, "")).join("·")) + '</span>' : "") +
+    '</div>').join("");
+  const right = nbs.slice().reverse().map(L => {
+    const tag = (o.tags || {})[L.n];
+    return '<div class="cmp-band nb' + (L.band ? " bnd" : "") + (links && links[L.n] ? " linked" : "") + '" data-side="nb" data-n="' + L.n + '">' +
+      '<b>' + L.n + '층</b>' +
+      '<span class="n-fossils">' + (L.band ? '<em>' + escapeHTML(safe(L.label, "검은 경계층")) + '</em>' :
+        L.fossils.map(id => '<i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id))).join(" ")) + '</span>' +
+      (tag ? '<span class="cmp-tag gold">' + escapeHTML(tag) + '</span>' : "") +
+    '</div>';
+  }).join("");
+  return '<div class="m-compare' + (o.live ? " live" : "") + '" id="mCompare">' +
+    '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.ourTitle, "우리 공원")) + '</div><div class="cmp-column">' + left + '</div></div>' +
+    '<svg class="cmp-lines" id="cmpLines" aria-hidden="true"></svg>' +
+    '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.neighborTitle, "이웃 마을 노두")) + '</div><div class="cmp-column">' + right + '</div></div>' +
+  '</div>';
 }
+/* 연결선 그리기. temp: 끌고 있는 임시 선 {x1,y1,x2,y2} (컨테이너 기준 좌표) */
+function drawLinks(links, temp){
+  const wrap = $("mCompare"), svg = $("cmpLines");
+  if(!wrap || !svg) return;
+  const wr = wrap.getBoundingClientRect();
+  svg.setAttribute("viewBox", "0 0 " + Math.max(1, wr.width) + " " + Math.max(1, wr.height));
+  const anchor = el => {
+    const r = el.getBoundingClientRect();
+    const ours = el.getAttribute("data-side") === "ours";
+    return { x: (ours ? r.right : r.left) - wr.left, y: r.top - wr.top + r.height / 2 };
+  };
+  const seg = (a, b, cls) =>
+    '<line class="' + cls + '" x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"></line>' +
+    '<circle class="' + cls + '" cx="' + a.x + '" cy="' + a.y + '" r="5"></circle>' +
+    '<circle class="' + cls + '" cx="' + b.x + '" cy="' + b.y + '" r="5"></circle>';
+  let out = "";
+  Object.keys(links || {}).forEach(n => {
+    const a = wrap.querySelector('.cmp-band[data-side="ours"][data-key="' + links[n] + '"]');
+    const b = wrap.querySelector('.cmp-band[data-side="nb"][data-n="' + n + '"]');
+    if(a && b) out += seg(anchor(a), anchor(b), "done");
+  });
+  if(temp) out += seg({ x: temp.x1, y: temp.y1 }, { x: temp.x2, y: temp.y2 }, "drag");
+  svg.innerHTML = out;
+}
+window.addEventListener("resize", () => { if($("cmpLines")) drawLinks(missionState().links); });
+
 function renderStage2(){
-  const fm = finalMissionData(), s2 = fm.stage2 || {};
+  const s2 = finalMissionData().stage2 || {};
   const m = missionState();
-  const layers = neighborLayers();
-  const cur = layers.find(L => !m.matched[L.n]);
-  const allMatched = !cur;
-  /* 왼쪽: 이웃 노두 기둥 (위→아래) */
-  let left = '<div class="m-col-title">이웃 마을 노두</div><div class="n-column">' +
-    layers.slice().reverse().map(L => {
-      const done = !!m.matched[L.n];
-      const isCur = cur && cur.n === L.n;
-      let tag = "";
-      if(done){
-        const ans = m.matched[L.n];
-        tag = L.doneTag ? L.doneTag : (ans === "none" ? safe(s2.noneTag, "시대 판정 불가") : (ans === "D" ? "경계층" : "지층 " + ans));
-      }
-      return '<div class="n-layer' + (L.band ? " band" : "") + (isCur ? " cur" : "") + (done ? " done" : "") + '">' +
-        '<b>' + L.n + '층</b>' +
-        '<span class="n-fossils">' + (L.band ? '<em>얇고 검은 띠 · 화석 없음</em>' :
-          L.fossils.map(id => '<i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id))).join(" ")) + '</span>' +
-        (done ? '<span class="n-tag">' + escapeHTML(tag) + '</span>' : (isCur ? '<span class="n-tag now">조사 중</span>' : "")) +
-        '</div>';
-    }).join("") + '</div>';
-  /* 오른쪽 */
-  let right = "";
-  if(allMatched){
+  const rel = s2.relative || {};
+  const linked = allLinked();
+  const tags = {};
+  if(m.relDone && rel.layerN) tags[rel.layerN] = safe(rel.tag, "");
+  let panel = "";
+  if(!linked){
+    const total = linkableLayers().length, done = linkableLayers().filter(L => !!m.links[L.n]).length;
+    panel = '<div class="m-howto">' + escapeHTML(safe(s2.howto, "")) + ' <b>' +
+      escapeHTML(String(s2.progress || "{done} / {total}").replace("{done}", done).replace("{total}", total)) + '</b></div>' +
+      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
+  }else if(!m.relDone){
+    /* 산호층: 직접 대비는 못 하지만 위아래 관계로 상대적인 순서는 안다 */
+    panel = (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "") +
+      '<div class="m-note">' + escapeHTML(safe(s2.summary, "")) + '</div>' +
+      '<div class="m-prompt">' + escapeHTML(safe(rel.question, "")) + '</div>' +
+      '<div class="m-howto">' + escapeHTML(safe(rel.howto, "")) + '</div>' +
+      '<div class="rel-parts">' + (rel.parts || []).map((pt, i) =>
+        '<span>' + escapeHTML(pt.text) + '</span>' +
+        (pt.choices || []).map(c => '<button class="rel-choice' + (m2.relPick[i] === c ? " on" : "") + '" data-rel="' + i + '" data-val="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>').join("") +
+        (i < (rel.parts || []).length - 1 ? '<span>,</span>' : '<span>.</span>')).join("") + '</div>' +
+      '<div class="modal-actions"><button class="btn primary" id="m2RelCheck">' + escapeHTML(safe(rel.check, "확인")) + '</button></div>' +
+      (m2.relFb ? feedbackBox(m2.relFb, "hint") : "");
+  }else if(!m.relSeen){
+    panel = '<div class="m-prompt done">' + escapeHTML(safe(rel.result, "")) + '</div>' +
+      '<div class="quiz-feedback explain">' + escapeHTML(safe(rel.explain, "")) + '</div>' +
+      '<div class="modal-actions"><button class="btn teal" id="m2RelNext">' + escapeHTML(safe(rel.next, "다음")) + '</button></div>';
+  }else{
     const cl = s2.closing || {};
     if(m.closingDone){
-      right = '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div>' +
+      const dn = s2.done || {};
+      panel = '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div>' +
         '<div class="quiz-feedback explain">' + escapeHTML(cl.explanation || "") + '</div>' +
-        (cl.extra ? '<div class="m-note">' + escapeHTML(cl.extra) + '</div>' : "") +
+        '<div class="m-complete"><div class="m-complete-title">' + escapeHTML(dn.title || "") + '</div><p>' + escapeHTML(dn.body || "") + '</p></div>' +
         '<div class="modal-actions"><button class="btn primary" id="m2Finish">탐사 완료</button></div>';
     }else{
-      right = '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div><div class="quiz-choices">' +
+      panel = '<div class="m-prompt">' + escapeHTML(cl.question || "") + '</div><div class="quiz-choices">' +
         (cl.choices || []).map((c, i) => '<button class="quiz-choice" data-close-ans="' + i + '"><span>' + ["①","②","③","④","⑤"][i] + '</span><span>' + escapeHTML(c) + '</span></button>').join("") +
-        '</div>' + (m2.closingFb ? feedbackBox(m2.closingFb, m2.closingKind) : "");
+        '</div>' + (m2.closingFb ? feedbackBox(m2.closingFb, "hint") : "");
     }
-  }else if(m2.explain){
-    right = '<div class="m-current">' + cur.n + '층 · ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
-      '<div class="quiz-feedback explain">' + escapeHTML(m2.explain) + '</div>' +
-      '<div class="modal-actions"><button class="btn teal" id="m2Next">' + (layers.indexOf(cur) === layers.length - 1 ? "마무리 문항" : "다음 층") + '</button></div>';
-  }else if(cur.era && !m2.eraDone && m2.phase === "match"){
-    /* 시대 먼저 묻기 (era 단계) */
-    right = '<div class="m-current">' + cur.n + '층 · 발견된 것: ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
-      '<div class="m-prompt">' + escapeHTML(cur.era.ask || "") + '</div><div class="m-choices">' +
-      (cur.era.choices || []).map(c => '<button class="m-choice" data-era="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>').join("") + '</div>' +
-      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
-  }else if(cur.era && !m2.eraDone && m2.phase === "eraKey"){
-    right = '<div class="m-current">' + cur.n + '층 → <b>' + escapeHTML(cur.era.answer || "") + '</b></div>' +
-      '<div class="m-prompt">' + escapeHTML(cur.era.askKey || s2.askKey || "") + '</div><div class="m-choices icons">' +
-      cur.fossils.map(id => '<button class="m-choice" data-era-key="' + id + '"><i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id)) + '</button>').join("") + '</div>' +
-      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
-  }else if(m2.phase === "match"){
-    const choices = Array.isArray(cur.matchChoices) ? cur.matchChoices : matchChoices();
-    right = '<div class="m-current">' + cur.n + '층 · 발견된 것: ' + escapeHTML(neighborLayerLabel(cur.n)) + '</div>' +
-      '<div class="m-prompt">' + escapeHTML(cur.askMatch || s2.askMatch || "") + '</div><div class="m-choices">' +
-      choices.map(c => '<button class="m-choice" data-match="' + c.key + '">' + escapeHTML(c.label) + '</button>').join("") + '</div>' +
-      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
-  }else{
-    const picked = matchChoices().find(c => c.key === m2.pick);
-    const opts = [];
-    if(cur.band){
-      opts.push({ key: "order", label: safe((s2.reasons || {}).order, "") });
-      opts.push({ key: "band", label: safe((s2.reasons || {}).band, "") });
-    }else{
-      cur.fossils.forEach(id => opts.push({ key: id, label: safe((itemById(id) || {}).name, id), item: id }));
-      opts.push({ key: "order", label: safe((s2.reasons || {}).order, "") });
-    }
-    right = '<div class="m-current">' + cur.n + '층 → <b>' + escapeHTML(picked ? picked.label : "") + '</b></div>' +
-      '<div class="m-prompt">' + escapeHTML(s2.askKey || "") + '</div><div class="m-choices icons">' +
-      opts.map(o => '<button class="m-choice" data-key="' + o.key + '">' + (o.item ? '<i class="item-visual-slot" data-item="' + o.item + '"></i>' : "") + escapeHTML(o.label) + '</button>').join("") + '</div>' +
-      '<button class="btn ghost small" id="m2Back">지층 다시 고르기</button>' +
-      (m2.feedback ? feedbackBox(m2.feedback, m2.fbKind) : "");
   }
-  $("missionBody").innerHTML =
-    '<div class="m-request"><b>의뢰</b> ' + escapeHTML(s2.request || "") + '</div>' +
-    '<div class="m-howto">' + escapeHTML(s2.howto || "") + '</div>' +
-    '<div class="m-layout"><div class="m-left">' + left + '</div><div class="m-right">' + right + '</div></div>';
   const body = $("missionBody");
+  body.innerHTML =
+    '<div class="m-request"><b>의뢰</b> ' + escapeHTML(s2.request || "") + '</div>' +
+    compareHTML(m.links, { live: !linked, tags: tags }) +
+    '<div class="m-panel">' + panel + '</div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
-  body.querySelectorAll("[data-era]").forEach(b => b.addEventListener("click", () => pickEra(cur, b.getAttribute("data-era"))));
-  body.querySelectorAll("[data-era-key]").forEach(b => b.addEventListener("click", () => pickEraKey(cur, b.getAttribute("data-era-key"))));
-  body.querySelectorAll("[data-match]").forEach(b => b.addEventListener("click", () => pickMatch(cur, b.getAttribute("data-match"))));
-  body.querySelectorAll("[data-key]").forEach(b => b.addEventListener("click", () => pickKey(cur, b.getAttribute("data-key"))));
+  drawLinks(m.links);
+  if(!linked) setupLinking($("mCompare"));
+  body.querySelectorAll("[data-rel]").forEach(b => b.addEventListener("click", () => {
+    playSound("click"); m2.relPick[Number(b.getAttribute("data-rel"))] = b.getAttribute("data-val"); m2.relFb = ""; renderStage2();
+  }));
+  const rc = $("m2RelCheck"); if(rc) rc.addEventListener("click", checkRelative);
+  const rn = $("m2RelNext"); if(rn) rn.addEventListener("click", () => { playSound("click"); m.relSeen = true; saveState(); renderStage2(); });
   body.querySelectorAll("[data-close-ans]").forEach(b => b.addEventListener("click", () => answerClosing(Number(b.getAttribute("data-close-ans")), b)));
-  const bk = $("m2Back"); if(bk) bk.addEventListener("click", () => { playSound("click"); m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: "" }; renderStage2(); });
-  const nx = $("m2Next"); if(nx) nx.addEventListener("click", () => { playSound("click"); m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: "" }; renderStage2(); });
   const fin = $("m2Finish"); if(fin) fin.addEventListener("click", finishMission);
 }
-/* era 단계: 대비 전에 먼저 시대를 판단한다 (공룡 → 중생대) */
-function pickEra(L, choice){
-  const era = L.era || {};
-  if(choice === era.answer){
-    missionRecord("m2_era_" + L.n, "ERA", true);
-    playSound("correct");
-    m2.phase = "eraKey"; m2.feedback = "";
-  }else{
-    missionRecord("m2_era_" + L.n, "ERA", false);
-    playSound("wrong");
-    m2.feedback = safe(era.wrong, "다시 생각해 보자."); m2.fbKind = "hint";
-  }
-  renderStage2();
-}
-function pickEraKey(L, key){
-  const s2 = finalMissionData().stage2 || {};
-  const era = L.era || {};
-  const trap = (era.trap || {})[key];
-  if(trap){
-    missionRecord("m2_erakey_" + L.n, "IDX", false);
-    playSound("wrong");
-    m2.feedback = trap; m2.fbKind = "hint";
-  }else if((era.key || []).indexOf(key) >= 0){
-    missionRecord("m2_erakey_" + L.n, "IDX", true);
-    playSound("correct");
-    m2.eraDone = true; m2.phase = "match"; m2.pick = null;
-    m2.feedback = safe(era.feedback, ""); m2.fbKind = "explain";
-  }else{
-    missionRecord("m2_erakey_" + L.n, "IDX", false);
-    playSound("wrong");
-    m2.feedback = safe(s2.wrongMatch, ""); m2.fbKind = "hint";
-  }
-  renderStage2();
-}
-function pickMatch(L, key){
+/* 한 쌍을 이어 본다: 이웃 층 n ↔ 우리 공원 층 key */
+function tryLink(n, key){
   const s2 = finalMissionData().stage2 || {};
   const m = missionState();
-  playSound("click");
-  m2.pick = key;
-  if(L.skipKey){
-    /* 근거를 따로 묻지 않는 층 (위치 관계를 질문에 담은 경우) */
-    const answerKey = L.answer === "boundary" ? "D" : L.answer;
-    if(key === answerKey){
-      missionRecord("m2_match_" + L.n, "ERA", true);
-      playSound("correct");
-      m.matched[L.n] = answerKey; saveState();
-      m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: L.explain || "" };
-    }else{
-      missionRecord("m2_match_" + L.n, "ERA", false);
-      playSound("wrong");
-      const per = (L.wrongMatch && typeof L.wrongMatch === "object") ? L.wrongMatch[key] : null;
-      m2.feedback = per || safe(s2.wrongMatch, ""); m2.fbKind = "hint";
-      m2.eraDone = true; m2.phase = "match"; m2.pick = null;
-    }
-    renderStage2();
-    return;
-  }
-  if(L.answer === "none"){
-    if(key === "none"){
-      missionRecord("m2_match_" + L.n, "ERA", true);
-      playSound("correct");
-      m.matched[L.n] = "none"; saveState();
-      m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint", explain: L.explain || "" };
-    }else{
-      /* 시대를 골랐다면 근거를 물어 함정(산호)을 겪게 한다 */
-      m2.phase = "key"; m2.feedback = "";
-    }
+  const L = neighborLayers().find(x => x.n === n);
+  if(!L || m.links[n]) return;
+  if(L.answer === key){
+    m.links[n] = key; saveState();
+    missionRecord("m2_link_" + n, "ERA", true);
+    playSound("correct");
+    m2.feedback = safe(s2.ok, "") + (L.note ? " " + L.note : ""); m2.fbKind = "explain";
   }else{
-    /* 정답이든 아니든 근거를 묻는다 — 근거가 이 미션의 핵심 */
-    m2.phase = "key"; m2.feedback = "";
+    missionRecord("m2_link_" + n, "ERA", false);
+    playSound("wrong");
+    m2.feedback = (L.wrongHints || {})[key] || L.wrongAll || safe(s2.wrong, ""); m2.fbKind = "hint";
   }
   renderStage2();
 }
-function pickKey(L, key){
-  const s2 = finalMissionData().stage2 || {};
+/* 끌어서 잇기 (마우스·터치 공용 pointer 이벤트). 어느 쪽 기둥에서 시작해도 되고, 반대쪽 층 위에서 놓으면 판정한다. */
+function setupLinking(wrap){
+  if(!wrap) return;
   const m = missionState();
-  const answerKey = L.answer === "boundary" ? "D" : L.answer;
-  const trap = (L.trap || {})[key];
-  if(trap){
-    missionRecord("m2_key_" + L.n, "IDX", false);
-    playSound("wrong");
-    m2.feedback = trap; m2.fbKind = "hint";
-    if(L.answer === "none"){ m2.phase = "match"; m2.pick = null; }
-    renderStage2();
-    return;
-  }
-  const keyOk = (L.key || []).indexOf(key) >= 0;
-  const matchOk = m2.pick === answerKey;
-  if(matchOk && keyOk){
-    missionRecord("m2_match_" + L.n, "ERA", true);
-    missionRecord("m2_key_" + L.n, "IDX", true);
+  let drag = null, pid = null, over = null;
+  const rel = e => { const r = wrap.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const anchorOf = el => {
+    const r = el.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+    return { x: (el.getAttribute("data-side") === "ours" ? r.right : r.left) - w.left, y: r.top - w.top + r.height / 2 };
+  };
+  const setOver = el => {
+    if(over === el) return;
+    if(over) over.classList.remove("over");
+    over = el;
+    if(over) over.classList.add("over");
+  };
+  const move = e => {
+    if(!drag || e.pointerId !== pid) return;
+    e.preventDefault();
+    const p = rel(e), a = anchorOf(drag.el);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const band = under && under.closest ? under.closest(".cmp-band") : null;
+    setOver(band && band.getAttribute("data-side") !== drag.side && wrap.contains(band) ? band : null);
+    drawLinks(m.links, { x1: a.x, y1: a.y, x2: p.x, y2: p.y });
+  };
+  const finish = e => {
+    if(!drag || e.pointerId !== pid) return;
+    const target = over;
+    drag.el.classList.remove("dragging");
+    setOver(null);
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", finish);
+    document.removeEventListener("pointercancel", finish);
+    const d = drag; drag = null; pid = null;
+    if(!target || e.type === "pointercancel"){ drawLinks(m.links); return; }
+    const n = Number(d.side === "nb" ? d.el.getAttribute("data-n") : target.getAttribute("data-n"));
+    const key = d.side === "ours" ? d.el.getAttribute("data-key") : target.getAttribute("data-key");
+    tryLink(n, key);
+  };
+  wrap.querySelectorAll(".cmp-band").forEach(el => {
+    el.addEventListener("pointerdown", e => {
+      if(drag || (e.button !== undefined && e.button !== 0)) return;
+      const side = el.getAttribute("data-side");
+      if(side === "nb" && m.links[el.getAttribute("data-n")]) return;   // 이미 이은 층
+      drag = { el: el, side: side }; pid = e.pointerId;
+      el.classList.add("dragging");
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", finish);
+      document.addEventListener("pointercancel", finish);
+      e.preventDefault();
+    });
+  });
+}
+/* 산호층의 상대적 순서: 빈칸 두 개를 모두 맞게 골라야 한다 */
+function checkRelative(){
+  const rel = (finalMissionData().stage2 || {}).relative || {};
+  const m = missionState();
+  const parts = rel.parts || [];
+  const ok = parts.length > 0 && parts.every((pt, i) => m2.relPick[i] === pt.answer);
+  if(ok){
+    missionRecord("m2_relative", "ERA", true);
     playSound("correct");
-    m.matched[L.n] = answerKey; saveState();
-    m2 = { phase: "match", pick: null, feedback: "", fbKind: "hint",
-           explain: L.explain || "" };
-  }else if(!keyOk){
-    missionRecord("m2_key_" + L.n, "IDX", false);
-    playSound("wrong");
-    m2.feedback = key === "order"
-      ? (L.band ? safe(s2.wrongOrderBand, "순서만으로는 경계층인지 알 수 없다.") : safe(s2.wrongOrderKey, "아래위 층의 순서로는 범위만 좁힐 수 있다. 이 층에는 시대를 정해 주는 표준 화석이 있다."))
-      : safe(s2.wrongMatch, "");
-    m2.fbKind = "hint";
+    m.relDone = true; saveState();
+    m2.feedback = ""; m2.relFb = "";
   }else{
-    missionRecord("m2_match_" + L.n, "ERA", false);
+    missionRecord("m2_relative", "ERA", false);
     playSound("wrong");
-    m2.feedback = safe(s2.wrongMatch, ""); m2.fbKind = "hint";
-    m2.phase = "match"; m2.pick = null;
+    m2.feedback = "";
+    m2.relFb = safe(rel.wrong, "다시 골라 보세요.");
   }
   renderStage2();
 }
@@ -458,11 +474,12 @@ function answerClosing(idx, btn){
     missionRecord("m2_closing", "ENV", true);
     playSound("correct");
     m.closingDone = true; saveState();
+    spawnConfetti();
   }else{
     missionRecord("m2_closing", "ENV", false);
     playSound("wrong");
     if(btn) btn.classList.add("wrong");
-    m2.closingFb = safe(cl.hint, "다시 생각해 보자."); m2.closingKind = "hint";
+    m2.closingFb = safe(cl.hint, "다시 생각해 보자.");
   }
   renderStage2();
 }
@@ -485,13 +502,18 @@ function finishMission(){
 function renderMissionComplete(){
   const c = finalMissionData().complete || {};
   const m = missionState();
+  const rel = (finalMissionData().stage2 || {}).relative || {};
+  const tags = {};
+  if(rel.layerN && rel.tag) tags[rel.layerN] = rel.tag;
   $("missionBody").innerHTML =
     '<div class="m-complete"><div class="m-complete-title">' + escapeHTML(c.title || "탐사 완료!") + '</div>' +
     '<p>' + escapeHTML(c.body || "") + '</p><p class="m-note">' + escapeHTML(c.note || "") + '</p></div>' +
-    '<div class="m-layout"><div class="m-left big">' + stratColumnHTML(m.placed, { clickable: true }) + '</div>' +
-    '<div class="m-right"><div class="m-howto">' + escapeHTML(c.columnHint || "") + '</div><div id="mLayerInfo" class="m-layer-info"></div>' +
-    '<div class="modal-actions"><button class="btn primary" id="mToResult">탐사 결과 보기</button></div></div></div>';
-  $("missionBody").querySelectorAll(".m-band.click").forEach(el => el.addEventListener("click", () => showColumnInfo(el.getAttribute("data-card"))));
+    compareHTML(m.links, { clickable: true, tags: tags }) +
+    '<div class="m-panel"><div class="m-howto">' + escapeHTML(c.columnHint || "") + '</div><div id="mLayerInfo" class="m-layer-info"></div>' +
+    '<div class="modal-actions"><button class="btn primary" id="mToResult">탐사 결과 보기</button></div></div>';
+  $("missionBody").querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
+  drawLinks(m.links);
+  $("missionBody").querySelectorAll(".cmp-band.click").forEach(el => el.addEventListener("click", () => showColumnInfo(el.getAttribute("data-card"))));
   $("mToResult").addEventListener("click", () => { playSound("click"); closeModal("finalMissionModal"); openResultScreen(); });
   if(m.placed.length) showColumnInfo(m.placed[m.placed.length - 1]);
 }
@@ -507,7 +529,7 @@ function showColumnInfo(cardId){
     '<div class="info-row"><div class="info-label">대표 화석</div><div class="info-value icons">' + items.map(i => '<i class="item-visual-slot" data-item="' + i.id + '"></i>' + escapeHTML(safe(i.name, ""))).join(" · ") + '</div></div>' +
     '<div class="info-row"><div class="info-label">당시 환경</div><div class="info-value">' + escapeHTML(card.env || "") + '</div></div>';
   box.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
-  document.querySelectorAll("#missionBody .m-band").forEach(el => el.classList.toggle("sel", el.getAttribute("data-card") === cardId));
+  document.querySelectorAll("#missionBody .m-band, #missionBody .cmp-band").forEach(el => el.classList.toggle("sel", el.getAttribute("data-card") === cardId));
 }
 
 /* ---------- 보고서 PNG용 층서 기둥 ---------- */

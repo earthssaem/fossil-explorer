@@ -182,6 +182,7 @@ function showAllCollected(){
     btn.onclick = defaultCinematicGo;
     btn.textContent = "계속";
     if(state.finalMissionDone) openResultScreen();
+    else if(typeof goToLookout === "function") goToLookout();
   };
   openCinematic();
   spawnConfetti();

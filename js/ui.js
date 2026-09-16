@@ -314,6 +314,8 @@ function bindUI(){
     playSound("click"); collectionReturnTo = "gameScreen"; renderCollection(); renderScreen("collectionScreen");
   });
   $("btnCollectionBack").addEventListener("click", () => { playSound("click"); renderScreen(collectionReturnTo); });
+  const gg = $("goalGuide");
+  if(gg) gg.addEventListener("click", () => { ensureAudioOnce(); playSound("click"); goToLookout(); });
   $("btnHome").addEventListener("click", () => { playSound("click"); saveState(); renderScreen("startScreen"); });
   $("btnSound").addEventListener("click", () => setSoundOn(!game.soundOn));
   $("btnCinematicGo").onclick = defaultCinematicGo;

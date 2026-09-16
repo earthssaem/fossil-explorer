@@ -148,8 +148,9 @@ function openOutcropModal(layerId, quiet){
   }
   /* 층서 기둥 (지층 대비) */
   renderStratColumn(layerId);
-  $("outcropNote").textContent = outcropNoteText(layerId) +
-    " 다른 구역의 노두도 조사해 이 층과 어떻게 이어지는지 비교해 보자.";
+  /* 앞 문장과 '다른 구역…' 문장은 줄을 나눠 보여 준다 */
+  $("outcropNote").innerHTML = escapeHTML(outcropNoteText(layerId)) +
+    "<br>다른 구역의 노두도 조사해 이 층과 어떻게 이어지는지 비교해 보자.";
   if(!quiet){
     openModal("outcropModal");
     playSound("place");

@@ -402,11 +402,16 @@ function drawWorld(){
 }
 
 /* ---------- 전망대 길 안내 ----------
-   노두를 모두 조사해 최종 미션이 열렸는데 전망대를 못 찾는 학생이 많다.
-   최종 미션을 마칠 때까지: 전망대가 화면 안에 있으면 그 위에 튀는 표식을, 화면 밖이면 화면 가장자리에
-   전망대 쪽을 가리키는 화살표를 그린다. 탐사 지도에도 전망대 표식을 그린다. */
+   마지막 구역에서 마지막 지층(F)을 해금하고 나서도 전망대를 못 찾는 학생이 많다.
+   그때부터 최종 미션을 마칠 때까지만: 전망대가 화면 안에 있으면 그 위에 튀는 표식을, 화면 밖이면
+   플레이어 곁에 전망대 쪽을 가리키는 화살표를 그린다. 탐사 지도의 전망대 표식도 이때만 그린다.
+   (그 전에는 전망대를 가리키지 않는다 — 탐사 순서를 앞질러 알려 주지 않기 위해서) */
+function lastLayerUnlocked(){
+  const last = layerData[layerData.length - 1];
+  return !!last && (state.unlockedLayers || []).includes(last.id);
+}
 function lookoutGuideActive(){
-  return !!WORLD.lookout && !state.finalMissionDone && finalMissionReady();
+  return !!WORLD.lookout && !state.finalMissionDone && lastLayerUnlocked();
 }
 function drawLookoutGuide(ctx, camX, camY, cw, ch, z){
   if(!lookoutGuideActive()) return;
@@ -568,12 +573,11 @@ function drawMiniMap(){
     g.fillStyle = "#2b1d15";
     g.fillText(String(o.layerId), x, y + 1);
   });
-  /* 전망대 표식 (최종 미션이 열리면 노랗게 깜박이며 강조) */
-  if(WORLD.lookout){
+  /* 전망대 표식: 마지막 지층을 해금한 뒤에만 노랗게 깜박이며 그린다 */
+  if(lookoutGuideActive()){
     const x = Math.round(WORLD.lookout.x * sx), y = Math.round(WORLD.lookout.y * sy) - 4;
-    const guide = lookoutGuideActive();
-    const on = !guide || Math.floor(performance.now() / 300) % 2 === 0;
-    if(guide){ g.fillStyle = "rgba(255,224,102,.35)"; g.beginPath(); g.arc(x, y, 14, 0, Math.PI * 2); g.fill(); }
+    const on = Math.floor(performance.now() / 300) % 2 === 0;
+    g.fillStyle = "rgba(255,224,102,.35)"; g.beginPath(); g.arc(x, y, 14, 0, Math.PI * 2); g.fill();
     g.fillStyle = "#2b1d15";
     g.beginPath(); g.moveTo(x, y - 9); g.lineTo(x + 9, y + 6); g.lineTo(x - 9, y + 6); g.closePath(); g.fill();
     g.fillStyle = on ? "#ffe066" : "#d8cbb0";

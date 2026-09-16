@@ -395,8 +395,79 @@ function drawWorld(){
     ctx.strokeRect(Math.round(game.near.x - 12) + .5, Math.round(game.near.y - 22) + .5, 24, 24);
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  drawLookoutGuide(ctx, camX, camY, cw, ch, z);
   positionHint();
   drawMiniMap();
+  updateGoalGuide();
+}
+
+/* ---------- 전망대 길 안내 ----------
+   노두를 모두 조사해 최종 미션이 열렸는데 전망대를 못 찾는 학생이 많다.
+   최종 미션을 마칠 때까지: 전망대가 화면 안에 있으면 그 위에 튀는 표식을, 화면 밖이면 화면 가장자리에
+   전망대 쪽을 가리키는 화살표를 그린다. 탐사 지도에도 전망대 표식을 그린다. */
+function lookoutGuideActive(){
+  return !!WORLD.lookout && !state.finalMissionDone && finalMissionReady();
+}
+function drawLookoutGuide(ctx, camX, camY, cw, ch, z){
+  if(!lookoutGuideActive()) return;
+  const now = performance.now();
+  const lx = WORLD.lookout.x, ly = WORLD.lookout.y - 26;       /* 데크 위쪽 */
+  const sx = (lx - camX) * z, sy = (ly - camY) * z;
+  const margin = 22 * z;
+  const onScreen = sx > margin && sx < cw - margin && sy > margin && sy < ch - margin;
+  ctx.save();
+  ctx.font = "bold " + Math.round(5 * z) + "px 'DungGeunMo', 'Noto Sans KR', sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const label = "전망대";
+  const drawLabel = (x, y) => {
+    const w = ctx.measureText(label).width + 6 * z, h = 7 * z;
+    ctx.fillStyle = "#2b1d15"; ctx.fillRect(Math.round(x - w / 2 - z), Math.round(y - h / 2 - z), Math.round(w + 2 * z), Math.round(h + 2 * z));
+    ctx.fillStyle = "#ffe066"; ctx.fillRect(Math.round(x - w / 2), Math.round(y - h / 2), Math.round(w), Math.round(h));
+    ctx.fillStyle = "#2b1d15"; ctx.fillText(label, Math.round(x), Math.round(y + z * .5));
+  };
+  const drawArrow = (x, y, angle, size) => {
+    ctx.save();
+    ctx.translate(Math.round(x), Math.round(y));
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(size, 0); ctx.lineTo(-size * .7, -size * .75); ctx.lineTo(-size * .3, 0); ctx.lineTo(-size * .7, size * .75); ctx.closePath();
+    ctx.fillStyle = "#2b1d15"; ctx.lineWidth = 3 * z; ctx.strokeStyle = "#2b1d15"; ctx.lineJoin = "round"; ctx.stroke();
+    ctx.fillStyle = "#ffe066"; ctx.fill();
+    ctx.restore();
+  };
+  if(onScreen){
+    /* 전망대 위에서 위아래로 튀는 화살표 + 이름표 */
+    const bob = Math.round(Math.sin(now / 220) * 3 * z);
+    drawArrow(sx, sy - 10 * z + bob, Math.PI / 2, 5 * z);
+    drawLabel(sx, sy - 24 * z + bob);
+  }else{
+    /* 플레이어 둘레에서 전망대 쪽을 가리키는 화살표 ("내 위치에서 저쪽으로") */
+    const px = (game.player.x - camX) * z, py = (game.player.y - 10 - camY) * z;
+    const ang = Math.atan2(ly - (game.player.y - 10), lx - game.player.x);
+    const pulse = Math.sin(now / 180) * 3 * z;
+    const r = 30 * z + pulse;
+    const ex = clamp(px + Math.cos(ang) * r, 16 * z, cw - 16 * z);
+    const ey = clamp(py + Math.sin(ang) * r, 24 * z, ch - 16 * z);
+    drawArrow(ex, ey, ang, 8 * z);
+    drawLabel(clamp(px + Math.cos(ang) * (r + 20 * z), 16 * z, cw - 16 * z), clamp(py + Math.sin(ang) * (r + 20 * z), 8 * z, ch - 8 * z));
+  }
+  ctx.restore();
+}
+/* 전망대까지 자동으로 걸어간다 (안내 연출의 '전망대로 가자' 버튼 · 상단 안내 배지) */
+function goToLookout(){
+  if(!WORLD.lookout || !game.running) return false;
+  const wp = findPath(game.player.x, game.player.y, WORLD.lookout.x, WORLD.lookout.y + 14);
+  if(wp === null){ toast("전망대로 가는 길이 아직 열리지 않았다. 관문을 확인해 보자."); return false; }
+  game.autoTarget = { waypoints: wp, then: "action" };
+  toast("전망대로 이동 중. 노란 화살표가 전망대 방향이다.", "gold");
+  return true;
+}
+/* 상단 안내 배지: 최종 미션이 열렸는데 아직 안 끝냈으면 보여 준다 */
+function updateGoalGuide(){
+  const el = $("goalGuide");
+  if(!el) return;
+  const on = lookoutGuideActive() && !anyModalOpen();
+  el.classList.toggle("on", on);
 }
 function drawPlayer(ctx){
   const p = game.player;
@@ -497,6 +568,21 @@ function drawMiniMap(){
     g.fillStyle = "#2b1d15";
     g.fillText(String(o.layerId), x, y + 1);
   });
+  /* 전망대 표식 (최종 미션이 열리면 노랗게 깜박이며 강조) */
+  if(WORLD.lookout){
+    const x = Math.round(WORLD.lookout.x * sx), y = Math.round(WORLD.lookout.y * sy) - 4;
+    const guide = lookoutGuideActive();
+    const on = !guide || Math.floor(performance.now() / 300) % 2 === 0;
+    if(guide){ g.fillStyle = "rgba(255,224,102,.35)"; g.beginPath(); g.arc(x, y, 14, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = "#2b1d15";
+    g.beginPath(); g.moveTo(x, y - 9); g.lineTo(x + 9, y + 6); g.lineTo(x - 9, y + 6); g.closePath(); g.fill();
+    g.fillStyle = on ? "#ffe066" : "#d8cbb0";
+    g.beginPath(); g.moveTo(x, y - 6); g.lineTo(x + 6, y + 4); g.lineTo(x - 6, y + 4); g.closePath(); g.fill();
+    g.fillStyle = "#2b1d15"; g.font = "bold 10px 'DungGeunMo', 'Noto Sans KR', sans-serif";
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText("전망대", x, y + 14);
+    g.font = "bold 11px 'DungGeunMo', 'Noto Sans KR', sans-serif";
+  }
   /* 카메라 범위 */
   const z = game.zoom;
   g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1;
@@ -611,6 +697,7 @@ function maybeParkComplete(){
       $("cinematicOverlay").classList.remove("on");
       btn.onclick = defaultCinematicGo;
       btn.textContent = "계속";
+      goToLookout();
     };
     openCinematic();
     playSound("badge");

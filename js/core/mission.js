@@ -1,7 +1,7 @@
 /* ==========================================================================
    최종 미션 · 흩어진 지층 기록을 완성하라
    1단계: 탐사에서 확인한 지층 기록 카드를 끌어 옮겨 오래된 것부터 차례로 배치한다 (순서 확인만 한다).
-   2단계: 두 지역의 지층 기둥을 나란히 놓고 같은 시대의 층끼리 끌어서 선으로 잇는다 (지층 대비).
+   2단계: 두 지역의 지층 기록을 나란히 놓고 같은 시대의 층끼리 끌어서 선으로 잇는다 (지층 대비).
           연결 대상 5개를 모두 이으면 바로 완료. 산호층은 직접 잇지 않은 채 남고, 추가 문항·체크 항목은 없다.
    완료 : 연결선이 남은 두 기둥을 그대로 보여 준다. 우리 공원 층을 누르면 시대·화석·환경을 다시 본다.
    진행 상태는 state.mission 에 저장되어 창을 닫았다 열어도 이어진다.
@@ -96,7 +96,7 @@ function openFinalMission(){
 function renderMission(){
   const m = missionState();
   const steps = $("missionSteps");
-  const names = ["1단계 지층 기둥", "2단계 지층 대비", "탐사 완료"];
+  const names = ["1단계 지층 기록", "2단계 지층 대비", "탐사 완료"];
   steps.innerHTML = names.map((n, i) => '<span class="' + (m.stage === i + 1 ? "now" : (m.stage > i + 1 ? "done" : "")) + '">' + n + '</span>').join("");
   if(m.stage === 1) renderStage1();
   else if(m.stage === 2) renderStage2();
@@ -155,7 +155,7 @@ function renderStage1(){
       (m1.feedback ? feedbackBox(m1.feedback, m1.fbKind) : "");
   }
   body.innerHTML =
-    '<div class="m-layout m-stage1"><div class="m-left"><div class="m-col-title">우리 공원 지층 기둥 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
+    '<div class="m-layout m-stage1"><div class="m-left"><div class="m-col-title">우리 공원 지층 기록 <small>' + m.placed.length + ' / ' + cards.length + '</small></div>' +
     stratColumnHTML(m.placed, {}) + '</div><div class="m-right">' + right + '</div></div>';
   body.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
   /* 이벤트 */
@@ -244,7 +244,7 @@ function autoScroll(list, y){
 }
 
 /* ---------- 2단계 · 두 지역의 지층 대비 (선으로 잇기) ----------
-   왼쪽: 1단계에서 완성한 우리 공원 지층 기둥 (경계 노두는 아래층·경계층으로 나뉨)
+   왼쪽: 1단계에서 완성한 우리 공원 지층 기록 (경계 노두는 아래층·경계층으로 나뉨)
    오른쪽: 이웃 마을 노두 (아래→위). 같은 시대의 층끼리 끌어서 선으로 잇는다.
    바른 연결만 저장되어 선이 남고, 틀리면 짧은 안내만 보여 준 뒤 다시 이을 수 있다.
    연결 대상을 모두 이으면 바로 완료 문구를 보여 준다. 추가 문항이나 체크 항목은 없다. */

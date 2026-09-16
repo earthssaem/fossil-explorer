@@ -2,7 +2,9 @@
    최종 미션 · 흩어진 지층 기록을 완성하라
    1단계: 탐사에서 확인한 지층 기록 카드를 끌어 옮겨 오래된 것부터 차례로 배치한다 (순서 확인만 한다).
    2단계: 두 지역의 지층 기록을 나란히 놓고 같은 시대의 층끼리 끌어서 선으로 잇는다 (지층 대비).
-          연결 대상 5개를 모두 이으면 바로 완료. 산호층은 직접 잇지 않은 채 남고, 추가 문항·체크 항목은 없다.
+          이웃 노두 5개 층을 모두 이으면 바로 완료. 추가 문항·체크 항목은 없다.
+   시기 : 카드·기둥의 '쌓인 시기(추정)'는 연구소 분석 결과로 알려 주는, 그 지층이 쌓였을 것으로 추정되는 때다
+          (화석 생물의 생존 기간이 아니다). 최종 미션 창을 처음 열 때 팝업으로 한 번 안내한다.
    완료 : 연결선이 남은 두 기둥을 그대로 보여 준다. 우리 공원 층을 누르면 시대·화석·환경을 다시 본다.
    진행 상태는 state.mission 에 저장되어 창을 닫았다 열어도 이어진다.
    ========================================================================== */
@@ -21,9 +23,11 @@ function missionState(){
   if(m.stage === 1 && m.placed.length && m.placed.length < missionCards().length) m.placed = [];
   if(!Array.isArray(m.order)) m.order = [];   // 1단계에서 학생이 배치한 카드 순서 (아래→위)
   if(!m.links || typeof m.links !== "object") m.links = {};   // 2단계 연결 {이웃 층 번호: 우리 공원 층 key}
-  /* 예전 저장 데이터의 연결 중 지금 정답과 다른 것은 지운다 (직접 잇지 않는 층, 바뀐 대응 등) */
-  ((DEFAULT_MISSION_DATA.finalMission.stage2 || {}).layers || []).forEach(L => {
-    if(m.links[L.n] && (L.answer === "none" || m.links[L.n] !== L.answer)) delete m.links[L.n];
+  /* 예전 저장 데이터의 연결 중 지금 정답과 다른 것, 지금은 없는 층 번호의 것은 지운다 (층 번호가 바뀐 경우 등) */
+  const nbLayers = (DEFAULT_MISSION_DATA.finalMission.stage2 || {}).layers || [];
+  Object.keys(m.links).forEach(n => {
+    const L = nbLayers.find(x => String(x.n) === String(n));
+    if(!L || m.links[n] !== L.answer) delete m.links[n];
   });
   if(!m.tries || typeof m.tries !== "object") m.tries = {};   // 문항별 시도 횟수 (첫 시도 정답 집계용)
   return m;
@@ -62,8 +66,14 @@ function shuffledCards(){
   return cards.map((c, i) => ({ c: c, k: hash2(i + 1, 3, 91) })).sort((a, b) => a.k - b.k).map(x => x.c);
 }
 
+/* '쌓인 시기(추정)' 라벨과 값. 카드의 era 는 연구소 분석 결과로 알려 준 쌓인 시기다 */
+function periodLabel(){ return safe(finalMissionData().periodLabel, "쌓인 시기(추정)"); }
+function cardPeriod(card){ const ly = layerById(card.layer); return safe(card.era, safe(ly && ly.era, "")); }
+/* 기둥 칸(flex column)에서도 한 줄에 놓이도록 라벨을 굵은 글씨 요소 안에 넣는다 */
+function periodHTML(text){ return '<b><small class="m-period">' + escapeHTML(periodLabel()) + '</small>' + escapeHTML(text) + '</b>'; }
+
 /* ---------- 층서 기둥 HTML (미션·결과·완료 화면 공용) ----------
-   placed: 놓인 카드 id 목록 (아래→위). clickable: 층을 눌러 정보 보기 */
+   placed: 놓인 카드 id 목록 (아래→위). clickable: 층을 눌러 정보 보기. small: 결과 화면용 (쌓인 시기를 적는다) */
 function stratColumnHTML(placed, opts){
   const o = opts || {};
   const cards = missionCards();
@@ -76,7 +86,8 @@ function stratColumnHTML(placed, opts){
     html += '<div class="m-band' + (on ? " on" : " empty") + (ly && ly.isBoundary ? " bnd" : "") + (o.clickable && on ? " click" : "") + (on && darkColor(cardColor(card)) ? " dark" : "") + '"' +
       ' data-card="' + card.id + '" style="flex-basis:' + share + '%;' + (on ? "background:" + cardColor(card) + ";" : "") + '">' +
       (on ? '<b>' + escapeHTML(safe(ly && ly.label, card.layer)) + (card.band ? " " + (card.band === "upper" ? "위층" : "아래층") : "") + '</b>' +
-            '<span>' + escapeHTML(o.small ? safe(ly && ly.era, "") : items) + '</span>'
+            (o.small ? '<span><small class="m-period">' + escapeHTML(periodLabel()) + '</small> ' + escapeHTML(cardPeriod(card)) + '</span>'
+                     : '<span>' + escapeHTML(items) + '</span>')
           : '<span class="q">?</span>') +
       '</div>';
   });
@@ -87,11 +98,27 @@ function stratColumnHTML(placed, opts){
 /* ---------- 열기 ---------- */
 function openFinalMission(){
   const fm = finalMissionData();
+  /* 처음 열 때는 '연구소 분석 결과' 팝업을 먼저 보여 주고, 확인을 누르면 미션 창을 연다 (한 번만) */
+  if(!state.labReportShown && fm.labReport && $("labReportModal")){
+    openLabReport(fm.labReport, () => { state.labReportShown = true; saveState(); openFinalMission(); });
+    return;
+  }
   $("finalTitle").textContent = "최종 미션 · " + safe(fm.title, "");
   /* 연결선(SVG)은 화면 크기를 재서 그리므로 모달을 먼저 보이게 한 뒤 내용을 그린다 */
   openModal("finalMissionModal");
   renderMission();
   playSound("place");
+}
+/* 연구소 분석 결과 팝업: 각 지층이 쌓였을 것으로 추정되는 시기를 알려 준다 (화석 생물의 생존 기간이 아님을 함께 적는다) */
+function openLabReport(lr, onOk){
+  $("labReportTitle").textContent = safe(lr.title, "연구소 분석 결과 도착");
+  const lines = Array.isArray(lr.lines) ? lr.lines : [];
+  $("labReportBody").innerHTML = lines.map((t, i) => '<p' + (i === lines.length - 1 ? ' class="lab-key"' : '') + '>' + escapeHTML(t) + '</p>').join("");
+  const btn = $("btnLabReportOk");
+  btn.textContent = safe(lr.button, "확인");
+  btn.onclick = () => { playSound("click"); closeModal("labReportModal"); if(typeof onOk === "function") onOk(); };
+  openModal("labReportModal");
+  playSound("register");
 }
 function renderMission(){
   const m = missionState();
@@ -118,15 +145,14 @@ function stage1Order(){
   if(!valid){ m.order = shuffledCards().map(c => c.id); saveState(); }
   return m.order;
 }
-/* 카드 한 장의 정보 줄: 시대 / 화석 / 환경 (모두 탐사에서 확인한 것) */
+/* 카드 한 장의 정보 줄: 쌓인 시기(추정) / 화석 / 환경 (화석·환경은 탐사에서 확인한 것, 시기는 연구소 분석 결과) */
 function sortCardHTML(card){
-  const ly = layerById(card.layer);
   const items = cardItems(card);
   return '<div class="m-sort-card" data-card="' + card.id + '">' +
     '<span class="m-sort-grip" aria-hidden="true">⋮⋮</span>' +
     '<span class="m-card-icons">' + items.map(i => '<i class="item-visual-slot" data-item="' + i.id + '"></i>').join("") + '</span>' +
     '<span class="m-sort-lines">' +
-      '<b>' + escapeHTML(safe(card.era, safe(ly && ly.era, ""))) + '</b>' +
+      periodHTML(cardPeriod(card)) +
       '<span>' + escapeHTML(items.map(i => safe(i.name, "")).join("·")) + '</span>' +
       '<span class="env">' + escapeHTML(safe(card.env, "")) + '</span>' +
     '</span></div>';
@@ -189,10 +215,23 @@ function checkOrder(){
   }else{
     missionRecord("m1_order", "ERA", false);
     playSound("wrong");
-    m1 = { feedback: st.wrong || "", fbKind: "hint" };
+    m1 = { feedback: wrongOrderHint(m.order, answer, st), fbKind: "hint" };
   }
   saveState();
   renderStage1();
+}
+/* 잘못 놓인 카드 중 가장 아래 것(order[i] ≠ answer[i] 인 첫 자리)을 짚어 준다.
+   그 자리에 와야 할 카드보다 위에 있어야 하는 카드이므로 "{card} 카드는 {other} 카드보다 위에 있어야 해요"가 된다.
+   정답 순서 전체는 보여 주지 않는다. */
+function wrongOrderHint(order, answer, st){
+  const cards = missionCards();
+  const nameOf = id => { const c = cards.find(x => x.id === id); return c ? cardItems(c).map(i => safe(i.name, "")).join("·") : id; };
+  let i = 0;
+  while(i < answer.length && order[i] === answer[i]) i++;
+  if(i >= answer.length || !st.wrongOrder) return st.wrong || "";
+  const misplaced = order[i], shouldBeHere = answer[i];
+  const dir = answer.indexOf(misplaced) > answer.indexOf(shouldBeHere) ? "위" : "아래";
+  return st.wrongOrder.replace("{card}", nameOf(misplaced)).replace("{other}", nameOf(shouldBeHere)).replace("{dir}", dir);
 }
 /* 카드 끌어 옮기기 (마우스·터치 공용 pointer 이벤트). 카드 전체가 손잡이다.
    끌고 있는 카드를 포인터 위치의 다른 카드 앞·뒤로 옮겨 넣고, 놓으면 순서를 저장한다.
@@ -244,10 +283,10 @@ function autoScroll(list, y){
 }
 
 /* ---------- 2단계 · 두 지역의 지층 대비 (선으로 잇기) ----------
-   왼쪽: 1단계에서 완성한 우리 공원 지층 기록 (경계 노두는 아래층·경계층으로 나뉨)
-   오른쪽: 이웃 마을 노두 (아래→위). 같은 시대의 층끼리 끌어서 선으로 잇는다.
+   왼쪽: 1단계에서 완성한 우리 공원 지층 기록 (경계 노두는 아래층·경계층으로 나뉨, 쌓인 시기(추정) 표시)
+   오른쪽: 이웃 마을 노두 (아래→위 5개 층, 시기 표시 없음). 같은 시대의 층끼리 끌어서 선으로 잇는다.
    바른 연결만 저장되어 선이 남고, 틀리면 짧은 안내만 보여 준 뒤 다시 이을 수 있다.
-   연결 대상을 모두 이으면 바로 완료 문구를 보여 준다. 추가 문항이나 체크 항목은 없다. */
+   5개 층을 모두 이으면 바로 완료 문구를 보여 준다. 추가 문항이나 체크 항목은 없다. */
 let m2 = { feedback: "", fbKind: "hint" };
 function neighborLayers(){ return (finalMissionData().stage2 || {}).layers || []; }
 /* 우리 공원 기둥의 층 목록 (아래→위). 경계 노두 카드는 아래층과 경계층 두 칸으로 나뉜다. */
@@ -265,8 +304,7 @@ function ourTargets(){
   });
   return out;
 }
-function linkableLayers(){ return neighborLayers().filter(L => L.answer !== "none"); }
-function allLinked(){ const m = missionState(); return linkableLayers().every(L => !!m.links[L.n]); }
+function allLinked(){ const m = missionState(); return neighborLayers().every(L => !!m.links[L.n]); }
 
 /* 두 기둥 비교 화면 HTML. links: {이웃 층 n: 우리 층 key}
    opts.live: 끌어서 잇기 가능 / opts.clickable: 우리 공원 층을 눌러 정보 보기 */
@@ -280,7 +318,7 @@ function compareHTML(links, opts){
     '<div class="cmp-band ours' + (t.band ? " bnd" : "") + (linkedKeys.indexOf(t.key) >= 0 ? " linked" : "") +
       (o.clickable ? " click" : "") + (darkColor(t.color) ? " dark" : "") + '"' +
       ' data-side="ours" data-key="' + t.key + '" data-card="' + t.card.id + '" style="background:' + t.color + ';' + (t.band ? "" : grow(t.thick)) + '">' +
-      '<b>' + escapeHTML(t.era) + '</b>' +
+      (t.band ? '<b>' + escapeHTML(t.era) + '</b>' : periodHTML(t.era)) +
       (t.items.length ? '<span>' + escapeHTML(t.items.map(i => safe(i.name, "")).join("·")) + '</span>' : "") +
     '</div>').join("");
   const right = nbs.slice().reverse().map(L =>
@@ -291,7 +329,8 @@ function compareHTML(links, opts){
         L.fossils.map(id => '<i class="item-visual-slot" data-item="' + id + '"></i>' + escapeHTML(safe((itemById(id) || {}).name, id))).join(" ")) + '</span>' +
     '</div>').join("") + (s2.hiddenBase ? '<div class="cmp-band nb base"><span>' + escapeHTML(s2.hiddenBase) + '</span></div>' : "");
   return '<div class="m-compare' + (o.live ? " live" : "") + '" id="mCompare">' +
-    '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.ourTitle, "우리 공원")) + '</div><div class="cmp-column">' + left + '</div></div>' +
+    '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.ourTitle, "우리 공원")) + '</div>' +
+      '<div class="cmp-note">' + escapeHTML(safe(finalMissionData().periodNote, "")) + '</div><div class="cmp-column">' + left + '</div></div>' +
     '<svg class="cmp-lines" id="cmpLines" aria-hidden="true"></svg>' +
     '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.neighborTitle, "이웃 마을 노두")) + '</div><div class="cmp-column">' + right + '</div></div>' +
   '</div>';
@@ -360,13 +399,6 @@ function tryLink(n, key){
   const m = missionState();
   const L = neighborLayers().find(x => x.n === n);
   if(!L || m.links[n]) return;
-  if(L.answer === "none"){
-    /* 직접 잇지 않는 층: 오답이 아니라 짧게 안내만 한다 */
-    playSound("click");
-    m2.feedback = safe(L.skipNote, safe(s2.wrong, "")); m2.fbKind = "hint";
-    renderStage2();
-    return;
-  }
   if(L.answer === key){
     m.links[n] = key; saveState();
     missionRecord("m2_link_" + n, "ERA", true);
@@ -473,6 +505,7 @@ function showColumnInfo(cardId){
   box.innerHTML =
     '<div class="info-row"><div class="info-label">지층</div><div class="info-value">' + escapeHTML(safe(ly && ly.label, "")) + (card.band ? " " + (card.band === "upper" ? "위층" : "아래층") : "") + '</div></div>' +
     '<div class="info-row"><div class="info-label">지질 시대</div><div class="info-value">' + escapeHTML(safe(ly && ly.era, "")) + '</div></div>' +
+    '<div class="info-row"><div class="info-label">' + escapeHTML(periodLabel()) + '</div><div class="info-value">' + escapeHTML(cardPeriod(card)) + '</div></div>' +
     '<div class="info-row"><div class="info-label">대표 화석</div><div class="info-value icons">' + items.map(i => '<i class="item-visual-slot" data-item="' + i.id + '"></i>' + escapeHTML(safe(i.name, ""))).join(" · ") + '</div></div>' +
     '<div class="info-row"><div class="info-label">당시 환경</div><div class="info-value">' + escapeHTML(card.env || "") + '</div></div>';
   box.querySelectorAll("[data-item]").forEach(el => renderAssetImage(el, itemById(el.getAttribute("data-item")), "normal"));
@@ -494,7 +527,7 @@ function drawColumnOnCanvas(g, x, y, w, h, placed){
     g.strokeStyle = "#3b2a20"; g.lineWidth = 2; g.strokeRect(x, by, w, bh);
     if(on && ly && ly.isBoundary){ g.fillStyle = "#1b140e"; g.fillRect(x, by + 3, w, 4); }
     g.fillStyle = on ? "#1b140e" : "#8a7a5d";
-    const label = on ? (safe(ly && ly.label, "") + (card.band ? (card.band === "upper" ? " 위" : " 아래") : "") + " · " + safe(ly && ly.era, "")) : "?";
+    const label = on ? (safe(ly && ly.label, "") + (card.band ? (card.band === "upper" ? " 위" : " 아래") : "") + " · " + cardPeriod(card)) : "?";
     g.fillText(fitText(g, label, w - 12), x + 6, by + bh / 2);
   });
 }

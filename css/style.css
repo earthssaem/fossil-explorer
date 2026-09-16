@@ -485,6 +485,16 @@ p{ margin:0; }
 .m-sort-lines b{ font-size:.86em; white-space:nowrap; }
 .m-sort-lines span{ font-size:.8em; }
 .m-sort-lines .env{ color:var(--muted); }
+/* '쌓인 시기(추정)' 라벨: 시기 값 앞에 붙는 작은 글씨 */
+.m-period{ font-size:.66em; color:var(--muted); font-weight:400; white-space:nowrap; margin-right:2px; }
+.m-band .m-period, .cmp-band .m-period{ display:inline; font-size:.62em; line-height:1.1; margin-right:3px; opacity:.85; }
+.cmp-band.dark .m-period, .m-band.dark .m-period{ color:#e8d7a3; }
+.cmp-note{ font-size:.72em; color:var(--muted); font-weight:400; margin:-4px 0 6px; line-height:1.3; }
+.m-layer-info .m-period{ display:inline; font-size:.85em; }
+.lab-report{ line-height:1.6; }
+.lab-report p{ margin:0 0 10px; }
+.lab-report p:last-child{ margin-bottom:0; }
+.lab-report .lab-key{ background:#fbeec9; border:3px solid var(--gold-d); padding:8px 12px; }
 .m-sort-lines .env::before{ content:"· "; }
 .m-stage1 .m-prompt{ margin-bottom:6px; padding:8px 12px; }
 .m-stage1 .m-prompt small{ display:block; font-weight:400; font-size:.8em; color:var(--muted); margin-top:2px; }

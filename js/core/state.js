@@ -25,6 +25,7 @@ function defaultState(){
     evidenceCinematicShown: false, // 경계층 첫 증거 발견 연출을 봤는지
     nickname: "",        // 탐사대원 닉네임 (보고서에 표시)
     startedAt: "",       // 탐사 시작 시각 (보고서용)
+    labReportShown: false,   // 연구소 분석 결과(쌓인 시기) 팝업을 봤는지 — 최종 미션 창을 처음 열 때 한 번만
     finalMissionDone: false, // 최종 미션(층서 복원) 완료 여부
     mission: {},             // 최종 미션 진행 { stage, order:[], placed:[], links:{} }
     score: 0,

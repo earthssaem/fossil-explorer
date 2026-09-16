@@ -116,7 +116,7 @@ const DEFAULT_MISSION_DATA = {
        (카드는 조사한 기록을 순서대로 배열하는 용도이며 시대의 길이를 나타내지 않는다) --- */
     cards: [
       { id: "A_lower", layer: "A", band: "lower", title: "스트로마톨라이트가 발견된 오래된 선캄브리아 시대 기록",
-        era: "선캄브리아 시대 초", env: "얕은 바다", thick: 1.2 },
+        era: "선캄브리아 시대", env: "얕은 바다", thick: 1.2 },
       { id: "A_upper", layer: "A", band: "upper", title: "에디아카라 생물군이 발견된 선캄브리아 시대 말 기록",
         era: "선캄브리아 시대 말", env: "바다", thick: 0.8 },
       { id: "B", layer: "B", title: "삼엽충과 산호가 발견된 고생대 바다",

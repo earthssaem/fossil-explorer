@@ -69,8 +69,9 @@ function shuffledCards(){
 /* '쌓인 시기(추정)' 라벨과 값. 카드의 era 는 연구소 분석 결과로 알려 준 쌓인 시기다 */
 function periodLabel(){ return safe(finalMissionData().periodLabel, "쌓인 시기(추정)"); }
 function cardPeriod(card){ const ly = layerById(card.layer); return safe(card.era, safe(ly && ly.era, "")); }
-/* 기둥 칸(flex column)에서도 한 줄에 놓이도록 라벨을 굵은 글씨 요소 안에 넣는다 */
-function periodHTML(text){ return '<b><small class="m-period">' + escapeHTML(periodLabel()) + '</small>' + escapeHTML(text) + '</b>'; }
+/* 카드·기둥 칸에는 시기 값만 굵게 쓴다. '쌓인 시기(추정)' 라벨은 칸마다 붙이지 않고 화면마다 한 번만(periodNoteHTML) 적는다 */
+function periodHTML(text){ return '<b class="m-era">' + escapeHTML(text) + '</b>'; }
+function periodNoteHTML(){ return '<div class="cmp-note">굵은 글씨는 <b>' + escapeHTML(periodLabel()) + '</b> · ' + escapeHTML(safe(finalMissionData().periodNote, "")) + '</div>'; }
 
 /* ---------- 층서 기둥 HTML (미션·결과·완료 화면 공용) ----------
    placed: 놓인 카드 id 목록 (아래→위). clickable: 층을 눌러 정보 보기. small: 결과 화면용 (쌓인 시기를 적는다) */
@@ -112,8 +113,14 @@ function openFinalMission(){
 /* 연구소 분석 결과 팝업: 각 지층이 쌓였을 것으로 추정되는 시기를 알려 준다 (화석 생물의 생존 기간이 아님을 함께 적는다) */
 function openLabReport(lr, onOk){
   $("labReportTitle").textContent = safe(lr.title, "연구소 분석 결과 도착");
+  const points = Array.isArray(lr.points) ? lr.points : [];
   const lines = Array.isArray(lr.lines) ? lr.lines : [];
-  $("labReportBody").innerHTML = lines.map((t, i) => '<p' + (i === lines.length - 1 ? ' class="lab-key"' : '') + '>' + escapeHTML(t) + '</p>').join("");
+  $("labReportBody").innerHTML =
+    (lr.intro ? '<p class="lab-intro">' + escapeHTML(lr.intro) + '</p>' : "") +
+    (points.length ? '<ul class="lab-points">' + points.map(pt =>
+        '<li><b>' + escapeHTML(safe(pt.k, "")) + '</b><span>' + escapeHTML(safe(pt.v, "")) + '</span></li>').join("") + '</ul>' : "") +
+    (lr.key ? '<p class="lab-key">' + escapeHTML(lr.key) + '</p>' : "") +
+    lines.map((t, i) => '<p' + (i === lines.length - 1 ? ' class="lab-key"' : '') + '>' + escapeHTML(t) + '</p>').join("");
   const btn = $("btnLabReportOk");
   btn.textContent = safe(lr.button, "확인");
   btn.onclick = () => { playSound("click"); closeModal("labReportModal"); if(typeof onOk === "function") onOk(); };
@@ -172,6 +179,7 @@ function renderStage1(){
     /* 화면은 위→아래로 그리므로 배열(아래→위)을 뒤집는다 */
     right = '<div class="m-prompt">' + escapeHTML(st.howto || "") +
       (st.hint ? '<small>' + escapeHTML(st.hint) + '</small>' : "") + '</div>' +
+      periodNoteHTML() +
       '<div class="m-sort-end top">' + escapeHTML(st.topLabel || "") + '</div>' +
       '<div class="m-sort" id="mSort">' +
         order.slice().reverse().map(id => sortCardHTML(cards.find(c => c.id === id))).join("") +
@@ -330,7 +338,7 @@ function compareHTML(links, opts){
     '</div>').join("") + (s2.hiddenBase ? '<div class="cmp-band nb base"><span>' + escapeHTML(s2.hiddenBase) + '</span></div>' : "");
   return '<div class="m-compare' + (o.live ? " live" : "") + '" id="mCompare">' +
     '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.ourTitle, "우리 공원")) + '</div>' +
-      '<div class="cmp-note">' + escapeHTML(safe(finalMissionData().periodNote, "")) + '</div><div class="cmp-column">' + left + '</div></div>' +
+      periodNoteHTML() + '<div class="cmp-column">' + left + '</div></div>' +
     '<svg class="cmp-lines" id="cmpLines" aria-hidden="true"></svg>' +
     '<div class="cmp-col"><div class="m-col-title">' + escapeHTML(safe(s2.neighborTitle, "이웃 마을 노두")) + '</div><div class="cmp-column">' + right + '</div></div>' +
   '</div>';
@@ -478,6 +486,20 @@ function finishMission(){
   checkBadges();
   spawnConfetti();
   renderMission();
+  openMissionDonePopup();
+}
+/* 완료 팝업: 긴 완료 화면 아래에 있는 버튼 대신, 성공 즉시 팝업으로 결과 화면·기둥 다시 보기를 고른다 */
+function openMissionDonePopup(){
+  const c = finalMissionData().complete || {};
+  if(!$("missionDoneModal")) return;
+  $("missionDoneTitle").textContent = safe(c.title, "탐사 완료!");
+  $("missionDoneBody").textContent = safe(c.body, "");
+  $("missionDoneNote").textContent = safe(c.note, "");
+  $("missionDoneScore").textContent = "+50점";
+  const toResult = $("btnDoneResult"), stay = $("btnDoneStay");
+  toResult.onclick = () => { playSound("click"); closeModal("missionDoneModal"); closeModal("finalMissionModal"); openResultScreen(); };
+  stay.onclick = () => { playSound("click"); closeModal("missionDoneModal"); };
+  openModal("missionDoneModal");
 }
 
 /* ---------- 완료 화면 ---------- */

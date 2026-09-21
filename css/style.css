@@ -494,7 +494,16 @@ p{ margin:0; }
 .lab-report{ line-height:1.6; }
 .lab-report p{ margin:0 0 10px; }
 .lab-report p:last-child{ margin-bottom:0; }
-.lab-report .lab-key{ background:#fbeec9; border:3px solid var(--gold-d); padding:8px 12px; }
+.lab-report .lab-key{ background:#fbeec9; border:3px solid var(--gold-d); padding:8px 12px; font-weight:700; }
+.lab-report .lab-intro{ font-weight:700; }
+.lab-points{ list-style:none; margin:0 0 10px; padding:0; border:3px solid var(--line); background:var(--panel-hi); }
+.lab-points li{ display:flex; gap:10px; align-items:flex-start; padding:6px 10px; line-height:1.4; }
+.lab-points li + li{ border-top:2px dashed var(--line); }
+.lab-points li b{ flex:0 0 110px; color:var(--teal-d); }
+.lab-points li span{ flex:1; }
+.mission-done .done-score{ display:inline-block; font-size:var(--fs-xl); font-weight:700; color:var(--gold-d); margin:2px 0 6px; animation:popIn .35s; }
+.mission-done .done-body{ font-weight:700; margin:0 0 6px; }
+@keyframes popIn{ from{ transform:scale(.6); opacity:0; } to{ transform:none; opacity:1; } }
 .m-sort-lines .env::before{ content:"· "; }
 .m-stage1 .m-prompt{ margin-bottom:6px; padding:8px 12px; }
 .m-stage1 .m-prompt small{ display:block; font-weight:400; font-size:.8em; color:var(--muted); margin-top:2px; }

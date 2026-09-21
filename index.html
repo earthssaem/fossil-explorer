@@ -226,6 +226,21 @@
     </div>
   </div>
 
+  <!-- ============ 최종 미션 완료 팝업 (2단계를 다 이으면 바로 뜬다) ============ -->
+  <div class="modal-backdrop" id="missionDoneModal">
+    <div class="modal-card pixel-panel center mission-done">
+      <div class="banner gold">최종 미션 성공</div>
+      <h3 class="modal-title" id="missionDoneTitle">탐사 완료!</h3>
+      <div class="done-score" id="missionDoneScore">+50점</div>
+      <p class="done-body" id="missionDoneBody"></p>
+      <p class="modal-note" id="missionDoneNote"></p>
+      <div class="modal-actions">
+        <button class="btn primary" id="btnDoneResult">탐사 결과 보기</button>
+        <button class="btn ghost" id="btnDoneStay">완성한 지층 다시 보기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ 배지 획득 ============ -->
   <div class="modal-backdrop" id="badgeModal">
     <div class="modal-card pixel-panel center">

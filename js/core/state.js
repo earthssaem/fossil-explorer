@@ -1,5 +1,28 @@
 /* ---------- 상태 · 저장 · 개념별 성취 · 다양성 집계 · 데이터 점검 · 사운드 ---------- */
 
+/* ---------- 데이터 파일 확인 ----------
+   교사가 js/data/*.js를 고치다 쉼표·따옴표·괄호를 하나만 빠뜨려도 그 파일 전체를 읽지 못한다.
+   그러면 화면은 멀쩡해 보이는데 어떤 버튼도 눌리지 않으므로, 어느 파일인지 화면에 알리고 멈춘다. */
+(function checkDataFiles(){
+  const loaded = get => { try{ return get() !== undefined; }catch(e){ return false; } };   // 선언 전 오류로 멈춘 파일은 접근 자체가 오류
+  const missing = [];
+  if(!loaded(() => DEFAULT_ITEM_DATA)) missing.push("js/data/items.js");
+  if(![() => DEFAULT_LAYER_DATA, () => DEFAULT_BADGE_DATA, () => DEFAULT_MISSION_DATA, () => DEFAULT_NOTE_DATA].every(loaded)) missing.push("js/data/layers.js");
+  if(!loaded(() => DEFAULT_WORLD_DATA)) missing.push("js/data/world.js");
+  if(!missing.length) return;
+  const box = document.createElement("div");
+  box.setAttribute("role", "alert");
+  box.style.cssText = "position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;" +
+    "background:rgba(20,14,10,.92);color:#fff8e6;font:16px/1.6 sans-serif;";
+  box.innerHTML = '<div style="max-width:560px;background:#3b2a20;border:3px solid #ffd166;padding:22px 24px;">' +
+    '<b style="font-size:19px;color:#ffd166;">게임 데이터 파일을 읽지 못했습니다</b>' +
+    '<p style="margin:10px 0;">' + missing.join(", ") + '</p>' +
+    '<p style="margin:10px 0;">최근에 고친 부분에서 쉼표( , ), 따옴표( " ), 괄호( { } [ ] )가 빠지거나 하나 더 들어가지 않았는지 확인해 주세요.</p>' +
+    '<p style="margin:10px 0;font-size:14px;opacity:.85;">정확한 줄 번호는 F12(개발자 도구) → Console 탭의 빨간 오류에 나옵니다.</p></div>';
+  document.body.appendChild(box);
+  throw new Error("[지층 탐사대] 데이터 파일을 읽지 못했습니다: " + missing.join(", "));
+})();
+
 /* ---------- 전역 상태 ---------- */
 const SAVE_KEY = "stratumExplorer_save_v3";
 
@@ -115,7 +138,7 @@ function eraOfItem(item){
 }
 
 /* 파일의 데이터를 직접 고쳤을 때 실수를 잡아 준다.
-   학생 화면에는 아무것도 띄우지 않고 브라우저 콘솔(F12)에만 남긴다. */
+   콘솔(F12)에 목록을 남기고, 시작 화면 구석에 '데이터 점검 n건' 표시를 띄운다 (showDataWarnings). */
 function validateContentData(){
   const warns = [];
   const seen = {};
@@ -126,10 +149,13 @@ function validateContentData(){
     else seen[it.id] = true;
     if(!layerData.some(l => l.id === it.layer)) warns.push(where + ": layer \"" + safe(it.layer,"") + "\" 에 해당하는 지층이 없습니다.");
     (Array.isArray(it.quiz) ? it.quiz : []).forEach((q, qi) => {
-      if(q.noTally) return;   /* 의도적으로 집계에서 제외한 문항 */
       const t = String(safe(q.tag, "")).trim().toUpperCase();
-      if(!t) warns.push(where + " 문항 " + (qi+1) + ": tag가 없습니다 → 개념별 성취에서 빠집니다.");
+      if(q.noTally){ /* 의도적으로 집계에서 제외한 문항 — tag 검사만 건너뛴다 */ }
+      else if(!t) warns.push(where + " 문항 " + (qi+1) + ": tag가 없습니다 → 개념별 성취에서 빠집니다.");
       else if(CONCEPT_KEYS.indexOf(t) < 0) warns.push(where + " 문항 " + (qi+1) + ": tag \"" + safe(q.tag,"") + "\" 는 " + CONCEPT_KEYS.join("/") + " 중 하나여야 합니다.");
+      if(q.type !== "choice" && q.type !== "ox") warns.push(where + " 문항 " + (qi+1) + ": type \"" + safe(q.type, "") + "\" 은(는) \"choice\" 또는 \"ox\"(소문자)여야 합니다.");
+      if(q.type === "ox" && q.answer !== "O" && q.answer !== "X") warns.push(where + " 문항 " + (qi+1) + ": OX 문항의 answer는 영문 대문자 \"O\" 또는 \"X\"여야 합니다 (지금: \"" + safe(q.answer, "") + "\").");
+      if(q.type === "choice" && (!Array.isArray(q.choices) || q.choices.length < 2)) warns.push(where + " 문항 " + (qi+1) + ": choices(보기)가 없습니다.");
       if(q.type === "choice" && Array.isArray(q.choices) && q.choices.indexOf(q.answer) < 0){
         warns.push(where + " 문항 " + (qi+1) + ": answer가 choices 안에 없습니다.");
       }
@@ -142,14 +168,47 @@ function validateContentData(){
       warns.push(where + ": 지층 " + it.layer + "은(는) 띠(bands)로 나뉘어 있는데 band 값 \"" + safe(it.band, "") + "\" 이(가) 어느 띠와도 맞지 않습니다.");
     }
   });
+  const wd = DEFAULT_WORLD_DATA || {};
   layerData.forEach(l => {
-    if(!l.era) warns.push("layerData " + safe(l.id,"?") + ": era가 없어 다양성 그래프에서 빠집니다.");
+    const where = "layerData " + safe(l.id,"?");
+    if(!l.era) warns.push(where + ": era가 없어 다양성 그래프에서 빠집니다.");
+    /* 아래 실수는 노두 조사를 끝낼 수 없게 만들어, 관문과 최종 미션이 영영 열리지 않는다 */
+    if(!itemData.some(it => it.layer === l.id)) warns.push(where + ": 이 지층에서 나오는 아이템이 하나도 없습니다 → 노두 조사를 끝낼 수 없습니다.");
+    if(!(wd.outcrops || []).some(o => o.layer === l.id)) warns.push(where + ": world.js의 outcrops에 이 지층의 노두가 없습니다 → 조사할 수 없습니다.");
+    (Array.isArray(l.bands) ? l.bands : []).forEach(b => {
+      const mine = itemData.filter(it => it.layer === l.id && it.band === b.key);
+      const bw = where + " 띠 \"" + safe(b.key, "?") + "\"";
+      if(b.repeat && mine.length > 1) warns.push(bw + ": repeat 띠에서는 첫 화석(" + safe(mine[0].name, mine[0].id) + ")만 나옵니다 → 나머지 " + mine.slice(1).map(it => safe(it.name, it.id)).join(", ") + "은(는) 발굴할 수 없어 노두 조사를 끝낼 수 없습니다.");
+      if(b.repeat && !mine.length) warns.push(bw + ": repeat 띠인데 이 띠의 아이템이 없습니다.");
+      const nSpots = (b.repeat ? b.repeat : mine.length) + (b.empty || 0) + (Array.isArray(b.spots) ? b.spots.length : 0);
+      if(!nSpots) warns.push(bw + ": 조사 지점이 하나도 없습니다 → 이 띠를 조사할 수 없어 노두 조사를 끝낼 수 없습니다.");
+      if(b.empty && Array.isArray(b.spots)) warns.push(bw + ": empty와 spots를 함께 쓰면 지점 이름이 겹쳐, 한 곳을 파면 다른 곳도 판 것으로 처리됩니다. 빈손 지점은 spots에 null로 넣으세요.");
+    });
+    if(l.summaryQuiz){
+      const q = l.summaryQuiz;
+      if(!Array.isArray(q.choices) || q.choices.indexOf(q.answer) < 0) warns.push(where + " 종합 문항(summaryQuiz): answer가 choices 안에 없습니다.");
+    }
   });
+  (wd.outcrops || []).forEach(o => { if(!layerData.some(l => l.id === o.layer)) warns.push("world.js 노두 layer \"" + safe(o.layer, "") + "\": 해당하는 지층이 없습니다."); });
+  (wd.zones || []).forEach(z => { if(!layerData.some(l => l.id === z.layer)) warns.push("world.js 구역 " + safe(z.id, "?") + ": layer \"" + safe(z.layer, "") + "\" 에 해당하는 지층이 없습니다."); });
+  (wd.cliffs || []).forEach(c => {
+    if(c.gate && !layerData.some(l => l.id === c.gate.needs)) warns.push("world.js 관문 " + safe(c.gate.id, "?") + ": needs \"" + safe(c.gate.needs, "") + "\" 에 해당하는 지층이 없습니다 → 관문이 열리지 않습니다.");
+  });
+  const BADGE_TYPES = ["discoverCount", "completeRate", "layerUnlock", "completeAll", "evidenceAll", "finalMission"];
+  badgeData.forEach(b => { if(BADGE_TYPES.indexOf(b.type) < 0) warns.push("배지 " + safe(b.name, b.id) + ": type \"" + safe(b.type, "") + "\" 은(는) " + BADGE_TYPES.join("/") + " 중 하나여야 합니다 → 받을 수 없는 배지가 됩니다."); });
   if(!layerData.some(l => l.isBoundary)) warns.push("isBoundary인 지층이 없습니다 — 경계 노두의 검은 띠가 나타나지 않습니다.");
   const fm = DEFAULT_MISSION_DATA.finalMission || {};
   (fm.cards || []).forEach(c => {
     if(!layerData.some(l => l.id === c.layer)) warns.push("최종 미션 카드 " + c.id + ": 지층 " + c.layer + " 이(가) 없습니다.");
   });
+  /* 2단계 정답(answer)은 우리 공원 기둥의 칸 이름이어야 한다. 틀리면 그 층을 이을 수 없어 미션을 끝낼 수 없다 */
+  if(typeof ourTargets === "function"){
+    const keys = ourTargets().map(t => t.key);
+    ((fm.stage2 || {}).layers || []).forEach(L => {
+      if(keys.indexOf(L.answer) < 0) warns.push("최종 미션 2단계 이웃 노두 " + L.n + "층: answer \"" + safe(L.answer, "") + "\" 은(는) " + keys.join("/") + " 중 하나여야 합니다 → 이을 수 없어 미션을 끝낼 수 없습니다.");
+      (L.fossils || []).forEach(id => { if(!itemData.some(it => it.id === id)) warns.push("최종 미션 2단계 이웃 노두 " + L.n + "층: 화석 id \"" + id + "\" 에 해당하는 아이템이 없습니다."); });
+    });
+  }
   if(warns.length && window.console && console.warn){
     console.warn("[지층 탐사대] 데이터 점검 " + warns.length + "건\n· " + warns.join("\n· "));
   }

@@ -36,6 +36,7 @@
 ```
 index.html            화면 뼈대
 css/style.css         도트 RPG UI 스타일
+fonts/                숫자·영문용 도트 글꼴 Press Start 2P (SIL OFL 1.1, 라이선스 파일 포함)
 js/data/items.js      ★ 화석·증거 아이템과 퀴즈 (교사 수정 영역)
 js/data/layers.js     ★ 지층·배지·미션·탐사 노트·개념 태그 (교사 수정 영역)
 js/data/world.js      ★ 지질공원 맵: 구역·절벽·관문·노두·길·소품·NPC 대사 (교사 수정 영역)
@@ -50,6 +51,10 @@ js/world/map.js       월드 생성, 충돌, 길찾기, 카메라, 렌더링, �
 js/world/title.js     시작 화면 도트 배경 (구름·새·지층 절벽에 박힌 화석·걷는 탐사대원, 게임 타일 재사용)
 js/ui.js              도트 아이콘, 대화창, 구역 배너, 화면 전환, 입력, 초기화
 ```
+
+글꼴: 숫자·영문용 Press Start 2P는 `fonts/`에 들어 있어 인터넷 없이도 됩니다. 한글 도트 글꼴(둥근모꼴)은 외부 CDN에서 받으며,
+막혀 있으면 기본 고딕으로 보입니다(게임은 그대로 동작). 오프라인에서도 쓰려면 `DungGeunMo.woff`를 `fonts/`에 넣고
+`css/style.css` 맨 위 DungGeunMo의 주소를 `url('../fonts/DungGeunMo.woff')`로 바꾸세요.
 
 ★ 표시 파일(교사 수정 영역)을 고친 뒤에는 게임을 새로고침해 확인하세요.
 - 쉼표·따옴표·괄호 실수로 파일을 읽지 못하면, 어느 파일인지 알려 주는 안내가 화면에 뜹니다. 정확한 줄 번호는 F12 → Console에 나옵니다.

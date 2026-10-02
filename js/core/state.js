@@ -382,6 +382,8 @@ const BGM_BASS = [
 ];
 function bgmTick(){
   if(!BGM.on || !audioCtx) return;
+  /* 늦게 깨어났으면(탭 전환·버벅임) 밀린 음을 한꺼번에 울리지 않고 지금부터 이어 간다 */
+  if(BGM.nextT < audioCtx.currentTime) BGM.nextT = audioCtx.currentTime + 0.05;
   while(BGM.nextT < audioCtx.currentTime + 0.3){
     const delay = Math.max(0, BGM.nextT - audioCtx.currentTime);
     const lead = noteHz(BGM_LEAD[BGM.step]), bass = noteHz(BGM_BASS[BGM.step]);

@@ -2,6 +2,16 @@
    지층 탐사대 · 도트 RPG UI
    원칙: 각진 모서리 · 4px 윤곽선 · 하드 그림자 · 그라데이션 없음 · 제한된 팔레트
    ========================================================================== */
+/* 숫자·영문용 도트 글꼴: 저장소에 함께 넣어 외부 서버(Google Fonts) 없이 쓴다 (SIL OFL 1.1, fonts/PressStart2P-OFL.txt).
+   예전에는 head에서 Google Fonts CSS를 불러와, 학교망에서 응답이 늦으면 게임 시작까지 멈췄다. */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../fonts/PressStart2P-latin.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* 한글 도트 글꼴(둥근모꼴): 외부 CDN에서 받는다. font-display:swap이라 받는 동안·막혔을 때도 게임은 바로 뜬다(그때는 기본 고딕).
+   직접 넣으려면 DungGeunMo.woff를 fonts/ 폴더에 두고 아래 주소를 url('../fonts/DungGeunMo.woff')로 바꾼다. */
 @font-face {
   font-family: 'DungGeunMo';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');

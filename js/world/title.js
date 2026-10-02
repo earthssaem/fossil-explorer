@@ -343,6 +343,15 @@ function titleFrame(t){
     TITLE.t += dt;
     titleUpdateBirds(dt);
   }
+  /* 실제로 바뀐 것(스크롤 1px, 새 위치, 깜박임·물결 프레임, 화면 크기)이 있을 때만 그린다.
+     동작 줄이기 설정에서는 한 번 그린 뒤로는 그리지 않는다 */
+  const sig = [TITLE.canvas.width, TITLE.canvas.height, TITLE.zoom,
+    titleScroll(TITLE_SPEED.cloudFar), titleScroll(TITLE_SPEED.cloudNear), titleScroll(TITLE_SPEED.ridge), titleScroll(TITLE_SPEED.ground),
+    TITLE.birds.map(b => Math.round(b.x) + "," + Math.round(b.y) + "," + (Math.floor(b.t * 5) % 2)).join(";"),
+    game.reducedMotion ? 0 : Math.floor(TITLE.t / 0.42) % 2, game.reducedMotion ? 0 : Math.floor(TITLE.t / 0.45) % 2,
+    TITLE.fossils.map(f => f.found ? 1 : 0).join("")].join("|");
+  if(sig === TITLE.lastSig) return;
+  TITLE.lastSig = sig;
   titleDraw();
 }
 

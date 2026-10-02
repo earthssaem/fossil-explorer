@@ -287,6 +287,7 @@ function renderDigSites(container, slots){
       else if(site.classList.contains("empty")) showEmptyDigResult(sl.slot, false);
       else if(site.classList.contains("undiscovered")) startDigging(sl.slot);
     });
+    makeKeyClickable(site, "조사 지점 " + (i + 1) + " · " + ({ undiscovered: "발굴하기", discovered: "발견한 화석 보기", collected: "도감에 등록한 화석 보기", empty: "빈 지점", observed: "관찰 결과 보기" })[status]);
     container.appendChild(site);
     game.sites.push({ slot: sl.slot, itemId: sl.itemId || null, find: sl.find || null, x: 0, el: site, status: status });
   });

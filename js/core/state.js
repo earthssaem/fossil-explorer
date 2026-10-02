@@ -85,6 +85,17 @@ const game = {
 };
 
 /* ---------- 유틸 ---------- */
+/* div로 만든 누를 수 있는 요소(발굴 지점·도감 카드 등)를 키보드로도 쓰게 한다: Tab으로 가서 Enter·Space로 누른다 */
+function makeKeyClickable(el, label){
+  el.tabIndex = 0;
+  el.setAttribute("role", "button");
+  if(label) el.setAttribute("aria-label", label);
+  el.addEventListener("keydown", e => {
+    if(e.target !== el || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    el.click();
+  });
+}
 function $(id){ return document.getElementById(id); }
 function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }

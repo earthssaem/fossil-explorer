@@ -80,7 +80,7 @@ p{ margin:0; }
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
   padding:12px 22px; font-size:var(--fs); font-weight:700; line-height:1.2;
-  color:#fff8e6; background:var(--teal);
+  color:#fff8e6; background:var(--teal-d);
   border:3px solid var(--line);
   box-shadow:0 0 0 2px rgba(255,255,255,.25) inset, 0 4px 0 var(--line);
   transform:translateY(0); transition:transform .06s, box-shadow .06s;
@@ -89,8 +89,9 @@ p{ margin:0; }
 .btn:hover{ filter:brightness(1.06); }
 .btn:active{ transform:translateY(4px); box-shadow:0 0 0 2px rgba(255,255,255,.25) inset, 0 0 0 var(--line); }
 .btn.primary{ background:var(--gold); color:var(--ink); text-shadow:none; }
-.btn.teal{ background:var(--teal); }
-.btn.blue{ background:var(--blue); }
+/* 흰 글자 대비 4.5:1 이상이 되도록 진한 색을 쓴다 (밝은 청록·파랑은 3:1 안팎) */
+.btn.teal{ background:var(--teal-d); }
+.btn.blue{ background:var(--blue-d); }
 .btn.red{ background:var(--red); }
 .btn.ghost{ background:var(--panel-hi); color:var(--ink); text-shadow:none; }
 .btn.small{ padding:8px 14px; font-size:.92em; }
@@ -105,11 +106,18 @@ p{ margin:0; }
   background:var(--panel-hi); border:3px solid var(--line); box-shadow:var(--shadow-sm);
   font-size:.92em; white-space:nowrap;
 }
-.chip.done{ background:var(--teal); color:#fff; }
+.chip.done{ background:var(--teal-d); color:#fff; }
 .chip.muted{ color:var(--muted); }
 
 /* ---------- 시작 화면 ---------- */
 .start-bg{ position:absolute; inset:0; background:#8fc3e0; overflow:hidden; }
+/* 키보드 포커스 표시: 짙은 갈색 테두리에 묻히지 않게 노란 테두리 (마우스·터치로 누를 때는 안 보임) */
+/* 확대(핀치 줌)는 허용하되, 버튼을 빠르게 두 번 눌러 화면이 확대되지는 않게 */
+button, .btn, .hud-btn, .ctrl-btn{ touch-action:manipulation; }
+:focus-visible{ outline:3px solid #ffd166; outline-offset:2px; box-shadow:0 0 0 5px #2b1d15; }
+.modal-card:focus-visible{ outline:none; box-shadow:none; }
+/* 최종 미션 2단계: 누르거나 Enter로 고른 층 (반대쪽 층을 고르면 잇는다) */
+.cmp-band.picked{ outline:4px solid #ffd166; outline-offset:-4px; }
 /* 저장이 안 되는 브라우저 안내 · 다른 탭 경고 */
 .nick-hint.save-warn{ color:#a33a1f; font-weight:700; }
 .stale-tab{ position:fixed; inset:0; z-index:950; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(20,14,10,.85); }
@@ -156,10 +164,10 @@ p{ margin:0; }
 .start-sub span{ display:inline-block; white-space:nowrap; }   /* 두 줄이 될 때는 쉼표 뒤에서만 나뉜다 */
 .start-nick label{ display:block; font-weight:700; margin-bottom:6px; }
 .start-nick input{
-  width:min(320px, 100%); padding:8px 12px; font-size:1.05em; text-align:center;
+  width:min(320px, 100%); padding:8px 12px; font-size:max(16px, 1.05em); text-align:center;   /* 16px 미만이면 iOS가 입력할 때 화면을 확대한다 */
   border:4px solid var(--line); background:#fff; color:var(--ink); outline:none;
 }
-.start-nick input:focus{ border-color:var(--teal-d); }
+.start-nick input:focus{ border-color:var(--teal-d); box-shadow:0 0 0 3px #ffd166; }
 /* 실명 금지 안내: 경고 빨강 대신 짙은 주황빛 갈색 (묻히지 않을 만큼만 강조) */
 .start-nick .nick-hint{ color:#a0522d; font-size:.88em; margin:6px 0 22px; }
 .start-buttons{ display:flex; flex-direction:column; gap:10px; }
@@ -214,7 +222,7 @@ p{ margin:0; }
 /* --hud-bottom: HUD 아래 끝 (좁은 화면에서 HUD가 두 줄로 접히면 JS가 갱신한다) — 미니맵·안내 배지·구역 배너가 그 아래에 놓인다 */
 #gameScreen{ background:var(--dark); --hud-bottom:50px; }
 #sceneViewport{ position:absolute; inset:0; overflow:hidden; }
-#worldCanvas{ display:block; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; }
+#worldCanvas{ display:block; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; touch-action:none; }
 #hud{
   position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:flex-start;
   pointer-events:none; z-index:20;
@@ -250,6 +258,7 @@ p{ margin:0; }
   background:var(--gold); color:var(--ink); border:3px solid var(--line); box-shadow:var(--shadow-sm);
   font-family:var(--font); cursor:pointer; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
 }
+#goalGuide:not(.on){ visibility:hidden; transition:opacity .25s, transform .25s, visibility 0s .25s; }   /* 꺼져 있을 때 보이지 않는 Tab 정지점이 되지 않게 */
 #goalGuide.on{ opacity:1; pointer-events:auto; transform:translateY(0); }
 #goalGuide:active{ transform:translate(2px, 2px); box-shadow:1px 1px 0 rgba(43,29,21,.35); }
 #goalGuide .gg-arrow{ font-size:20px; line-height:1; animation:ggBob .9s ease-in-out infinite; }
@@ -350,7 +359,7 @@ p{ margin:0; }
 .info-row:last-child{ border-bottom:none; }
 .info-label{ flex:0 0 96px; font-weight:700; color:var(--muted); }
 .info-value{ flex:1; }
-.info-value.locked{ color:#9a8a70; }
+.info-value.locked{ color:var(--muted); }
 .badge-big{ width:96px; height:96px; margin:8px auto; }
 .badge-big svg{ width:100%; height:100%; }
 .rare-visual{ width:72px; height:72px; margin:6px auto 10px; position:relative; }
@@ -531,7 +540,7 @@ p{ margin:0; }
 .n-layer.done{ opacity:.85; }
 .n-layer b{ font-size:.8em; }
 .n-fossils{ font-size:.82em; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
-.n-tag{ font-size:.72em; background:var(--teal); color:#fff; padding:1px 6px; align-self:flex-start; }
+.n-tag{ font-size:.72em; background:var(--teal-d); color:#fff; padding:1px 6px; align-self:flex-start; }
 .n-tag.now{ background:var(--gold); color:var(--ink); }
 .m-panel{ margin-top:10px; }
 .m-compare{ position:relative; display:flex; gap:64px; align-items:stretch; margin:6px 0; }
@@ -667,5 +676,5 @@ p{ margin:0; }
   #dialogBox{ bottom:180px; }
 }
 @media (prefers-reduced-motion: reduce){
-  *{ animation:none !important; transition:none !important; }
+  *, *::before, *::after{ animation:none !important; transition:none !important; }
 }

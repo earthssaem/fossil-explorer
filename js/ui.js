@@ -98,8 +98,52 @@ function setSoundOn(v){
     bgmStop();
   }
 }
-function closeModal(id){ const m = $(id); if(m) m.classList.remove("on"); }
-function openModal(id){ const m = $(id); if(m) m.classList.add("on"); applyIcons(m); }
+/* ---------- 팝업(모달) ----------
+   열면: 팝업 상자로 포커스를 옮기고, 나머지 화면·아래쪽 팝업을 inert로 막는다 (키보드 Tab이 뒤로 빠져나가지 않게).
+   닫으면: 열기 전 포커스로 돌려준다. Esc는 닫기 버튼이 있는 팝업만 닫는다 (퀴즈처럼 닫기가 없는 팝업은 그대로). */
+const modalStack = [];   // [{ id, prev }] 나중에 연 것이 위
+function syncInert(){
+  const open = modalStack.filter(x => $(x.id) && $(x.id).classList.contains("on"));
+  const top = open.length ? $(open[open.length - 1].id) : null;
+  Array.from($("app").children).forEach(el => {
+    if(top) el.inert = el !== top; else el.inert = false;
+  });
+}
+function openModal(id){
+  const m = $(id);
+  if(!m) return;
+  if(!m.classList.contains("on")){
+    const i = modalStack.findIndex(x => x.id === id);
+    if(i >= 0) modalStack.splice(i, 1);
+    modalStack.push({ id: id, prev: document.activeElement });
+  }
+  m.classList.add("on");
+  m.setAttribute("role", "dialog");
+  m.setAttribute("aria-modal", "true");
+  applyIcons(m);
+  syncInert();
+  /* 내용은 연 뒤에 그려지기도 하므로 다음 틀에서 상자에 포커스 (첫 선택지에 주면 Enter 한 번에 답이 골라진다) */
+  const card = m.querySelector(".modal-card") || m;
+  if(!card.hasAttribute("tabindex")) card.setAttribute("tabindex", "-1");
+  setTimeout(() => { if(m.classList.contains("on") && !m.contains(document.activeElement)) card.focus({ preventScroll: true }); }, 0);
+}
+function closeModal(id){
+  const m = $(id);
+  if(!m) return;
+  m.classList.remove("on");
+  const i = modalStack.findIndex(x => x.id === id);
+  const prev = i >= 0 ? modalStack[i].prev : null;
+  if(i >= 0) modalStack.splice(i, 1);
+  syncInert();
+  if(prev && prev.focus && document.contains(prev) && !prev.closest("[inert]")) prev.focus({ preventScroll: true });
+}
+document.addEventListener("keydown", e => {
+  if(e.key !== "Escape") return;
+  const top = modalStack.length ? $(modalStack[modalStack.length - 1].id) : null;
+  if(!top || !top.classList.contains("on")) return;
+  const close = top.querySelector(".modal-close") || top.querySelector("[data-close]");
+  if(close){ e.preventDefault(); close.click(); }
+});
 function anyModalOpen(){
   return !!document.querySelector(".modal-backdrop.on") ||
          $("cinematicOverlay").classList.contains("on") ||
@@ -217,38 +261,48 @@ function renderNoteCards(container){
 }
 
 /* ---------- 입력 ---------- */
+/* 키 판별: e.code(자판 위치) 우선 — 한글 입력 상태에서는 e.key가 'ㅈ'·'ㄷ'처럼 들어와 W·A·S·D·E·M이 안 먹힐 수 있다 */
+const KEY_DIR = { ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right", ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down" };
+const KEY_BY_CHAR = { a: "KeyA", d: "KeyD", w: "KeyW", s: "KeyS", e: "KeyE", m: "KeyM", " ": "Space" };
+function keyCode(e){ return e.code || KEY_BY_CHAR[String(e.key || "").toLowerCase()] || e.key; }
+function releaseInputs(){
+  game.input.left = game.input.right = game.input.up = game.input.down = false;
+}
 function bindInputs(){
   window.addEventListener("keydown", e => {
     if(e.repeat) return ensureAudioOnce();
     ensureAudioOnce();
     if(!game.running) return;
+    const k = keyCode(e);
     if($("dialogBox").classList.contains("on")){
-      if(e.key === "e" || e.key === "E" || e.key === " " || e.key === "Enter"){ e.preventDefault(); advanceDialog(); }
+      if(k === "KeyE" || k === "Space" || k === "Enter" || k === "NumpadEnter"){ e.preventDefault(); advanceDialog(); }
       return;
     }
     if(anyModalOpen()) return;
-    if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = true;
-    if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = true;
-    if(e.key === "ArrowUp" || e.key === "w" || e.key === "W") game.input.up = true;
-    if(e.key === "ArrowDown" || e.key === "s" || e.key === "S") game.input.down = true;
-    if(e.key === "e" || e.key === "E" || e.key === " "){ e.preventDefault(); tryAction(); }
-    if(e.key === "m" || e.key === "M"){ $("btnCollectionHud").click(); }
+    if(KEY_DIR[k]){ game.input[KEY_DIR[k]] = true; if(k.indexOf("Arrow") === 0) e.preventDefault(); }
+    if(k === "KeyE" || k === "Space"){ e.preventDefault(); tryAction(); }
+    if(k === "KeyM"){ $("btnCollectionHud").click(); }
   });
   window.addEventListener("keyup", e => {
-    if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") game.input.left = false;
-    if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") game.input.right = false;
-    if(e.key === "ArrowUp" || e.key === "w" || e.key === "W") game.input.up = false;
-    if(e.key === "ArrowDown" || e.key === "s" || e.key === "S") game.input.down = false;
+    const k = keyCode(e);
+    if(KEY_DIR[k]) game.input[KEY_DIR[k]] = false;
   });
+  /* 창을 바꾸거나(Alt+Tab 등) 탭을 숨기면 keyup이 오지 않아 캐릭터가 계속 걸어간다 — 눌린 키를 모두 푼다 */
+  window.addEventListener("blur", releaseInputs);
+  document.addEventListener("visibilitychange", () => { if(document.hidden) releaseInputs(); });
   bindHold($("btnLeft"), v => game.input.left = v);
   bindHold($("btnRight"), v => game.input.right = v);
   bindHold($("btnUp"), v => game.input.up = v);
   bindHold($("btnDown"), v => game.input.down = v);
-  $("btnAction").addEventListener("click", () => {
+  /* 조사 버튼: 방향 버튼을 누른 채 다른 손가락으로 눌러도 되도록 pointerdown에서 바로 실행한다
+     (두 번째 손가락의 탭은 click이 생기지 않는다). 키보드(Enter·Space)로 누른 경우만 click으로 받는다 */
+  const act = () => {
     ensureAudioOnce();
     if($("dialogBox").classList.contains("on")){ advanceDialog(); return; }
     tryAction();
-  });
+  };
+  $("btnAction").addEventListener("pointerdown", e => { e.preventDefault(); act(); });
+  $("btnAction").addEventListener("click", e => { if(e.detail === 0) act(); });
   $("dialogBox").addEventListener("click", advanceDialog);
   ["pointerdown", "touchstart"].forEach(ev => window.addEventListener(ev, ensureAudioOnce, { passive: true }));
 }
@@ -280,7 +334,7 @@ function bindUI(){
       heroSay(heroGreeting(), true);
     });
     nickEl.addEventListener("focus", () => heroSay(heroGreeting(), false));
-    nickEl.addEventListener("keydown", e => { if(e.key === "Enter") $("btnStart").click(); });
+    nickEl.addEventListener("keydown", e => { if(e.key === "Enter" && !e.isComposing && e.keyCode !== 229 && !e.repeat) $("btnStart").click(); });
   }
   $("btnStart").addEventListener("click", () => {
     let nm = (nickEl ? nickEl.value : state.nickname || "").trim();

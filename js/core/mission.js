@@ -274,6 +274,19 @@ function setupSortable(list){
     playSound("place");
   };
   list.querySelectorAll(".m-sort-card").forEach(card => {
+    /* 키보드: 카드에 포커스를 두고 ↑·↓로 한 칸씩 옮긴다 */
+    card.tabIndex = 0;
+    card.setAttribute("aria-label", card.textContent.replace(/⋮⋮/g, "").trim() + " — 위아래 화살표로 옮기기");
+    card.addEventListener("keydown", e => {
+      if(e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      if(e.key === "ArrowUp" && card.previousElementSibling) list.insertBefore(card, card.previousElementSibling);
+      else if(e.key === "ArrowDown" && card.nextElementSibling) list.insertBefore(card.nextElementSibling, card);
+      else return;
+      card.focus();
+      readSortOrder();
+      playSound("place");
+    });
     card.addEventListener("pointerdown", e => {
       if(drag || (e.button !== undefined && e.button !== 0)) return;
       drag = card; pid = e.pointerId;
@@ -465,17 +478,40 @@ function setupLinking(wrap){
     document.removeEventListener("pointerup", finish);
     document.removeEventListener("pointercancel", finish);
     const d = drag; drag = null; pid = null;
+    /* 끌지 않고 눌렀다 뗀 경우: 고르기 (한쪽을 고른 뒤 반대쪽을 누르면 잇는다) */
+    if(!target && e.type !== "pointercancel" && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8){ drawLinks(m.links); pick(d.el); return; }
     if(!target || e.type === "pointercancel"){ drawLinks(m.links); return; }
     const n = Number(d.side === "nb" ? d.el.getAttribute("data-n") : target.getAttribute("data-n"));
     const key = d.side === "ours" ? d.el.getAttribute("data-key") : target.getAttribute("data-key");
     tryLink(n, key);
   };
+  /* 끌기 대신 쓰는 방법(터치·키보드): 한쪽 기둥의 층을 고르고, 반대쪽 기둥의 층을 고르면 잇는다 */
+  let picked = null;
+  const pick = el => {
+    const side = el.getAttribute("data-side");
+    if(picked && picked !== el && picked.getAttribute("data-side") !== side){
+      const a = picked; picked.classList.remove("picked"); picked = null;
+      const nbEl = side === "nb" ? el : a, ourEl = side === "nb" ? a : el;
+      tryLink(Number(nbEl.getAttribute("data-n")), ourEl.getAttribute("data-key"));
+      return;
+    }
+    if(picked) picked.classList.remove("picked");
+    picked = picked === el ? null : el;
+    if(picked){ picked.classList.add("picked"); playSound("click"); }
+  };
   wrap.querySelectorAll(".cmp-band[data-side]").forEach(el => {
+    const side0 = el.getAttribute("data-side");
+    if(!(side0 === "nb" && m.links[el.getAttribute("data-n")])){
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", (side0 === "nb" ? "이웃 마을 " + el.getAttribute("data-n") + "층: " : "우리 공원: ") + el.textContent.trim() + " — 고른 뒤 반대쪽 층을 골라 잇기");
+      el.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(el); } });
+    }
     el.addEventListener("pointerdown", e => {
       if(drag || (e.button !== undefined && e.button !== 0)) return;
       const side = el.getAttribute("data-side");
       if(side === "nb" && m.links[el.getAttribute("data-n")]) return;   // 이미 이은 층
-      drag = { el: el, side: side }; pid = e.pointerId;
+      drag = { el: el, side: side, x: e.clientX, y: e.clientY }; pid = e.pointerId;
       el.classList.add("dragging");
       document.addEventListener("pointermove", move);
       document.addEventListener("pointerup", finish);

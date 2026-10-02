@@ -5,7 +5,7 @@
 function updateHud(){
   const s = $("hudScore"); if(s) s.textContent = safe(state.score, 0);
   const o = $("hudOutcrops"); if(o) o.textContent = exploredOutcropCount() + "/" + layerData.length;
-  const c = $("hudCollect"); if(c) c.textContent = state.completed.length + "/" + itemData.length;
+  const c = $("hudCollect"); if(c) c.textContent = countItems(state.completed) + "/" + itemData.length;
   const comboEl = $("hudCombo");
   if(comboEl){
     if(safe(state.combo, 0) >= 2){ comboEl.style.display = ""; $("hudComboNum").textContent = state.combo; }
@@ -20,10 +20,10 @@ function checkBadges(){
     if(state.badges.includes(b.id)) return;
     let earned = false;
     switch(b.type){
-      case "discoverCount": earned = state.discovered.length >= safe(b.value,1); break;
-      case "completeRate":  earned = (state.completed.length / total) >= safe(b.value,0.5); break;
+      case "discoverCount": earned = countItems(state.discovered) >= safe(b.value,1); break;
+      case "completeRate":  earned = (countItems(state.completed) / total) >= safe(b.value,0.5); break;
       case "layerUnlock":   earned = state.unlockedLayers.length >= safe(b.value,1); break;
-      case "completeAll":   earned = state.completed.length >= total; break;
+      case "completeAll":   earned = countItems(state.completed) >= total; break;
       /* 경계층에 남은 흔적을 모두 발굴했는가 (퀴즈까지는 아니어도 됨) */
       case "evidenceAll":   earned = evidenceItems().length > 0 &&
                                      evidenceItems().every(i => state.discovered.includes(i.id)); break;
@@ -53,7 +53,7 @@ function renderCollection(){
   const grid = $("collectionGrid");
   grid.innerHTML = "";
   const total = Math.max(1, itemData.length);
-  const done = state.completed.length;
+  const done = countItems(state.completed);
   $("collectRateFill").style.width = Math.round(done / total * 100) + "%";
   const stats = $("collectStats");
   let chips = '<span class="chip"><i data-icon="bone"></i>전체 ' + done + "/" + total + " (" + Math.round(done / total * 100) + "%)</span>";
@@ -123,9 +123,9 @@ function openResultScreen(){
   const stat = (icon, label, val) => '<div class="result-stat"><span><i data-icon="' + icon + '"></i>' + label + '</span><span class="val">' + val + '</span></div>';
   $("resultStats").innerHTML =
     stat("pick", "조사한 노두", exploredOutcropCount() + " / " + layerData.length) +
-    stat("bone", "발견한 단서", state.completed.length + " / " + total) +
+    stat("bone", "발견한 단서", countItems(state.completed) + " / " + total) +
     stat("map", "완성한 지층", m.placed.length + " / " + cardsN) +
-    stat("book", "화석도감 완성도", Math.round(state.completed.length / total * 100) + "%") +
+    stat("book", "화석도감 완성도", Math.round(countItems(state.completed) / total * 100) + "%") +
     stat("brain", "퀴즈 정답률 (첫 시도)", acc + "%") +
     stat("star", "총 점수", safe(state.score, 0) + "점") +
     stat("medal", "획득 배지", state.badges.length + " / " + badgeData.length);
@@ -135,6 +135,7 @@ function openResultScreen(){
   renderBadgeGrid($("resultBadges"));
   $("reportSavedMsg").textContent = "";
   drawReport();
+  showReportImage();
   renderScreen("resultScreen");
 }
 /* 완성한 지층 기록 미리보기 */
@@ -235,7 +236,7 @@ function drawReport(){
   const mst = missionState();
   const stats = [
     ["조사한 노두", exploredOutcropCount() + " / " + layerData.length],
-    ["발견한 단서", state.completed.length + " / " + total],
+    ["발견한 단서", countItems(state.completed) + " / " + total],
     ["완성한 지층", mst.placed.length + " / " + Math.max(1, missionCards().length)],
     ["퀴즈 정답률 (첫 시도)", acc + "%"],
     ["총 점수", safe(state.score, 0) + "점"],
@@ -284,30 +285,54 @@ function fitText(g, text, maxW){
   while(t.length > 1 && g.measureText(t + "…").width > maxW) t = t.slice(0, -1);
   return t + "…";
 }
+/* 보고서 미리보기를 그림(img)으로도 보여 준다 — 다운로드가 막힌 기기에서도 길게 누르거나(휴대폰·태블릿)
+   오른쪽 클릭으로(컴퓨터) 저장할 수 있게 */
+function showReportImage(){
+  const cv = $("reportCanvas"), box = $("reportPreview");
+  if(!cv || !box) return;
+  let img = $("reportImg");
+  if(!img){
+    img = document.createElement("img");
+    img.id = "reportImg";
+    img.alt = "제출용 탐사 보고서";
+    box.appendChild(img);
+  }
+  try{ img.src = cv.toDataURL("image/png"); cv.style.display = "none"; img.style.display = ""; }
+  catch(e){ img.style.display = "none"; cv.style.display = ""; }
+}
 function saveReport(){
   drawReport();
   const cv = $("reportCanvas");
   const nm = (safe(state.nickname, "탐사대원") || "탐사대원").replace(/[^\wㄱ-힣]/g, "");
   const fname = "탐사보고서_" + nm + ".png";
-  const okMsg = "저장 완료. 「" + fname + "」 파일을 선생님께 제출하세요.";
+  const msg = $("reportSavedMsg");
+  const fallback = "저장이 안 되면 위 보고서 그림을 길게 누르거나(휴대폰·태블릿) 오른쪽 클릭해(컴퓨터) 저장하세요.";
+  const download = blobOrUrl => {
+    const a = document.createElement("a");
+    const url = typeof blobOrUrl === "string" ? blobOrUrl : URL.createObjectURL(blobOrUrl);
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    if(typeof blobOrUrl !== "string") setTimeout(() => URL.revokeObjectURL(url), 4000);
+    /* 다운로드가 실제로 됐는지는 브라우저가 알려 주지 않는다 — 확인할 곳과 대안을 함께 안내한다 */
+    msg.textContent = "「" + fname + "」 파일을 내려받았어요. 다운로드 폴더에서 확인해 선생님께 제출하세요. " + fallback;
+  };
   try{
     cv.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = fname;
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-      $("reportSavedMsg").textContent = okMsg;
+      if(!blob){ msg.textContent = fallback; return; }
+      /* 휴대폰·태블릿: 공유 창(사진에 저장, 메신저 등)을 쓸 수 있으면 그쪽이 확실하다 */
+      const file = typeof File === "function" ? new File([blob], fname, { type: "image/png" }) : null;
+      const touch = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+      if(touch && file && navigator.canShare && navigator.canShare({ files: [file] })){
+        navigator.share({ files: [file], title: "탐사 보고서" })
+          .then(() => { msg.textContent = "보고서를 공유(저장)했어요. 선생님께 제출하세요."; })
+          .catch(err => { if(!err || err.name !== "AbortError") download(blob); });
+        return;
+      }
+      download(blob);
     }, "image/png");
   }catch(e){
-    try{
-      const a = document.createElement("a");
-      a.href = cv.toDataURL("image/png"); a.download = fname; a.click();
-      $("reportSavedMsg").textContent = okMsg;
-    }catch(e2){
-      $("reportSavedMsg").textContent = "이 브라우저에서는 저장이 막혀 있습니다. 화면을 캡처해 제출하세요.";
-    }
+    try{ download(cv.toDataURL("image/png")); }
+    catch(e2){ msg.textContent = "이 브라우저에서는 파일 저장이 막혀 있습니다. 위 보고서 그림을 길게 누르거나 오른쪽 클릭해 저장하거나, 화면을 캡처해 제출하세요."; }
   }
   playSound("register");
 }

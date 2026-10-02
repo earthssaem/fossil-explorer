@@ -160,7 +160,7 @@ function completeItem(itemId){
   maybeParkComplete(); /* 경계층의 흔적까지 모두 등록해야 최종 미션이 열리므로 여기서도 확인 */
   if(layerId) maybeLayerSummaryQuiz(layerId);   /* 마지막 화석까지 등록했고 지점도 다 팠으면 종합 문항 */
   /* 전부 수집 시 축하 연출 */
-  if(state.completed.length >= itemData.length){
+  if(countItems(state.completed) >= itemData.length){
     setTimeout(showAllCollected, 1400);
   }
 }

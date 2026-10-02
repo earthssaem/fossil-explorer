@@ -242,18 +242,53 @@ function loadState(){
         const it = itemData.find(x => x.id === id);
         if(it && !isBandedLayer(it.layer) && state.dugSlots.indexOf(id) < 0) state.dugSlots.push(id);
       });
+      migrateDugSlots();
+      savedOwner = (state.discovered.length || state.dugSlots.length) ? safe(state.nickname, "") : "";
     }
   }catch(e){ /* localStorage 차단/오류 → 기본 상태로 진행 */ }
 }
+/* 띠 노두의 '판 지점' 기록을 지금 데이터에 맞춘다.
+   1) 예전 이름(A#lower0 처럼 순서 번호)을 아이템 id가 든 새 이름으로 바꾼다.
+   2) 판 것으로 되어 있는데 그 화석을 발견한 기록이 없으면(교사가 화석을 바꾸거나 앞에 끼워 넣은 경우) 다시 팔 수 있게 되돌린다.
+      그대로 두면 그 지점은 '발견됨'으로 보이지만 새 화석은 영영 나오지 않아 노두 조사를 끝낼 수 없다.
+   3) 거꾸로, 이미 발견한 화석의 지점은 판 것으로 맞춘다 (한 화석이 여러 지점에서 나오는 repeat 띠는 어느 지점인지 몰라 제외). */
+function migrateDugSlots(){
+  const dug = state.dugSlots;
+  layerData.forEach(ly => (layerBands(ly.id) || []).forEach(b => b.slots.forEach(sl => {
+    if(!sl.legacy) return;
+    const i = dug.indexOf(sl.legacy);
+    if(i >= 0){ dug.splice(i, 1); if(dug.indexOf(sl.slot) < 0) dug.push(sl.slot); }
+    const found = sl.itemId && state.discovered.indexOf(sl.itemId) >= 0;
+    if(sl.itemId && !found && dug.indexOf(sl.slot) >= 0) dug.splice(dug.indexOf(sl.slot), 1);
+    if(found && !sl.repeat && dug.indexOf(sl.slot) < 0) dug.push(sl.slot);
+  })));
+}
+/* 지금 데이터에 있는 아이템만 센다 (교사가 아이템을 지우거나 id를 바꿔도 '12/10 (120%)'처럼 부풀지 않게) */
+function countItems(ids){ return itemData.filter(it => ids.indexOf(it.id) >= 0).length; }
+/* 이 기기에 진행이 저장되어 있던 대원 닉네임 (공용 PC에서 다른 학생이 이어받는 것을 막을 때 씀) */
+let savedOwner = "";
+/* 이 브라우저에서 진행을 저장할 수 있는지 (시크릿 창, 저장 차단, 꽉 찬 저장소) */
+function storageWorks(){
+  try{ const k = SAVE_KEY + "_test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+  catch(e){ return false; }
+}
 function saveState(){
+  if(game.staleTab) return;   // 다른 탭에서 더 새 진행이 저장됐다 — 덮어쓰지 않는다
   try{
     state.lastPlayed = new Date().toLocaleString();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  }catch(e){ /* 저장 불가 환경에서도 게임은 계속 */ }
+  }catch(e){
+    /* 저장 불가 환경에서도 게임은 계속 — 다만 새로고침하면 처음부터라는 것을 한 번 알린다 */
+    if(!game.saveWarned && typeof toast === "function"){
+      game.saveWarned = true;
+      toast("진행이 저장되지 않고 있어요. 끝까지 한 뒤 결과 화면에서 보고서를 저장하세요.", "gold");
+    }
+  }
 }
 /* 진행 상황 초기화 — 콘텐츠는 항상 파일의 DEFAULT_* 를 쓰므로 지울 것은 진행 상황뿐이다 */
 function resetProgress(){
   state = defaultState();
+  savedOwner = "";
   try{
     localStorage.removeItem(SAVE_KEY);
   }catch(e){ /* localStorage 차단 환경에서도 계속 */ }

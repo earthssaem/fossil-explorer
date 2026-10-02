@@ -703,20 +703,42 @@ function renderFallbackItem(container, item, silhouette){
 function renderAssetImage(container, item, type){
   if(!container) return;
   container.innerHTML = "";
+  container.dataset.assetSrc = "";   // 그림 파일을 기다리는 중에 같은 칸이 다른 그림으로 바뀌면 늦게 온 그림을 넣지 않는다
   if(type === "silhouette"){
     // 미발견 카드: 스포일러 방지를 위해 항상 실루엣 fallback
     renderFallbackItem(container, item, true);
     return;
   }
+  /* 도트 그림을 먼저 바로 그리고, 교사가 넣은 그림 파일(item.img)은 미리 받아 성공했을 때만 바꾼다.
+     없는 파일을 매번 요청하면 웹에 올렸을 때 404가 반복되고, 응답이 올 때까지 그림 칸이 비어 보인다. */
+  renderFallbackItem(container, item, false);
   const src = item && item.img;
-  if(!src){ renderFallbackItem(container, item, false); return; }
-  const img = document.createElement("img");
-  img.className = "item-img";
-  img.alt = safe(item.name, "단서");
-  img.onerror = () => renderFallbackItem(container, item, false);
-  img.src = src;
-  container.appendChild(img);
+  if(!src || ASSET_IMG.failed.has(src)) return;
+  container.dataset.assetSrc = src;
+  const show = () => {
+    if(container.dataset.assetSrc !== src) return;
+    const img = document.createElement("img");
+    img.className = "item-img";
+    img.alt = safe(item.name, "단서");
+    img.src = src;
+    container.innerHTML = "";
+    container.appendChild(img);
+  };
+  if(ASSET_IMG.ok.has(src)){ show(); return; }
+  let pending = ASSET_IMG.pending.get(src);
+  if(!pending){
+    pending = new Promise(res => {
+      const probe = new Image();
+      probe.onload = () => { ASSET_IMG.ok.add(src); res(true); };
+      probe.onerror = () => { ASSET_IMG.failed.add(src); res(false); };
+      probe.src = src;
+    });
+    ASSET_IMG.pending.set(src, pending);
+  }
+  pending.then(ok => { if(ok) show(); });
 }
+/* 그림 파일 확인 결과 (페이지를 연 동안 기억) */
+const ASSET_IMG = { ok: new Set(), failed: new Set(), pending: new Map() };
 
 /* ---------- 플레이어 캐릭터 ---------- */
 /* 캐릭터 공용 팔레트 (도트 스프라이트) */

@@ -331,6 +331,7 @@ function resizeWorldCanvas(){
   if(!WORLD.canvas) return;
   /* game.zoom = 월드 1px을 그리는 캔버스(기기) 픽셀 수 */
   game.zoom = fitPixelCanvas(WORLD.canvas, viewportW(), viewportH());
+  WORLD.lastSig = "";   // 크기를 바꾸면 캔버스가 지워지므로 다시 그린다
   WORLD.ctx.imageSmoothingEnabled = false;
   updateCamera(true);
 }
@@ -863,5 +864,25 @@ function gameLoop(t){
   checkZoneChange();
   if(game.digging) tickDigging(dt);
   updateCamera(false);
-  drawWorld();
+  /* 화면에 보이는 것이 그대로면 다시 그리지 않는다 (서 있을 때·팝업이 떠 있을 때 매 프레임 지도 전체를 그리던 비용) */
+  const sig = worldSignature();
+  if(sig !== WORLD.lastSig){ WORLD.lastSig = sig; drawWorld(); }
+}
+/* 그림에 영향을 주는 값들. 하나라도 바뀌면 다시 그린다.
+   시간에 따라 바뀌는 것: 물(450ms)·깜박임(420ms)·탐사 지도 표식(300ms)·걷기 동작, 전망대 안내 화살표(연속).
+   화면을 덮는 팝업이 떠 있으면 시간 요소는 멈춘다 (뒤의 물결이 멈춰도 보이지 않는다). */
+function worldSignature(){
+  const z = game.zoom, p = game.player, n = game.near;
+  const covered = !!document.querySelector(".modal-backdrop.on") || $("cinematicOverlay").classList.contains("on");
+  const now = covered ? 0 : performance.now();
+  const guide = lookoutGuideActive();
+  return [
+    WORLD.canvas.width, WORLD.canvas.height, z, Math.round(game.camX * z), Math.round(game.camY * z),
+    Math.round(p.x), Math.round(p.y), p.face, p.moving && Math.floor(p.walkT * 7) % 2,
+    Math.floor(now / 450) % 2, Math.floor(now / 420) % 2, Math.floor(now / 300) % 2, guide ? Math.floor(now / 33) : 0,
+    n ? n.kind + n.x + "," + n.y : "", covered, anyModalOpen(), game.zone,
+    WORLD.gates.map(g => g.open ? 1 : 0).join(""),
+    state.dugSlots.length, state.discovered.length, state.foundOutcrops.length, state.talkedNpc.length,
+    state.unlockedLayers.length, state.finalMissionDone, $("actionHint").classList.contains("on")
+  ].join("|");
 }

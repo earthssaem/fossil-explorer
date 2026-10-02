@@ -88,8 +88,15 @@ function buildWipeBackground(){
   w.style.background = "linear-gradient(" + stops.join(", ") + ")";
 }
 /* 소리 켜기/끄기 (시작 화면·게임 HUD 버튼 공용) */
+/* 소리 켜기/끄기는 진행과 따로 저장한다 (진행을 초기화해도, 새로고침해도 유지 — 컴퓨터실에서 매번 다시 끄지 않게) */
+const SOUND_KEY = "stratumExplorer_sound";
+function loadSoundSetting(){
+  try{ if(localStorage.getItem(SOUND_KEY) === "off") game.soundOn = false; }catch(e){ }
+  ["btnSound", "btnSoundTitle"].forEach(id => { const b = $(id); if(b) b.innerHTML = iconSVG(game.soundOn ? "sound" : "mute"); });
+}
 function setSoundOn(v){
   game.soundOn = !!v;
+  try{ localStorage.setItem(SOUND_KEY, game.soundOn ? "on" : "off"); }catch(e){ }
   ["btnSound", "btnSoundTitle"].forEach(id => { const b = $(id); if(b) b.innerHTML = iconSVG(game.soundOn ? "sound" : "mute"); });
   if(game.soundOn){
     playSound("click");
@@ -496,6 +503,12 @@ function initGame(){
   loadState();
   showDataWarnings(validateContentData());
   showStorageNotice();
+  loadSoundSetting();
+  /* 탭을 숨기면 배경음을 멈추고, 돌아오면(시작 화면이면) 다시 튼다 */
+  document.addEventListener("visibilitychange", () => {
+    if(document.hidden) bgmStop();
+    else if($("startScreen").classList.contains("active") && audioReady) bgmStart();
+  });
   watchOtherTabs();
   applyIcons(document);
   buildWipeBackground();

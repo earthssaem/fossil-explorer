@@ -367,6 +367,17 @@ function bindUI(){
   }
 }
 
+/* 데이터 점검 결과: 경고가 있을 때만 시작 화면 구석에 교사용 버튼을 띄운다 (누르면 목록) */
+function showDataWarnings(warns){
+  if(!warns || !warns.length || !$("startScreen")) return;
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "data-warn";
+  b.textContent = "⚠ 데이터 점검 " + warns.length + "건 (교사용)";
+  b.addEventListener("click", () => alert("[데이터 점검 " + warns.length + "건] js/data 파일을 확인해 주세요.\n\n· " + warns.join("\n· ")));
+  $("startScreen").appendChild(b);
+}
+
 /* HUD 아래 끝을 CSS 변수(--hud-bottom)로 알려 준다. 좁은 화면에서 HUD가 두 줄로 접혀도
    미니맵·전망대 안내 배지·구역 배너가 HUD 버튼(처음으로 등)을 가리지 않게 한다 */
 function trackHudHeight(){
@@ -391,7 +402,7 @@ function initGame(){
   }catch(e){ }
   try{ localStorage.removeItem("stratumExplorer_teacherData_v2"); localStorage.removeItem("stratumExplorer_teacherData_v1"); }catch(e){ }
   loadState();
-  validateContentData();
+  showDataWarnings(validateContentData());
   applyIcons(document);
   buildWipeBackground();
   bindUI();

@@ -439,6 +439,31 @@ function buildProps(){
 }
 
 /* ---------- 노두(강가 절벽) 스프라이트: 층 색으로 생성 ---------- */
+/* 표지판 글자: 6×7 굵은 도트 글꼴 (6px 글씨를 fillText로 쓰면 반투명 픽셀로 뭉개져 흐리게 보인다) */
+const SIGN_GLYPHS = {
+  A: ["..##..", ".####.", "##..##", "##..##", "######", "##..##", "##..##"],
+  B: ["#####.", "##..##", "##..##", "#####.", "##..##", "##..##", "#####."],
+  C: [".####.", "##..##", "##....", "##....", "##....", "##..##", ".####."],
+  D: ["#####.", "##..##", "##..##", "##..##", "##..##", "##..##", "#####."],
+  E: ["######", "##....", "##....", "#####.", "##....", "##....", "######"],
+  F: ["######", "##....", "##....", "#####.", "##....", "##....", "##...."]
+};
+/* 표에 없는 글자(교사가 바꾼 id 등)는 한 번 그려 본 뒤 반투명 픽셀을 있음/없음으로 잘라 도트로 만든다 */
+function signGlyph(ch){
+  if(SIGN_GLYPHS[ch]) return SIGN_GLYPHS[ch];
+  const gw = 6, gh = 7;
+  const g = makeCanvas(gw, gh).getContext("2d");
+  g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillText(ch, gw / 2, gh / 2 + .5);
+  const d = g.getImageData(0, 0, gw, gh).data;
+  const rows = [];
+  for(let y = 0; y < gh; y++){
+    let row = "";
+    for(let x = 0; x < gw; x++) row += d[(y * gw + x) * 4 + 3] >= 128 ? "#" : ".";
+    rows.push(row);
+  }
+  return rows;
+}
 function buildOutcropProp(ly, below){
   const W = 48, H = 26;
   const c = makeCanvas(W, H);
@@ -455,7 +480,7 @@ function buildOutcropProp(ly, below){
     const h = 2 + Math.floor(hash2(i, 5, 17) * 3);
     const col = y < bedsTop ? (i % 2 ? c2 : c1) : (i % 2 ? shade(cb, -14) : cb);
     g.fillStyle = col;
-    g.fillRect(1, y, W - 2, h);
+    g.fillRect(1, y, W - 2, h + 1);    // 층리선 줄까지 칠한다 (빈 줄에 반투명 선만 그리면 뒤의 바닥 타일이 비친다)
     g.fillStyle = "rgba(40,20,5,.35)";
     g.fillRect(1, y + h, W - 2, 1);
     /* 경계 노두: 검은 띠 */
@@ -473,11 +498,18 @@ function buildOutcropProp(ly, below){
   }
   g.fillStyle = "#2b1d15";
   g.fillRect(0, 2, 1, H - 2); g.fillRect(W - 1, 2, 1, H - 2); g.fillRect(0, H - 1, W, 1);
-  /* 표지판 (노두 기호) */
-  g.fillStyle = "#2b1d15"; g.fillRect(W - 12, H - 12, 10, 8);
-  g.fillStyle = "#fff8e6"; g.fillRect(W - 11, H - 11, 8, 6);
-  g.fillStyle = "#2b1d15"; g.font = "bold 6px sans-serif"; g.textBaseline = "top";
-  g.fillText(String(ly.id), W - 9, H - 11);
+  /* 표지판 (노두 기호): 테두리 1px + 여백 1px 안에 도트 글자, 글자 사이 1px */
+  const glyphs = String(ly.id).split("").map(signGlyph);
+  const sw = glyphs.reduce((s, gl) => s + gl[0].length + 1, 3), sh = 11;
+  const sx = Math.max(1, W - 2 - sw), sy = H - 3 - sh;
+  g.fillStyle = "#2b1d15"; g.fillRect(sx, sy, sw, sh);
+  g.fillStyle = "#fff8e6"; g.fillRect(sx + 1, sy + 1, sw - 2, sh - 2);
+  g.fillStyle = "#2b1d15";
+  let gx = sx + 2;
+  glyphs.forEach(gl => {
+    gl.forEach((row, yy) => { for(let xx = 0; xx < row.length; xx++) if(row[xx] === "#") g.fillRect(gx + xx, sy + 2 + yy, 1, 1); });
+    gx += gl[0].length + 1;
+  });
   PROPS["outcrop_" + ly.id] = { img: c, w: W, h: H, ax: 24, ay: H, solid: { x: -24, y: -8, w: 48, h: 8 }, tall: false };
 }
 

@@ -85,6 +85,7 @@ function renderCollection(){
         (completed ? " · " + escapeHTML(safe(item.group, "")) : "") + '</div>' +
       '<div class="card-state">' + (completed ? iconSVG("star") + iconSVG("star") + iconSVG("star") : (discovered ? iconSVG("lens") : iconSVG("lock"))) + '</div>';
     renderAssetImage(card.querySelector(".card-visual"), item, discovered ? "normal" : "silhouette");
+    makeKeyClickable(card, discovered ? itemDisplayName(item) : "미발견 단서");
     card.addEventListener("click", () => {
       playSound("click");
       if(!discovered){ toast("아직 발견하지 못한 단서다. 노두를 조사하자."); return; }

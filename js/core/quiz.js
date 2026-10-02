@@ -125,6 +125,7 @@ function afterQuestionSolved(){
     }
   });
   actions.appendChild(b);
+  b.focus({ preventScroll: true });   // 키보드로 푸는 학생이 바로 Enter로 넘어가게
 }
 
 /* ---------- 아이템 완료(도감 등록 + 층 해금) ---------- */
@@ -221,3 +222,18 @@ function openLayerModal(layerId){
 }
 
 /* ---------- HUD ---------- */
+
+/* 퀴즈 단축키: 1~5 = 보기 번호, O·X = OX 문항 (마우스 없이 풀 수 있게) */
+document.addEventListener("keydown", e => {
+  const m = $("quizModal");
+  if(!m || !m.classList.contains("on") || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  const btns = Array.from(document.querySelectorAll("#quizChoices .quiz-choice"));
+  const q = Array.isArray(quiz.list) ? quiz.list[quiz.index] : null;
+  let i = -1;
+  if(/^Digit[1-5]$|^Numpad[1-5]$/.test(e.code)) i = Number(e.code.slice(-1)) - 1;
+  else if(q && q.type === "ox" && e.code === "KeyO") i = 0;
+  else if(q && q.type === "ox" && e.code === "KeyX") i = 1;
+  if(i < 0 || !btns[i] || btns[i].disabled) return;
+  e.preventDefault();
+  btns[i].click();
+});

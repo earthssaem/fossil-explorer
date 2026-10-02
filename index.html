@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>지층 탐사대: 사라진 시간을 이어라</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,10 +93,10 @@
 
     <div id="mobileControls">
       <div class="dpad">
-        <button class="ctrl-btn up" id="btnUp">▲</button>
-        <button class="ctrl-btn left" id="btnLeft">◀</button>
-        <button class="ctrl-btn down" id="btnDown">▼</button>
-        <button class="ctrl-btn right" id="btnRight">▶</button>
+        <button class="ctrl-btn up" id="btnUp" aria-label="위로">▲</button>
+        <button class="ctrl-btn left" id="btnLeft" aria-label="왼쪽으로">◀</button>
+        <button class="ctrl-btn down" id="btnDown" aria-label="아래로">▼</button>
+        <button class="ctrl-btn right" id="btnRight" aria-label="오른쪽으로">▶</button>
       </div>
       <button class="ctrl-btn act" id="btnAction">조사</button>
     </div>
@@ -120,7 +120,7 @@
   <!-- ============ 노두 조사창 ============ -->
   <div class="modal-backdrop" id="outcropModal">
     <div class="modal-card pixel-panel wide">
-      <button class="modal-close" data-close="outcropModal">✕</button>
+      <button class="modal-close" aria-label="닫기" data-close="outcropModal">✕</button>
       <h3 class="modal-title" id="outcropModalTitle">노두 조사</h3>
       <div class="xsec-layout">
         <div class="xsec-wrap" id="outcropXsec"></div>
@@ -163,7 +163,7 @@
   <!-- ============ 아이템 관찰 ============ -->
   <div class="modal-backdrop" id="itemModal">
     <div class="modal-card pixel-panel">
-      <button class="modal-close" data-close="itemModal">✕</button>
+      <button class="modal-close" aria-label="닫기" data-close="itemModal">✕</button>
       <h3 class="modal-title" id="itemModalTitle">단서 관찰</h3>
       <div class="modal-item-visual"><div class="item-visual-slot" id="itemModalVisual"></div></div>
       <div id="itemModalInfo"></div>
@@ -191,7 +191,7 @@
       <div class="quiz-progress-dots" id="quizDots"></div>
       <div class="quiz-question" id="quizQuestion"></div>
       <div class="quiz-choices" id="quizChoices"></div>
-      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
       <div class="modal-actions" id="quizActions"></div>
     </div>
   </div>
@@ -199,7 +199,7 @@
   <!-- ============ 층 정보 ============ -->
   <div class="modal-backdrop" id="layerModal">
     <div class="modal-card pixel-panel">
-      <button class="modal-close" data-close="layerModal">✕</button>
+      <button class="modal-close" aria-label="닫기" data-close="layerModal">✕</button>
       <h3 class="modal-title" id="layerModalTitle">층 정보</h3>
       <div id="layerModalInfo"></div>
       <div class="modal-actions"><button class="btn ghost small" data-close="layerModal">닫기</button></div>
@@ -209,7 +209,7 @@
   <!-- ============ 최종 미션 · 흩어진 지층 기록을 완성하라 ============ -->
   <div class="modal-backdrop" id="finalMissionModal">
     <div class="modal-card pixel-panel mission-card">
-      <button class="modal-close" data-close="finalMissionModal">✕</button>
+      <button class="modal-close" aria-label="닫기" data-close="finalMissionModal">✕</button>
       <h3 class="modal-title" id="finalTitle">최종 미션</h3>
       <div class="mission-steps" id="missionSteps"></div>
       <div class="mission-body" id="missionBody"></div>
@@ -308,7 +308,7 @@
 
 </div>
 <div id="screenWipe" aria-hidden="true"></div>
-<div id="toastZone"></div>
+<div id="toastZone" role="status" aria-live="polite"></div>
 
 <script src="js/data/items.js"></script>
 <script src="js/data/layers.js"></script>

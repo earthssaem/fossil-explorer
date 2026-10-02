@@ -107,6 +107,7 @@ function openFinalMission(){
   $("finalTitle").textContent = "최종 미션 · " + safe(fm.title, "");
   /* 연결선(SVG)은 화면 크기를 재서 그리므로 모달을 먼저 보이게 한 뒤 내용을 그린다 */
   openModal("finalMissionModal");
+  m2.feedback = "";   // 지난번에 열었을 때의 판정 문구는 지운다
   renderMission();
   playSound("place");
 }
@@ -227,6 +228,9 @@ function checkOrder(){
   }
   saveState();
   renderStage1();
+  /* 힌트는 카드 목록 아래에 나오므로, 화면 밖이면 보이는 곳까지 스크롤한다 */
+  const fb = $("mFeedback");
+  if(fb && fb.scrollIntoView) fb.scrollIntoView({ block: "nearest" });
 }
 /* 잘못 놓인 카드 중 가장 아래 것(order[i] ≠ answer[i] 인 첫 자리)을 짚어 준다.
    그 자리에 와야 할 카드보다 위에 있어야 하는 카드이므로 "{card} 카드는 {other} 카드보다 위에 있어야 해요"가 된다.
@@ -351,7 +355,7 @@ function drawLinks(links, temp){
   if(wr.width < 2 || wr.height < 2){
     /* 아직 화면에 보이지 않아 크기를 잴 수 없다 — 비워 두고 다음 프레임에 다시 그린다 */
     svg.innerHTML = "";
-    requestAnimationFrame(() => { if($("cmpLines") === svg) drawLinks(links, temp); });
+    requestAnimationFrame(() => { if($("cmpLines") === svg && $("finalMissionModal").classList.contains("on")) drawLinks(links, temp); });
     return;
   }
   svg.setAttribute("viewBox", "0 0 " + wr.width + " " + wr.height);
@@ -373,7 +377,7 @@ function drawLinks(links, temp){
   if(temp) out += seg({ x: temp.x1, y: temp.y1 }, { x: temp.x2, y: temp.y2 }, "drag");
   svg.innerHTML = out;
 }
-window.addEventListener("resize", () => { if($("cmpLines")) drawLinks(missionState().links); });
+window.addEventListener("resize", () => { if($("cmpLines") && $("finalMissionModal").classList.contains("on")) drawLinks(missionState().links); });
 
 function renderStage2(){
   const s2 = finalMissionData().stage2 || {};
@@ -400,19 +404,23 @@ function renderStage2(){
   drawLinks(m.links);
   if(!linked) setupLinking($("mCompare"));
   const fin = $("m2Finish"); if(fin) fin.addEventListener("click", finishMission);
+  /* 판정 결과는 기둥 아래에 나오므로, 화면 밖이면 보이는 곳까지 스크롤한다 */
+  const fb = $("mFeedback");
+  if(fb && fb.scrollIntoView) fb.scrollIntoView({ block: "nearest" });
 }
 /* 한 쌍을 이어 본다: 이웃 층 n ↔ 우리 공원 층 key */
 function tryLink(n, key){
   const s2 = finalMissionData().stage2 || {};
   const m = missionState();
   const L = neighborLayers().find(x => x.n === n);
-  if(!L || m.links[n]) return;
+  if(!L || m.links[n]){ drawLinks(m.links); return; }   // 끌던 임시 선을 지운다
   if(L.answer === key){
     m.links[n] = key; saveState();
     missionRecord("m2_link_" + n, "ERA", true);
     playSound("correct");
     m2.feedback = safe(s2.ok, "") + (L.note ? " " + L.note : ""); m2.fbKind = "explain";
-    if(allLinked()) spawnConfetti();
+    /* 다 이으면 바로 완료 — 화면 아래 버튼을 찾지 않아도 성공 팝업이 뜬다 */
+    if(allLinked()){ finishMission(); return; }
   }else{
     missionRecord("m2_link_" + n, "ERA", false);
     playSound("wrong");
@@ -442,7 +450,10 @@ function setupLinking(wrap){
     const p = rel(e), a = anchorOf(drag.el);
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const band = under && under.closest ? under.closest(".cmp-band") : null;
-    setOver(band && band.getAttribute("data-side") && band.getAttribute("data-side") !== drag.side && wrap.contains(band) ? band : null);
+    /* 반대쪽 기둥의 층만 놓을 곳이 된다 (이미 이은 이웃 층은 제외) */
+    const ok = band && band.getAttribute("data-side") && band.getAttribute("data-side") !== drag.side && wrap.contains(band) &&
+      !(band.getAttribute("data-side") === "nb" && m.links[band.getAttribute("data-n")]);
+    setOver(ok ? band : null);
     drawLinks(m.links, { x1: a.x, y1: a.y, x2: p.x, y2: p.y });
   };
   const finish = e => {

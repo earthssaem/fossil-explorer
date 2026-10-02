@@ -33,6 +33,7 @@ function defaultState(){
     maxCombo: 0,
     quizAnswered: 0,     // 응답한 퀴즈 수
     quizFirstCorrect: 0, // 첫 시도 정답 수
+    quizScored: [],      // 집계를 마친 문항 ("item:아이템id#번호", "summary:층id#0") — 새로고침 후 다시 풀어도 한 번만 집계
     conceptStats: emptyConceptStats(), // 개념(태그)별 성취 {correct, total}
     seenZones: [],       // 구역 이름 배너를 본 구역 id
     talkedNpc: [],       // 대화한 NPC id (해설사 첫 대화 등)
@@ -172,7 +173,7 @@ function loadState(){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
       // 배열 필드 방어
-      ["discovered","completed","unlockedLayers","layerQuizDone","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","seenZones","talkedNpc"].forEach(k=>{
+      ["discovered","completed","unlockedLayers","layerQuizDone","badges","seenInDex","foundOutcrops","visitedCells","dugSlots","seenZones","talkedNpc","quizScored"].forEach(k=>{
         if(!Array.isArray(state[k])) state[k] = [];
       });
       state.conceptStats = normalizeConceptStats(state.conceptStats);

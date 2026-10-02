@@ -169,7 +169,8 @@ function renderStratColumn(currentId){
     html += '<div class="col-band' + (cur ? " cur" : "") + (dug ? " dug" : "") + (lr.isBoundary ? " bnd" : "") + '"' +
       ' style="' + (dug || cur ? "background:" + c + ";" : "") + '" title="' + escapeHTML(safe(lr.label, "")) + '">' +
       '<b>' + escapeHTML(safe(lr.id, "?")) + '</b>' +
-      '<span>' + (dug ? escapeHTML(safe(lr.era, "")) : "?") + '</span></div>';
+      /* 시대는 그 층 정보를 해금(화석 퀴즈를 모두 풂)한 뒤에만 — 발굴만 하고 보여 주면 곧 나올 퀴즈의 답이 된다 */
+      '<span>' + (state.unlockedLayers.includes(lr.id) ? escapeHTML(safe(lr.era, "")) : "?") + '</span></div>';
   });
   col.innerHTML = html;
 }
@@ -184,10 +185,12 @@ function outcropNoteText(layerId){
     if(next.index === 0) return "아래층부터 차례로 조사해 보자. 먼저 " + label + "을(를) 조사한다.";
     return "이제 그 위의 " + label + "을(를) 조사한다.";
   }
-  const left = itemsOfLayer(layerId).filter(i => !state.completed.includes(i.id)).length;
-  return left > 0
-    ? "반짝이는 곳을 눌러 화석을 발굴한다. (남은 화석 " + left + "개)"
-    : "이 지층의 화석을 모두 찾았다.";
+  const items = itemsOfLayer(layerId);
+  const undug = items.filter(i => !state.discovered.includes(i.id)).length;
+  const quizLeft = items.filter(i => state.discovered.includes(i.id) && !state.completed.includes(i.id)).length;
+  if(undug > 0) return "반짝이는 곳을 눌러 화석을 발굴한다. (남은 화석 " + undug + "개)";
+  if(quizLeft > 0) return "발굴한 화석을 눌러 단서 해석 퀴즈를 풀자. (남은 퀴즈 " + quizLeft + "개)";
+  return "이 지층의 화석을 모두 찾았다.";
 }
 
 /* 잠긴 띠에 그리는 작은 자물쇠 (도트) */
@@ -287,14 +290,6 @@ function renderDigSites(container, slots){
   });
 }
 
-/* ---------- 카메라 (플레이어 추적 + 경계 clamp) ---------- */
-function tryAction(){
-  if(anyModalOpen()) return;
-  const o = game.nearSite;
-  if(!o) return;
-  playSound("click");
-  openOutcropModal(o.layerId);
-}
 /* 확대 조사창 안 반짝이는 지점 발굴 시작 */
 function startDigging(siteId){
   const s = game.sites.find(x => x.slot === siteId);
@@ -468,6 +463,7 @@ function startLayerSummaryQuiz(layerId){
   if(!layerSummaryPending(layerId)) return;
   const ly = layerById(layerId);
   quiz.itemId = null;
+  quiz.key = "summary:" + layerId;
   quiz.list = [ly.summaryQuiz];
   quiz.heading = safe(ly.label, "지층") + " 노두 · 아래층과 위층을 비교한다";
   quiz.finishLabel = "탐사 기록에 추가";
@@ -585,7 +581,7 @@ function openItemModal(itemId, fromCollection){
 /* ---------- 퀴즈 시스템 ----------
    아이템에 딸린 문항과 최종 미션 마무리 문항이 같은 화면을 쓴다.
    quiz.list / quiz.heading / quiz.finishLabel / quiz.onFinish 로 구분한다. */
-const quiz = { itemId: null, index: 0, attempts: 0, solvedInModal: 0,
+const quiz = { itemId: null, key: "", index: 0, attempts: 0, solvedInModal: 0,
                list: null, heading: "", finishLabel: "", onFinish: null };
 
 /* 아이템이 속한 띠 이름 */

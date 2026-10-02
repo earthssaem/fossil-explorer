@@ -155,14 +155,32 @@ function buildWorld(){
   /* 8. 노두 (이 공원에서는 강가 절벽에 드러남) */
   const reserved = [];   // 소품 배치 금지 셀 (c,r)
   const reserve = (c, r, w, h) => { for(let rr = r; rr < r + h; rr++) for(let cc = c; cc < c + w; cc++) reserved.push(cellIdx(cc, rr)); };
+  /* 노두 그림(가로 3칸 × 세로 2칸)이 다리·길·계단·물을 덮지 않는 가장 가까운 풀밭을 고른다.
+     앞줄은 걸어서 닿을 수 있어야 한다. 같은 거리면 강에서 먼 쪽. 못 찾으면 데이터의 자리 그대로 */
+  const free = (c, r) => inWorld(c, r) && (kind[cellIdx(c, r)] === "grass" || kind[cellIdx(c, r)] === "sand");
+  const outcropSpot = (col0, row0, out) => {
+    let best = null;
+    for(let dr = 0; dr >= -2; dr--) for(let dc = -3; dc <= 3; dc++){
+      const col = col0 + dc, row = row0 + dr;
+      let ok = true;
+      for(let c = col; c <= col + 2 && ok; c++) ok = free(c, row) && free(c, row - 1) && inWorld(c, row + 1) && !WORLD.solid[cellIdx(c, row + 1)];
+      if(!ok) continue;
+      const cost = Math.abs(dr) + Math.abs(dc) + (dc * out < 0 ? 0.5 : 0);
+      if(!best || cost < best.cost) best = { col: col, row: row, cost: cost };
+    }
+    return best || { col: col0, row: row0 };
+  };
   (worldData.outcrops || []).forEach(o => {
     const rc = riverCol(o.row);
-    const col = o.side === "east" ? rc + rv.halfWidth + 3 : rc - rv.halfWidth - 5;
-    const x = (col + 1.5) * T, y = (o.row + 1) * T;
-    WORLD.outcrops.push({ layerId: o.layer, x: x, y: y, col: col, row: o.row });
-    reserve(col - 1, o.row - 2, 5, 5);
+    const spot = o.side === "east" ? outcropSpot(rc + rv.halfWidth + 3, o.row, 1) : outcropSpot(rc - rv.halfWidth - 5, o.row, -1);
+    const col = spot.col, row = spot.row;
+    const x = (col + 1.5) * T, y = (row + 1) * T;
+    WORLD.outcrops.push({ layerId: o.layer, x: x, y: y, col: col, row: row });
+    reserve(col - 1, row - 2, 5, 5);
     /* 노두 앞은 흙길로 */
-    for(let c = col - 1; c <= col + 3; c++) paint(c, o.row + 1);
+    for(let c = col - 1; c <= col + 3; c++) paint(c, row + 1);
+    /* 노두 밑줄은 지나갈 수 없다 (걸어 들어가면 캐릭터가 그림 뒤로 사라진다) */
+    for(let c = col; c <= col + 2; c++) WORLD.solid[cellIdx(c, row)] = true;
   });
   /* 9. 고정 소품·NPC·전망대 */
   (worldData.fixed || []).forEach(f => {
@@ -402,16 +420,13 @@ function drawWorld(){
 }
 
 /* ---------- 전망대 길 안내 ----------
-   마지막 구역에서 마지막 지층(F)을 해금하고 나서도 전망대를 못 찾는 학생이 많다.
-   그때부터 최종 미션을 마칠 때까지만: 전망대가 화면 안에 있으면 그 위에 튀는 표식을, 화면 밖이면
+   노두 조사를 다 마치고 나서도 전망대를 못 찾는 학생이 많다.
+   최종 미션이 열린 때부터 마칠 때까지만: 전망대가 화면 안에 있으면 그 위에 튀는 표식을, 화면 밖이면
    플레이어 곁에 전망대 쪽을 가리키는 화살표를 그린다. 탐사 지도의 전망대 표식도 이때만 그린다.
-   (그 전에는 전망대를 가리키지 않는다 — 탐사 순서를 앞질러 알려 주지 않기 위해서) */
-function lastLayerUnlocked(){
-  const last = layerData[layerData.length - 1];
-  return !!last && (state.unlockedLayers || []).includes(last.id);
-}
+   (그 전에는 전망대를 가리키지 않는다 — 탐사 순서를 앞질러 알려 주지 않기 위해서.
+    마지막 층 해금을 기준으로 삼으면, 관문이 없는 E→F 구간에서 E를 건너뛴 학생에게 미션이 안 열렸는데도 안내가 켜진다) */
 function lookoutGuideActive(){
-  return !!WORLD.lookout && !state.finalMissionDone && lastLayerUnlocked();
+  return !!WORLD.lookout && !state.finalMissionDone && finalMissionReady();
 }
 function drawLookoutGuide(ctx, camX, camY, cw, ch, z){
   if(!lookoutGuideActive()) return;
@@ -761,6 +776,8 @@ function enterWorld(){
   updateCamera(true);
   $("actionHint").classList.remove("on");
   updateHud();
+  /* 종합 문항이 뜬 채로 새로고침했다면 다시 낸다 (그 노두 창을 다시 열지 않아도) */
+  layerData.forEach(ly => maybeLayerSummaryQuiz(ly.id));
 }
 function onWorldClick(e){
   ensureAudioOnce();

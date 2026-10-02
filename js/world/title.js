@@ -261,10 +261,10 @@ function titleResize(force){
   if(!cv) return;
   const bg = cv.parentNode;
   const w = bg.clientWidth || window.innerWidth, h = bg.clientHeight || window.innerHeight;
-  const zoom = w < 700 ? 2 : 3;
-  const W = Math.ceil(w / zoom), H = Math.ceil(h / zoom);
-  if(!force && W === TITLE.W && H === TITLE.H && zoom === TITLE.zoom) return;
-  cv.width = w; cv.height = h;
+  const cw = cv.width, ch = cv.height;
+  const zoom = fitPixelCanvas(cv, w, h);   // 캔버스는 기기 픽셀 크기, zoom = 월드 1px당 기기 픽셀 수
+  const W = Math.ceil(cv.width / zoom), H = Math.ceil(cv.height / zoom);
+  if(!force && cw === cv.width && ch === cv.height && W === TITLE.W && H === TITLE.H && zoom === TITLE.zoom) return;
   TITLE.zoom = zoom; TITLE.W = W; TITLE.H = H;
   titleBuild();
   titleDraw();
@@ -349,7 +349,8 @@ function titleFrame(t){
 /* ---------- 화석 클릭 ---------- */
 function titleFossilAt(clientX, clientY){
   const r = TITLE.canvas.getBoundingClientRect();
-  const wx = (clientX - r.left) / TITLE.zoom, wy = (clientY - r.top) / TITLE.zoom;
+  const k = TITLE.canvas.width / r.width / TITLE.zoom;   // CSS px → 월드 px
+  const wx = (clientX - r.left) * k, wy = (clientY - r.top) * k;
   const L = TITLE.lay;
   if(!L || wy < L.yCliff || wy > L.yCliff + L.cliffH) return null;
   const lx = (wx + titleScroll(TITLE_SPEED.ridge)) % TITLE.P;

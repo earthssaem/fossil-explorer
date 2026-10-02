@@ -26,6 +26,16 @@ function makeCanvas(w, h){
   c.width = w; c.height = h;
   return c;
 }
+/* 화면 캔버스를 기기 픽셀 크기로 맞추고, 도트 1px을 기기 픽셀 몇 개로 그릴지(정수) 정한다.
+   캔버스를 CSS 픽셀 크기로 만들면 브라우저가 화면 배율(125%·150%, 휴대폰)만큼 한 번 더 늘리면서
+   도트 크기가 3px·4px처럼 들쭉날쭉해진다. 기본 배율: 좁은 화면 2, 넓은 화면 3 (CSS 픽셀 기준) */
+function fitPixelCanvas(cv, cssW, cssH){
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(cssW * dpr)), h = Math.max(1, Math.round(cssH * dpr));
+  if(cv.width !== w) cv.width = w;
+  if(cv.height !== h) cv.height = h;
+  return Math.max(1, Math.round((cssW < 700 ? 2 : 3) * dpr));
+}
 /* (x,y) → 색 함수를 16×16에 찍어 타일을 만든다 */
 function genTile(key, fn){
   const c = makeCanvas(T, T);

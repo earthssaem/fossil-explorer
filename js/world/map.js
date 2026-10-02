@@ -329,15 +329,14 @@ function viewportW(){ return $("sceneViewport").clientWidth || window.innerWidth
 function viewportH(){ return $("sceneViewport").clientHeight || window.innerHeight; }
 function resizeWorldCanvas(){
   if(!WORLD.canvas) return;
-  WORLD.canvas.width = viewportW();
-  WORLD.canvas.height = viewportH();
-  game.zoom = viewportW() < 700 ? 2 : 3;
+  /* game.zoom = 월드 1px을 그리는 캔버스(기기) 픽셀 수 */
+  game.zoom = fitPixelCanvas(WORLD.canvas, viewportW(), viewportH());
   WORLD.ctx.imageSmoothingEnabled = false;
   updateCamera(true);
 }
 function updateCamera(snap){
   const z = game.zoom;
-  const vw = viewportW() / z, vh = viewportH() / z;
+  const vw = WORLD.canvas.width / z, vh = WORLD.canvas.height / z;
   const tx = clamp(game.player.x - vw / 2, 0, Math.max(0, WORLD.W - vw));
   const ty = clamp(game.player.y - vh / 2 - 8, 0, Math.max(0, WORLD.H - vh));
   const ease = (snap || game.reducedMotion) ? 1 : 0.14;
@@ -517,10 +516,10 @@ function buildPlayerSprites(){
 function positionHint(){
   const hint = $("actionHint");
   if(!hint || !hint.classList.contains("on") || !game.near) return;
-  const z = game.zoom;
-  const sx = (game.near.x - game.camX) * z, sy = (game.near.y - 30 - game.camY) * z;
-  hint.style.left = clamp(sx, 120, WORLD.canvas.width - 120) + "px";
-  hint.style.top = clamp(sy, 70, WORLD.canvas.height - 120) + "px";
+  const k = game.zoom * viewportW() / WORLD.canvas.width;   // 월드 px → CSS px
+  const sx = (game.near.x - game.camX) * k, sy = (game.near.y - 30 - game.camY) * k;
+  hint.style.left = clamp(sx, 120, viewportW() - 120) + "px";
+  hint.style.top = clamp(sy, 70, viewportH() - 120) + "px";
 }
 
 /* ---------- 탐사 지도 (미니맵) ----------
@@ -783,9 +782,9 @@ function onWorldClick(e){
   ensureAudioOnce();
   if(anyModalOpen()) return;
   const r = WORLD.canvas.getBoundingClientRect();
-  const z = game.zoom;
-  const wx = (e.clientX - r.left) / z + game.camX;
-  const wy = (e.clientY - r.top) / z + game.camY;
+  const k = WORLD.canvas.width / r.width / game.zoom;   // CSS px → 월드 px
+  const wx = (e.clientX - r.left) * k + game.camX;
+  const wy = (e.clientY - r.top) * k + game.camY;
   /* 가까운 상호작용 대상을 눌렀나? */
   let target = null, bd = 26;
   const chk = (kind, o, x, y) => { const d = Math.hypot(x - wx, y - wy); if(d < bd){ bd = d; target = { kind, o, x, y }; } };

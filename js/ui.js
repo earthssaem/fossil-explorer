@@ -367,6 +367,17 @@ function bindUI(){
   }
 }
 
+/* HUD 아래 끝을 CSS 변수(--hud-bottom)로 알려 준다. 좁은 화면에서 HUD가 두 줄로 접혀도
+   미니맵·전망대 안내 배지·구역 배너가 HUD 버튼(처음으로 등)을 가리지 않게 한다 */
+function trackHudHeight(){
+  const hud = $("hud"), scr = $("gameScreen");
+  if(!hud || !scr) return;
+  const set = () => { if(hud.offsetHeight) scr.style.setProperty("--hud-bottom", (hud.offsetTop + hud.offsetHeight) + "px"); };
+  if(window.ResizeObserver) new ResizeObserver(set).observe(hud);
+  window.addEventListener("resize", set);
+  set();
+}
+
 /* ---------- 초기화 ---------- */
 function initGame(){
   game.reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -385,6 +396,7 @@ function initGame(){
   buildWipeBackground();
   bindUI();
   bindInputs();
+  trackHudHeight();
   renderStartProgress();
   renderHelpMissions();
   updateHud();

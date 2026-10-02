@@ -203,7 +203,8 @@ p{ margin:0; }
 .note-card div{ color:#4a3a2e; font-size:.95em; }
 
 /* ---------- 탐사 화면 ---------- */
-#gameScreen{ background:var(--dark); }
+/* --hud-bottom: HUD 아래 끝 (좁은 화면에서 HUD가 두 줄로 접히면 JS가 갱신한다) — 미니맵·안내 배지·구역 배너가 그 아래에 놓인다 */
+#gameScreen{ background:var(--dark); --hud-bottom:50px; }
 #sceneViewport{ position:absolute; inset:0; overflow:hidden; }
 #worldCanvas{ display:block; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; }
 #hud{
@@ -226,7 +227,7 @@ p{ margin:0; }
 .hud-btn.wide span{ font-weight:700; }
 
 #zoneBanner{
-  position:absolute; top:64px; left:50%; transform:translate(-50%, -12px); z-index:22;
+  position:absolute; top:calc(var(--hud-bottom) + 14px); left:50%; transform:translate(-50%, -12px); z-index:22;
   background:rgba(43,29,21,.88); color:#f6ead0; border:3px solid #f6ead0; padding:8px 20px; text-align:center;
   opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; min-width:240px;
 }
@@ -236,7 +237,7 @@ p{ margin:0; }
 
 /* 전망대 길 안내 배지 (최종 미션이 열린 뒤 ~ 끝날 때까지) */
 #goalGuide{
-  position:absolute; top:62px; left:10px; transform:translateY(-12px); z-index:21;
+  position:absolute; top:calc(var(--hud-bottom) + 12px); left:10px; transform:translateY(-12px); z-index:21;
   display:flex; align-items:center; gap:10px; padding:6px 14px 6px 10px; text-align:left;
   background:var(--gold); color:var(--ink); border:3px solid var(--line); box-shadow:var(--shadow-sm);
   font-family:var(--font); cursor:pointer; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
@@ -622,8 +623,12 @@ p{ margin:0; }
 }
 @media (max-width:760px){
   #controlGuide{ display:none; }
-  #miniWrap{ width:112px; padding:5px; right:8px; bottom:auto; top:62px; }
-  #zoneBanner{ top:180px; min-width:200px; }
+  #hud{ top:8px; left:8px; right:8px; gap:6px; }
+  .hud-group{ gap:4px; }
+  .hud-chip{ min-height:34px; padding:3px 7px; gap:4px; font-size:11px; }
+  .hud-btn{ min-width:34px; height:34px; padding:0 6px; }
+  #miniWrap{ width:112px; padding:5px; right:8px; bottom:auto; top:calc(var(--hud-bottom) + 10px); }
+  #zoneBanner{ top:calc(var(--hud-bottom) + 128px); min-width:200px; }
   #goalGuide{ left:8px; max-width:calc(100% - 136px); padding:5px 10px 5px 8px; }
   #goalGuide .gg-text small{ display:none; }
   #toastZone{ top:auto; bottom:190px; }

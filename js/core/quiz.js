@@ -3,6 +3,7 @@ function startQuiz(itemId){
   const item = itemData.find(i => i.id === itemId);
   if(!item || !Array.isArray(item.quiz) || !item.quiz.length){ completeItem(itemId); return; }
   quiz.itemId = itemId;
+  quiz.key = "item:" + itemId;
   quiz.list = item.quiz;
   quiz.heading = safe(item.name,"단서") + " · 단서를 보고 추리한다";
   quiz.finishLabel = "도감에 기록 추가";
@@ -46,6 +47,13 @@ function renderQuizQuestion(){
     afterQuestionSolved(true);
   }
 }
+/* 지금 문항을 집계했다고 기록한다. 처음이면 true (같은 문항은 한 번만 집계) */
+function markQuizScored(){
+  const key = safe(quiz.key, "?") + "#" + quiz.index;
+  if(state.quizScored.indexOf(key) >= 0) return false;
+  state.quizScored.push(key);
+  return true;
+}
 function checkAnswer(answer, btnEl){
   if(!Array.isArray(quiz.list) || !quiz.list[quiz.index]) return;
   const q = quiz.list[quiz.index];
@@ -55,14 +63,17 @@ function checkAnswer(answer, btnEl){
     playSound("correct");
     if(btnEl) btnEl.classList.add("correct");
     document.querySelectorAll("#quizChoices .quiz-choice").forEach(b => b.disabled = true);
-    state.quizAnswered = safe(state.quizAnswered,0) + 1;
-    if(quiz.attempts === 0){
+    /* 퀴즈 도중 새로고침 등으로 이미 집계한 문항을 다시 풀면 점수·개념별 성취에 두 번 넣지 않는다 */
+    const fresh = markQuizScored();
+    if(fresh && quiz.attempts === 0){
+      state.quizAnswered = safe(state.quizAnswered,0) + 1;
       state.quizFirstCorrect = safe(state.quizFirstCorrect,0) + 1;
       state.combo = safe(state.combo,0) + 1;
       state.maxCombo = Math.max(safe(state.maxCombo,0), state.combo);
       state.score = safe(state.score,0) + 30;
       recordConcept(q.tag, true);   // 첫 시도 정답 → correct + total
-    }else{
+    }else if(fresh){
+      state.quizAnswered = safe(state.quizAnswered,0) + 1;
       state.score = safe(state.score,0) + 15;
       recordConcept(q.tag, false);  // 2회차 정답 → total만
     }
@@ -84,8 +95,10 @@ function checkAnswer(answer, btnEl){
     }else{
       /* 두 번째 오답: 정답과 해설 공개 후 다음으로 */
       document.querySelectorAll("#quizChoices .quiz-choice").forEach(b => b.disabled = true);
-      state.quizAnswered = safe(state.quizAnswered,0) + 1;
-      recordConcept(q.tag, false);  // 끝내 못 맞힘 → total만
+      if(markQuizScored()){
+        state.quizAnswered = safe(state.quizAnswered,0) + 1;
+        recordConcept(q.tag, false);  // 끝내 못 맞힘 → total만
+      }
       saveState();
       fb.className = "quiz-feedback explain";
       fb.textContent = "정답은 「" + safe(q.answer,"?") + "」. 탐사 기록: " + safe(q.explanation, "");

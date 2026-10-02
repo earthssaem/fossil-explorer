@@ -128,7 +128,7 @@ function titleBuildCliff(P, H){
     while(yy < s.y1){
       const h = Math.max(1, Math.min(s.y1 - yy, 2 + Math.floor(hash2(i, si, 17) * 3)));
       g.fillStyle = i % 2 ? c2 : c1;
-      g.fillRect(0, yy, P, h);
+      g.fillRect(0, yy, P, Math.min(h + 1, s.y1 - yy));   // 층리선 줄까지 칠한다 (빈 줄에 반투명 선만 그리면 뒤의 하늘이 비친다)
       if(yy + h < s.y1){ g.fillStyle = "rgba(40,20,5,.35)"; g.fillRect(0, yy + h, P, 1); }
       yy += h + 1; i++;
     }

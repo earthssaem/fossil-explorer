@@ -157,7 +157,7 @@ function toast(msg, kind){
 /* ---------- 시작 화면 ---------- */
 function renderStartProgress(){
   const total = itemData.length;
-  const allDone = total > 0 && state.completed.length >= total;
+  const allDone = total > 0 && countItems(state.completed) >= total;
   /* 처음부터 다시 시작: 지울 진행 상황이 있을 때만 활성 */
   const restart = $("btnRestart");
   if(restart) restart.disabled = !(state.startedAt || state.discovered.length > 0 || state.completed.length > 0);
@@ -189,7 +189,7 @@ function heroSay(msg, hop){
 function heroGreeting(){
   const nm = (state.nickname || "").trim();
   if(!nm) return "탐사대원, 이름을 알려줘!";
-  if(itemData.length && state.completed.length >= itemData.length) return nm + " 대원, 전설의 탐정이군!";
+  if(itemData.length && countItems(state.completed) >= itemData.length) return nm + " 대원, 전설의 탐정이군!";
   return nm + " 대원, 준비됐어?";
 }
 function renderHelpMissions(){
@@ -283,14 +283,26 @@ function bindUI(){
     nickEl.addEventListener("keydown", e => { if(e.key === "Enter") $("btnStart").click(); });
   }
   $("btnStart").addEventListener("click", () => {
-    const nm = (nickEl ? nickEl.value : state.nickname || "").trim();
+    let nm = (nickEl ? nickEl.value : state.nickname || "").trim();
     if(!nm){
       toast("먼저 탐사대원 닉네임을 입력하세요. (실명은 쓰지 않습니다)");
       heroSay("이름이 없으면 출발할 수 없어!", true);
       if(nickEl){ nickEl.focus(); nickEl.classList.add("shake-x"); setTimeout(() => nickEl.classList.remove("shake-x"), 600); }
       return;
     }
+    /* 공용 PC: 다른 대원의 기록이 남아 있는데 다른 닉네임으로 시작하면, 그 기록을 이어받지 않도록 묻는다 */
+    if(savedOwner && nm.slice(0, 12) !== savedOwner){
+      if(confirm("이 기기에는 「" + savedOwner + "」 대원의 탐사 기록이 남아 있습니다.\n\n" +
+                 "[확인] 그 기록을 지우고 「" + nm.slice(0, 12) + "」 대원으로 새로 시작\n[취소] 「" + savedOwner + "」 대원의 기록으로 이어서 하기")){
+        resetProgress();
+        game.player.placed = false;
+      }else{
+        nm = savedOwner;
+        if(nickEl) nickEl.value = savedOwner;
+      }
+    }
     state.nickname = nm.slice(0, 12);
+    savedOwner = state.nickname;
     const firstRun = !state.startedAt;
     if(!state.startedAt) state.startedAt = new Date().toLocaleString();
     saveState();
@@ -367,6 +379,32 @@ function bindUI(){
   }
 }
 
+/* 진행을 저장할 수 없는 브라우저면 시작 화면에 계속 보이는 안내를 둔다 */
+function showStorageNotice(){
+  if(storageWorks()) return;
+  const box = document.querySelector("#startScreen .start-nick");
+  if(!box) return;
+  const p = document.createElement("p");
+  p.className = "nick-hint save-warn";
+  p.textContent = "이 화면에서는 진행이 저장되지 않아요(시크릿 창이거나 저장이 막혀 있음). 새로고침하면 처음부터 다시 해야 하니, 끝까지 한 뒤 결과 화면에서 보고서를 저장하세요.";
+  box.appendChild(p);
+}
+/* 같은 게임이 다른 탭(창)에서도 열려 진행이 저장되면, 이 탭이 그 진행을 덮어쓰지 않게 막고 새로고침을 안내한다 */
+function watchOtherTabs(){
+  window.addEventListener("storage", e => {
+    if(e.key !== SAVE_KEY || game.staleTab) return;
+    game.staleTab = true;
+    const box = document.createElement("div");
+    box.className = "stale-tab";
+    box.setAttribute("role", "alert");
+    box.innerHTML = '<div class="pixel-panel"><b>다른 탭에서도 이 게임이 열려 있습니다</b>' +
+      '<p>진행이 섞이지 않도록 이 탭에서는 저장하지 않습니다. 한 탭에서만 진행해 주세요.</p>' +
+      '<button class="btn primary" type="button">이 탭을 최신 진행으로 새로고침</button></div>';
+    box.querySelector("button").addEventListener("click", () => location.reload());
+    document.body.appendChild(box);
+  });
+}
+
 /* 데이터 점검 결과: 경고가 있을 때만 시작 화면 구석에 교사용 버튼을 띄운다 (누르면 목록) */
 function showDataWarnings(warns){
   if(!warns || !warns.length || !$("startScreen")) return;
@@ -403,6 +441,8 @@ function initGame(){
   try{ localStorage.removeItem("stratumExplorer_teacherData_v2"); localStorage.removeItem("stratumExplorer_teacherData_v1"); }catch(e){ }
   loadState();
   showDataWarnings(validateContentData());
+  showStorageNotice();
+  watchOtherTabs();
   applyIcons(document);
   buildWipeBackground();
   bindUI();

@@ -16,11 +16,13 @@ function layerBands(layerId){
   return ly.bands.map((b, bi) => {
     const mine = items.filter(i => safe(i.band, "") === b.key);
     const slots = [];
+    /* 화석 지점 이름에는 아이템 id를 넣는다. 순서 번호로 붙이면, 교사가 수업 중에 화석을 바꾸거나 끼워 넣었을 때
+       이미 판 학생의 '판 지점'이 엉뚱한 화석을 가리켜 진행이 막힌다. legacy: 예전 이름 (저장 데이터 이관용) */
     if(b.repeat){
       const it = mine[0] || null;
-      for(let i = 0; i < b.repeat; i++) slots.push({ slot: layerId + "#" + b.key + i, itemId: it ? it.id : null });
+      for(let i = 0; i < b.repeat; i++) slots.push({ slot: layerId + "#" + b.key + ":" + (it ? it.id : "") + ":" + i, legacy: layerId + "#" + b.key + i, itemId: it ? it.id : null, repeat: true });
     }else{
-      mine.forEach((it, i) => slots.push({ slot: layerId + "#" + b.key + i, itemId: it.id }));
+      mine.forEach((it, i) => slots.push({ slot: layerId + "#" + b.key + ":" + it.id, legacy: layerId + "#" + b.key + i, itemId: it.id }));
     }
     if(b.empty){ for(let i = 0; i < b.empty; i++) slots.push({ slot: layerId + "#" + b.key + "e" + i, itemId: null }); }
     /* spots: 지점별 지정. null = 빈손, {name, shape, note} = 관찰만 하는 드문 화석 (아이템·퀴즈 없음) */

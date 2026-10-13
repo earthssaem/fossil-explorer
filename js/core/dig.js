@@ -307,7 +307,7 @@ function tickDigging(dt){
   const d = game.digging;
   const s = game.sites.find(x => x.slot === d.siteId);
   if(!s){ game.digging = null; return; }
-  d.progress += dt * 55;   // 약 1.8초에 완료
+  d.progress += dt * ((typeof demoDigSpeed === "function" && demoDigSpeed()) || 55);   // 약 1.8초에 완료 (교사 시연의 즉시 발굴은 더 빠르게)
   d.particleT -= dt;
   if(d.particleT <= 0){
     spawnDigParticles(s.el, 3);

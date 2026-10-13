@@ -251,6 +251,7 @@ function buildWorld(){
 
 /* 관문 열림 여부 (진행 상태에서 계산) */
 function gateIsOpen(g){
+  if(typeof demoGatesOpen === "function" && demoGatesOpen()) return true;   // 교사 시연: 관문 모두 열기
   if(!outcropDone(g.needs)) return false;
   if(g.needsEvidence && !allEvidenceCollected()) return false;
   return true;
@@ -747,6 +748,13 @@ function checkZoneChange(){
 }
 
 /* ---------- 씬 시작 ---------- */
+/* 맵·스프라이트를 아직 만들지 않았으면 만든다 (탐사 화면에 들어갈 때, 교사 시연의 순간이동에서) */
+function ensureWorldBuilt(){
+  if(WORLD.tile.length) return;
+  if(!TILES.shadow) buildTiles(worldData.zones);   // 시작 화면 배경이 먼저 만들었으면 재사용
+  buildPlayerSprites();
+  buildWorld();
+}
 function enterWorld(){
   const vp = $("sceneViewport");
   if(!WORLD.canvas){
@@ -756,11 +764,7 @@ function enterWorld(){
     WORLD.canvas.addEventListener("click", onWorldClick);
     window.addEventListener("resize", resizeWorldCanvas);
   }
-  if(!WORLD.tile.length){
-    if(!TILES.shadow) buildTiles(worldData.zones);   // 시작 화면 배경이 먼저 만들었으면 재사용
-    buildPlayerSprites();
-    buildWorld();
-  }
+  ensureWorldBuilt();
   const st = worldData.start;
   if(!game.player.placed){
     game.player.x = st.col * T + T / 2;
@@ -808,7 +812,7 @@ function gameLoop(t){
   const dt = Math.min(0.05, (t - lastT) / 1000 || 0.016);
   lastT = t;
   if(!game.running || !WORLD.ctx) return;
-  const speed = 84;
+  const speed = 84 * (typeof demoWalkSpeed === "function" ? demoWalkSpeed() : 1);   // 교사 시연: 빠른 걷기
   let moving = false;
   if(!game.digging && !anyModalOpen()){
     let dx = 0, dy = 0;

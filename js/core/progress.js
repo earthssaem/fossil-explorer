@@ -14,7 +14,8 @@ function updateHud(){
 }
 
 /* ---------- 배지 시스템 ---------- */
-function checkBadges(){
+/* silent=true 면 팝업 없이 기록만 한다 (교사 시연에서 진행 상태를 한 번에 만들 때) */
+function checkBadges(silent){
   const total = Math.max(1, itemData.length);
   badgeData.forEach(b => {
     if(state.badges.includes(b.id)) return;
@@ -33,7 +34,7 @@ function checkBadges(){
     if(earned){
       state.badges.push(b.id);
       saveState();
-      setTimeout(() => showBadgePopup(b), 500);
+      if(!silent) setTimeout(() => showBadgePopup(b), 500);
     }
   });
 }

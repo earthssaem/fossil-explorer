@@ -25,6 +25,9 @@
 
 /* ---------- 전역 상태 ---------- */
 const SAVE_KEY = "stratumExplorer_save_v3";
+/* 교사 시연 모드(js/demo.js)의 진행은 학생 진행과 따로 저장한다 — 시연을 해도 이 기기의 학생 기록은 그대로 남는다 */
+const DEMO_SAVE_KEY = "stratumExplorer_demo_v3";
+function activeSaveKey(){ return game.demo ? DEMO_SAVE_KEY : SAVE_KEY; }
 
 let itemData   = deepClone(DEFAULT_ITEM_DATA);
 let layerData  = deepClone(DEFAULT_LAYER_DATA);
@@ -81,7 +84,8 @@ const game = {
   reducedMotion: false,
   smallScreen: false,
   stepSoundTimer: 0,
-  zone: null                 // 현재 서 있는 구역 id
+  zone: null,                // 현재 서 있는 구역 id
+  demo: false                // 교사 시연 모드(js/demo.js)가 켜져 있는지 — 진행을 DEMO_SAVE_KEY에 따로 저장한다
 };
 
 /* ---------- 유틸 ---------- */
@@ -236,9 +240,9 @@ function conceptSummary(){
 }
 
 /* ---------- 저장 시스템 (localStorage, 실패해도 앱 유지) ---------- */
-function loadState(){
+function loadState(key){
   try{
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = localStorage.getItem(key || SAVE_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
       state = Object.assign(defaultState(), parsed);
@@ -287,7 +291,7 @@ function saveState(){
   if(game.staleTab) return;   // 다른 탭에서 더 새 진행이 저장됐다 — 덮어쓰지 않는다
   try{
     state.lastPlayed = new Date().toLocaleString();
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    localStorage.setItem(activeSaveKey(), JSON.stringify(state));
   }catch(e){
     /* 저장 불가 환경에서도 게임은 계속 — 다만 새로고침하면 처음부터라는 것을 한 번 알린다 */
     if(!game.saveWarned && typeof toast === "function"){
@@ -301,7 +305,7 @@ function resetProgress(){
   state = defaultState();
   savedOwner = "";
   try{
-    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(activeSaveKey());
   }catch(e){ /* localStorage 차단 환경에서도 계속 */ }
   game.digging = null;
   game.near = null;

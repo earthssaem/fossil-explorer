@@ -35,6 +35,8 @@
       </div>
       <p class="start-footer">© 2026 제작: 김연경(<a href="mailto:earthssaem@gmail.com">earthssaem@gmail.com</a>)</p>
     </div>
+    <!-- 교사 시연 모드 입구 (비밀번호 → js/demo.js) -->
+    <button type="button" class="demo-entry" id="btnDemo">교사 시연</button>
   </section>
 
   <!-- ============ 2. 게임 방법 ============ -->
@@ -71,6 +73,7 @@
       <div class="hud-group">
         <button class="hud-btn" id="btnSound" title="소리 켜기/끄기"><i data-icon="sound"></i></button>
         <button class="hud-btn wide" id="btnCollectionHud" title="화석도감 (M)"><i data-icon="book"></i><span>도감</span></button>
+        <button class="hud-btn demo" id="btnDemoHud" title="교사 시연 패널 (` 키)"><span>시연</span></button>
         <button class="hud-btn" id="btnHome" title="처음으로"><i data-icon="home"></i></button>
       </div>
     </div>
@@ -249,6 +252,33 @@
     </div>
   </div>
 
+  <!-- ============ 교사 시연 모드 · 비밀번호 ============ -->
+  <div class="modal-backdrop" id="demoPassModal">
+    <div class="modal-card pixel-panel center demo-pass">
+      <button class="modal-close" aria-label="닫기" data-close="demoPassModal">✕</button>
+      <div class="banner muted">교사용</div>
+      <h3 class="modal-title">교사 시연 모드</h3>
+      <p class="modal-note">학회·연수 발표용입니다. 시연 진행은 학생 진행과 따로 저장됩니다.</p>
+      <form id="demoPassForm" autocomplete="off">
+        <input id="demoPassInput" type="password" inputmode="numeric" maxlength="12" placeholder="비밀번호" autocomplete="off" aria-label="비밀번호">
+        <p class="demo-pass-msg" id="demoPassMsg" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button class="btn primary" type="submit">들어가기</button>
+          <button class="btn ghost" type="button" data-close="demoPassModal">취소</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ 교사 시연 모드 · 시연 패널 ============ -->
+  <div class="modal-backdrop" id="demoModal">
+    <div class="modal-card pixel-panel wide demo-panel">
+      <button class="modal-close" aria-label="닫기" data-close="demoModal">✕</button>
+      <h3 class="modal-title"><span class="demo-tag">교사 시연</span>시연 패널</h3>
+      <div id="demoBody"></div>
+    </div>
+  </div>
+
   <!-- ============ 4. 도감 ============ -->
   <section id="collectionScreen" class="screen panel-screen">
     <div class="back-bar">
@@ -320,5 +350,6 @@
 <script src="js/world/map.js"></script>
 <script src="js/world/title.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/demo.js"></script>
 </body>
 </html>

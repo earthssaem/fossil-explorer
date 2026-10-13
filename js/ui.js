@@ -515,6 +515,7 @@ function initGame(){
   bindUI();
   bindInputs();
   trackHudHeight();
+  if(typeof demoInit === "function") demoInit();   // 교사 시연 모드 (js/demo.js) — 이 탭에서 켜 둔 시연이면 이어서 켠다
   renderStartProgress();
   renderHelpMissions();
   updateHud();

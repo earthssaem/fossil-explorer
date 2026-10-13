@@ -42,6 +42,7 @@ function renderQuizQuestion(){
     b.addEventListener("click", () => checkAnswer(c, b));
     box.appendChild(b);
   });
+  if(typeof demoMarkAnswer === "function") demoMarkAnswer(q, choices, box);   // 교사 시연: 정답 표시
   if(!choices.length){
     box.innerHTML = '<p style="font-weight:700; color:#9a8a68;">선택지가 없어 자동으로 통과합니다. (교사용: quiz 데이터에 choices를 추가하세요)</p>';
     afterQuestionSolved(true);

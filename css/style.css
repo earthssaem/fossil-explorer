@@ -195,6 +195,8 @@ button, .btn, .hud-btn, .ctrl-btn{ touch-action:manipulation; }
 .start-footer{ margin-top:14px; padding-top:10px; border-top:2px dashed rgba(59,42,32,.2); color:var(--muted); font-size:.78em; }
 .start-footer a{ color:inherit; text-decoration:underline; text-underline-offset:2px; }
 .start-footer a:hover{ color:var(--ink); }
+footer .hub{color:inherit;font-weight:500;white-space:nowrap;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);text-underline-offset:3px}
+footer .hub:hover{color:var(--ink);text-decoration-color:currentColor}
 .cta-wrap{ animation:ctaBob 1.2s steps(2, end) infinite; }
 .cta-wrap:hover{ animation-play-state:paused; }
 @keyframes ctaBob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-3px);} }

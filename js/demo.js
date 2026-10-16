@@ -169,50 +169,50 @@ function demoOpenPanel(){
 function demoRenderPanel(){
   const body = $("demoBody");
   if(!body) return;
-  const btn = (act, val, label, sub) =>
-    '<button type="button" class="demo-btn" data-act="' + act + '" data-val="' + escapeHTML(val) + '">' +
-      '<b>' + escapeHTML(label) + '</b>' + (sub ? '<small>' + escapeHTML(sub) + '</small>' : '') + '</button>';
+  /* 설명은 버튼 안에 쓰지 않고 마우스를 올리면 보이는 말풍선(title)으로만 둔다 */
+  const chip = (act, val, label, tip) =>
+    '<button type="button" class="demo-chip" data-act="' + act + '" data-val="' + escapeHTML(val) + '" title="' + escapeHTML(tip) + '">' + escapeHTML(label) + '</button>';
+  const row = (name, tip, inner) =>
+    '<div class="demo-row"><span class="demo-label" title="' + escapeHTML(tip) + '">' + name + '</span><div class="demo-chips">' + inner + '</div></div>';
   const n = layerData.length;
+  const first = layerData[0].id;
   const status = state.finalMissionDone ? "최종 미션 완료" : (finalMissionReady() ? "최종 미션 열림 (전망대)" : "노두 조사 중");
   let html =
-    '<p class="demo-note">시연 진행은 학생 진행과 따로 저장됩니다. 이 패널은 <kbd>`</kbd> 키(Tab 키 위)로도 열고 닫습니다.</p>' +
-    '<div class="demo-status">현재 시연 상태 · 노두 ' + exploredOutcropCount() + ' / ' + n +
-      ' · 단서 ' + countItems(state.completed) + ' / ' + itemData.length + ' · ' + escapeHTML(status) + '</div>';
+    '<div class="demo-status">현재: 노두 ' + exploredOutcropCount() + '/' + n +
+      ' · 단서 ' + countItems(state.completed) + '/' + itemData.length + ' · ' + escapeHTML(status) + '</div>';
 
-  /* 1. 진행 상태 바로 가기 */
-  html += '<h4>진행 상태 바로 가기 <small>지금 시연 진행을 지우고 그 상태로 만든 뒤 알맞은 곳에 세운다</small></h4><div class="demo-grid">';
-  html += btn("jump", "0", "처음 상태", "입구에서 새 탐사 시작");
+  /* 1. 진행 단계: 지금 시연 진행을 지우고 그 상태로 만든 뒤 알맞은 곳에 세운다 */
+  let steps = chip("jump", "0", "처음", "처음 상태 · 입구에서 새 탐사 시작");
   layerData.forEach((ly, i) => {
     const next = layerData[i + 1];
-    const label = i === 0 ? "노두 " + ly.id + " 완료" : "노두 " + layerData[0].id + "~" + ly.id + " 완료";
-    html += btn("jump", String(i + 1), label, next ? "노두 " + next.id + " 앞에서 시작" : "전망대 앞 · 최종 미션 열림");
+    if(!next){ steps += chip("jump", String(n), "전부", "노두 " + first + "~" + ly.id + " 모두 조사 완료 · 전망대 앞, 최종 미션 열림"); return; }
+    const label = i === 0 ? ly.id : first + "~" + ly.id;
+    steps += chip("jump", String(i + 1), label, "노두 " + label + " 조사 완료 · 노두 " + next.id + " 앞에서 시작");
   });
-  html += btn("jump", "mission", "최종 미션 완료", "결과 화면 · 보고서까지 완성");
-  html += '</div>';
+  steps += chip("stage1", "", "미션 2단계", "최종 미션 1단계(카드 순서)를 정답으로 놓은 채 2단계 지층 대비부터 시작");
+  steps += chip("jump", "mission", "완료", "최종 미션까지 완료 · 결과 화면과 보고서");
+  html += row("진행 단계", "지금 시연 진행을 지우고 그 상태로 만든 뒤 알맞은 곳에 세운다", steps);
 
-  /* 2. 최종 미션 */
-  html += '<h4>최종 미션 <small>노두를 모두 조사한 상태에서</small></h4><div class="demo-grid">' +
-    btn("stage1", "", "1단계 완료 처리", "카드를 정답 순서로 놓은 채 2단계 지층 대비부터 시연") + '</div>';
+  /* 2. 순간이동: 진행은 그대로 두고 자리만 옮긴다 */
+  let tps = chip("tp", "start", "입구", "입구로 이동");
+  layerData.forEach(ly => { tps += chip("tp", "outcrop:" + ly.id, ly.id, "노두 " + ly.id + " 앞으로 이동"); });
+  tps += chip("tp", "lookout", "전망대", "전망대로 이동");
+  html += row("순간이동", "진행은 그대로 두고 자리만 옮긴다", tps);
 
-  /* 3. 순간이동 */
-  html += '<h4>순간이동 <small>진행은 그대로 두고 자리만 옮긴다</small></h4><div class="demo-grid small">';
-  html += btn("tp", "start", "입구");
-  layerData.forEach(ly => { html += btn("tp", "outcrop:" + ly.id, "노두 " + ly.id); });
-  html += btn("tp", "lookout", "전망대");
-  html += '</div>';
-
-  /* 4. 옵션 */
-  html += '<h4>시연 옵션</h4><div class="demo-opts">';
+  /* 3. 옵션 */
+  let opts = "";
   DEMO_OPT_LIST.forEach(o => {
-    html += '<button type="button" class="demo-opt' + (demoOpts[o.key] ? " on" : "") + '" data-opt="' + o.key + '" aria-pressed="' + (demoOpts[o.key] ? "true" : "false") + '">' +
-      '<span class="sw"></span><b>' + escapeHTML(o.name) + '</b><small>' + escapeHTML(o.desc) + '</small></button>';
+    opts += '<button type="button" class="demo-opt' + (demoOpts[o.key] ? " on" : "") + '" data-opt="' + o.key + '" aria-pressed="' + (demoOpts[o.key] ? "true" : "false") + '" title="' + escapeHTML(o.desc) + '">' +
+      '<span class="sw"></span>' + escapeHTML(o.name) + '</button>';
   });
-  html += '</div>';
+  opts += '<p class="demo-warn">※ 퀴즈 정답 표시는 청중 화면에도 보입니다.</p>';
+  html += row("옵션", "켜고 끌 수 있는 시연 옵션", opts);
 
-  /* 5. 끝내기 */
+  /* 4. 끝내기 */
   html += '<div class="modal-actions demo-foot">' +
+    '<span class="demo-note">시연 진행은 학생 기록과 따로 저장 · <kbd>`</kbd> 키로 열고 닫기</span>' +
     '<button type="button" class="btn ghost small" data-close="demoModal">닫기</button>' +
-    '<button type="button" class="btn red small" data-act="exit">시연 끝내기 · 학생 모드로</button></div>';
+    '<button type="button" class="btn red small" data-act="exit">시연 끝내기</button></div>';
   body.innerHTML = html;
 
   body.querySelectorAll("[data-act]").forEach(el => el.addEventListener("click", () => {
@@ -220,7 +220,11 @@ function demoRenderPanel(){
     playSound("click");
     if(act === "jump") demoJump(val);
     else if(act === "tp") demoTeleportTo(val);
-    else if(act === "stage1") demoSkipStage1();
+    else if(act === "stage1"){
+      /* 노두를 다 조사하지 않았거나 이미 완료한 상태면 먼저 '노두 전부 완료' 상태로 만든다 */
+      if(!finalMissionReady() || state.finalMissionDone) demoBuildProgress(layerData.length, false);
+      demoSkipStage1();
+    }
     else if(act === "exit") demoExit();
   }));
   body.querySelectorAll("[data-opt]").forEach(el => el.addEventListener("click", () => {
